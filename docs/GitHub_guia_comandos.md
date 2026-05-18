@@ -1,7 +1,6 @@
 # Guia rapida de Git y GitHub para Nutricoach
 
-Esta guia define el flujo de trabajo recomendado para **Nutricoach**, una app de seguimiento nutricional desarrollada con React Native.
-
+Esta guía define el flujo de trabajo recomendado para NutriCoach AI, una app fullstack de hábitos saludables desarrollada con React + TypeScript + Vite en el frontend, Node.js + Express en el backend y PostgreSQL + Sequelize como base de datos.
 Repositorio del proyecto:
 
 ```bash
@@ -463,7 +462,7 @@ npm run lint
 npm test
 ```
 
-Si el proyecto usa Expo o React Native CLI, seguid el comando acordado en el `README.md`.
+Cuando existan los scripts definitivos del frontend y backend, seguid los comandos documentados en el README.md.
 
 ### Mezclar muchas tareas en una rama
 
