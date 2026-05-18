@@ -97,6 +97,18 @@ El frontend nunca llamará directamente a Gemini. Todas las peticiones a IA pasa
 
 ---
 
+## Despliegue previsto
+
+El proyecto está pensado para desplegarse en un VPS Linux propio usando Docker y Docker Compose.
+
+La arquitectura de despliegue prevista contempla un reverse proxy con HTTPS delante del frontend y del backend. El frontend y la API Express se servirán detrás de este reverse proxy, evitando exponer servicios internos de forma innecesaria.
+
+PostgreSQL deberá quedar dentro de una red interna de Docker y no exponerse públicamente. Solo el backend debería poder comunicarse con la base de datos.
+
+Esta sección se ampliará cuando existan la estructura `client/`, `server/` y el archivo `docker-compose.yml`. No se documentarán aquí IPs, usuarios SSH, rutas privadas, tokens ni credenciales reales.
+
+---
+
 ## Modelo de datos previsto
 
 Modelo inicial orientado a PostgreSQL + Sequelize. Podrá evolucionar durante la fase de implementación.
