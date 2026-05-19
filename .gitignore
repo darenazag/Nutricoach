@@ -160,3 +160,6 @@ backend/.env.*
 frontend/.env
 frontend/.env.*
 !frontend/.env.example
+
+
+.claude
