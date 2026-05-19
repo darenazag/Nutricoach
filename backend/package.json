@@ -8,6 +8,7 @@
     "build": "tsc",
     "start": "node dist/server.js",
     "check": "tsc --noEmit",
+    "seed:ai-prompts": "tsx src/modules/ai/seeders/seedAiPromptTemplates.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
