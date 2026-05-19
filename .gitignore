@@ -142,5 +142,21 @@ vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .vite/
 
-#Personal
+# Personal
 Otros/
+
+# Project-specific node_modules
+frontend/node_modules/
+backend/node_modules/
+
+# Build output (project-specific)
+backend/dist/
+frontend/dist/
+
+# Environment files (project-specific)
+backend/.env
+backend/.env.*
+!backend/.env.example
+frontend/.env
+frontend/.env.*
+!frontend/.env.example
