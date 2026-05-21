@@ -1,15 +1,22 @@
-import { GoogleGenAI } from '@google/genai';
+import type { GoogleGenAI } from '@google/genai' with { 'resolution-mode': 'import' };
 import { AiProviderError } from './aiProvider.types.js';
 import type { AiProviderRequest, AiProviderJsonResponse } from './aiProvider.types.js';
 
 const DEFAULT_MODEL = 'gemini-2.5-flash';
+const DEFAULT_TEMPERATURE = 0.4;
+const DEFAULT_MAX_OUTPUT_TOKENS = 1024;
 
-/**
- * Creates a configured GoogleGenAI instance.
- * Throws AiProviderError('missing_api_key') if GEMINI_API_KEY is not set.
- * Call lazily — do NOT call at module load or app startup.
- */
-export function createGeminiClient(): GoogleGenAI {
+function parseNumberEnv(value: string | undefined, fallback: number): number {
+  if (value === undefined || value === '') return fallback;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : fallback;
+}
+
+// @google/genai is ESM-only; the backend currently compiles to CJS
+// (no "type": "module" in package.json). A static import would fail TS1479
+// under module: Node16. Dynamic import works at runtime because Node lets
+// CJS load ESM via `import()`.
+export async function createGeminiClient(): Promise<GoogleGenAI> {
   const apiKey = process.env['GEMINI_API_KEY'];
   if (!apiKey) {
     throw new AiProviderError(
@@ -17,6 +24,7 @@ export function createGeminiClient(): GoogleGenAI {
       'missing_api_key',
     );
   }
+  const { GoogleGenAI } = await import('@google/genai');
   return new GoogleGenAI({ apiKey });
 }
 
@@ -36,8 +44,15 @@ export async function generateGeminiJson<T = unknown>(
   request: AiProviderRequest,
 ): Promise<AiProviderJsonResponse<T>> {
   const model = request.model ?? process.env['GEMINI_MODEL'] ?? DEFAULT_MODEL;
+  const temperature =
+    request.temperature ??
+    parseNumberEnv(process.env['GEMINI_TEMPERATURE'], DEFAULT_TEMPERATURE);
+  const maxOutputTokens = Math.trunc(
+    request.maxOutputTokens ??
+      parseNumberEnv(process.env['GEMINI_MAX_OUTPUT_TOKENS'], DEFAULT_MAX_OUTPUT_TOKENS),
+  );
 
-  const client = createGeminiClient();
+  const client = await createGeminiClient();
 
   let rawText: string;
   let rawResponse: unknown;
@@ -49,10 +64,8 @@ export async function generateGeminiJson<T = unknown>(
       config: {
         systemInstruction: request.systemPrompt,
         responseMimeType: 'application/json',
-        ...(request.temperature !== undefined && { temperature: request.temperature }),
-        ...(request.maxOutputTokens !== undefined && {
-          maxOutputTokens: request.maxOutputTokens,
-        }),
+        temperature,
+        maxOutputTokens,
       },
     });
 
