@@ -1,5 +1,4 @@
 import 'dotenv/config';
-import { fileURLToPath } from 'node:url';
 import mongoose from 'mongoose';
 import { connectMongo } from '../../../config/mongo.js';
 import { AiPromptTemplate } from '../models/index.js';
@@ -67,10 +66,10 @@ async function main(): Promise<void> {
   }
 }
 
-// ESM entry-point detection: compares the resolved path of this file
-// with the script argv[1] passed to tsx/node. Avoids running `main()`
-// when this file is imported from elsewhere (e.g. seeders/index.ts).
-const isMain = process.argv[1] === fileURLToPath(import.meta.url);
+// Entry-point detection compatible with CJS and tsx.
+// Matches when argv[1] is the seeder script (ts or compiled js).
+const entryPoint = process.argv[1] ?? '';
+const isMain = /seedAiPromptTemplates\.(ts|js)$/.test(entryPoint);
 
 if (isMain) {
   main().catch((err) => {
