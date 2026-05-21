@@ -1,4 +1,5 @@
 import 'dotenv/config';
+import { fileURLToPath } from 'node:url';
 import mongoose from 'mongoose';
 import { connectMongo } from '../../../config/mongo.js';
 import { AiPromptTemplate } from '../models/index.js';
@@ -66,10 +67,12 @@ async function main(): Promise<void> {
   }
 }
 
-// CJS-compatible entry-point detection: when this file is the script
-// passed to `tsx`/`node`, `require.main === module`. Avoids running
-// `main()` if the file is imported from elsewhere (e.g. via seeders/index.ts).
-if (require.main === module) {
+// ESM entry-point detection: compares the resolved path of this file
+// with the script argv[1] passed to tsx/node. Avoids running `main()`
+// when this file is imported from elsewhere (e.g. seeders/index.ts).
+const isMain = process.argv[1] === fileURLToPath(import.meta.url);
+
+if (isMain) {
   main().catch((err) => {
     console.error('[seed:ai-prompts] FATAL:', err);
     process.exit(1);
