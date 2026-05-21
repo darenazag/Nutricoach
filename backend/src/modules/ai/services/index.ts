@@ -18,4 +18,5 @@ export {
 
 export { getDefaultPromptTemplate } from './aiPrompt.service.js';
 export { validateAiResponse } from './aiValidation.service.js';
+export { generateConversationId, generateMessageId } from './aiId.service.js';
 export { runAiChat, type AiChatServiceResult } from './aiChat.service.js';
