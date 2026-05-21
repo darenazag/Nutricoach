@@ -6,3 +6,5 @@ export * from './prompts/index.js';
 export * from './providers/index.js';
 export * from './seeders/index.js';
 export * as repositories from './repositories/index.js';
+export { aiRouter } from './routes/ai.routes.js';
+export { postAiChat } from './controllers/aiChat.controller.js';
