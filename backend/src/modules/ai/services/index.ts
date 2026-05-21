@@ -5,6 +5,17 @@ export type {
   AiMenuResponse,
   AiPlateAnalysisRequest,
   AiPlateAnalysisResponse,
+  AiProfileExplanationRequest,
+  AiProfileExplanationResponse,
   AiServiceMetadata,
   AiServiceResult,
 } from './aiResponse.types.js';
+
+export {
+  AiServiceError,
+  type AiServiceErrorCode,
+} from './aiServiceError.js';
+
+export { getDefaultPromptTemplate } from './aiPrompt.service.js';
+export { validateAiResponse } from './aiValidation.service.js';
+export { runAiChat, type AiChatServiceResult } from './aiChat.service.js';
