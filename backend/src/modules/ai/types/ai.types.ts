@@ -1,4 +1,8 @@
-export type AiInteractionType = 'chat' | 'menu_generation' | 'plate_analysis';
+export type AiInteractionType =
+  | 'chat'
+  | 'menu_generation'
+  | 'plate_analysis'
+  | 'profile_explanation';
 
 export type AiRole = 'user' | 'assistant' | 'system';
 
@@ -14,6 +18,7 @@ export const AI_INTERACTION_TYPES: AiInteractionType[] = [
   'chat',
   'menu_generation',
   'plate_analysis',
+  'profile_explanation',
 ];
 
 export const AI_ROLES: AiRole[] = ['user', 'assistant', 'system'];

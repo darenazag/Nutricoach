@@ -6,6 +6,9 @@ import {
   aiMenuResponseSchema,
   aiPlateAnalysisRequestSchema,
   aiPlateAnalysisResponseSchema,
+  aiProfileExplanationRequestSchema,
+  aiProfileExplanationResponseSchema,
+  aiSafetySchema,
 } from '../schemas/index.js';
 import type { AiProvider } from '../types/index.js';
 
@@ -17,6 +20,11 @@ export type AiMenuResponse = z.infer<typeof aiMenuResponseSchema>;
 
 export type AiPlateAnalysisRequest = z.infer<typeof aiPlateAnalysisRequestSchema>;
 export type AiPlateAnalysisResponse = z.infer<typeof aiPlateAnalysisResponseSchema>;
+
+export type AiProfileExplanationRequest = z.infer<typeof aiProfileExplanationRequestSchema>;
+export type AiProfileExplanationResponse = z.infer<typeof aiProfileExplanationResponseSchema>;
+
+export type AiSafetyOutput = z.infer<typeof aiSafetySchema>;
 
 export interface AiServiceMetadata {
   provider: AiProvider;

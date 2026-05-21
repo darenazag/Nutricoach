@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { aiSafetySchema } from './aiSafety.schema.js';
 
 const objectiveEnum = z.enum(['lose_weight', 'maintain', 'gain_muscle']);
 const planEnum = z.enum(['free', 'pro']);
@@ -35,12 +36,20 @@ const detectedFoodSchema = z
   })
   .strict();
 
+// Nutrition values expressed as ranges to reflect estimation uncertainty
+const nutritionRangeSchema = z
+  .object({
+    min: z.number().nonnegative(),
+    max: z.number().nonnegative(),
+  })
+  .strict();
+
 const estimatedNutritionSchema = z
   .object({
-    calories: z.number().nonnegative(),
-    protein: z.number().nonnegative(),
-    carbs: z.number().nonnegative(),
-    fat: z.number().nonnegative(),
+    caloriesRange: nutritionRangeSchema,
+    proteinRange: nutritionRangeSchema,
+    carbsRange: nutritionRangeSchema,
+    fatRange: nutritionRangeSchema,
   })
   .strict();
 
@@ -57,6 +66,8 @@ export const aiPlateAnalysisStructuredDataSchema = z
   .object({
     detectedFoods: z.array(detectedFoodSchema),
     estimatedNutrition: estimatedNutritionSchema,
+    assumptions: z.array(z.string()).default([]),
+    confidenceReason: z.string(),
     proportions: proportionsSchema,
     recommendations: z.array(z.string()).default([]),
     warnings: z.array(z.string()).default([]),
@@ -68,5 +79,6 @@ export const aiPlateAnalysisResponseSchema = z
   .object({
     responseText: z.string(),
     structuredData: aiPlateAnalysisStructuredDataSchema,
+    safety: aiSafetySchema,
   })
   .strict();
