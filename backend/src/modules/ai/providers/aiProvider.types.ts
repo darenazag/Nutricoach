@@ -19,6 +19,16 @@ export interface AiProviderJsonResponse<T = unknown> {
   };
 }
 
+export interface AiProviderImageRequest {
+  systemPrompt: string;
+  userPrompt: string;
+  imageBuffer: Buffer;
+  mimeType: string;
+  model?: string;
+  temperature?: number;
+  maxOutputTokens?: number;
+}
+
 export type AiProviderErrorCode =
   | 'missing_api_key'
   | 'invalid_response'

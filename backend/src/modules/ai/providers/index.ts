@@ -6,4 +6,10 @@ export {
   type AiProviderErrorCode,
 } from './aiProvider.types.js';
 
-export { createGeminiClient, generateGeminiJson } from './geminiClient.js';
+export {
+  createGeminiClient,
+  generateGeminiJson,
+  generateGeminiJsonWithImage,
+} from './geminiClient.js';
+
+export { type AiProviderImageRequest } from './aiProvider.types.js';
