@@ -46,6 +46,62 @@ export interface AiChatResponseData {
   metadata: AiMetadata;
 }
 
+// ── Plate analysis ─────────────────────────────────────────────────────────
+
+export interface NutritionRange {
+  min: number;
+  max: number;
+}
+
+export interface EstimatedNutrition {
+  caloriesRange: NutritionRange;
+  proteinRange: NutritionRange;
+  carbsRange: NutritionRange;
+  fatRange: NutritionRange;
+}
+
+export interface DetectedFood {
+  name: string;
+  estimatedQuantity: string;
+  confidence: AiConfidence;
+}
+
+export interface PlateProportions {
+  protein: string;
+  carbs: string;
+  vegetables: string;
+  fats: string;
+}
+
+export interface PlateAnalysisStructuredData {
+  detectedFoods: DetectedFood[];
+  estimatedNutrition: EstimatedNutrition;
+  assumptions: string[];
+  confidenceReason: string;
+  proportions: PlateProportions;
+  recommendations: string[];
+  warnings: string[];
+  confidence: AiConfidence;
+}
+
+export interface AiPlateAnalysisResponseData {
+  responseText: string;
+  structuredData: PlateAnalysisStructuredData;
+  safety: AiSafety;
+  metadata: AiMetadata;
+  analysisId: string;
+}
+
+export interface AiPlateAnalysisFormPayload {
+  userId: string;
+  objective?: AiObjective;
+  caloriesTarget?: number;
+  plan?: AiPlan;
+  image: File;
+}
+
+// ── Shared errors ───────────────────────────────────────────────────────────
+
 export interface AiApiError {
   code: string;
   message: string;
