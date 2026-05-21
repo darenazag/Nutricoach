@@ -27,3 +27,13 @@ export {
   defaultAiPromptTemplates,
   type DefaultAiPromptTemplate,
 } from './defaultPromptTemplates.js';
+
+export {
+  renderPromptTemplate,
+  extractPromptVariables,
+  findMissingPromptVariables,
+  buildRenderedPrompt,
+  type RenderPromptVariables,
+  type BuildRenderedPromptInput,
+  type BuildRenderedPromptOutput,
+} from './renderPromptTemplate.js';
