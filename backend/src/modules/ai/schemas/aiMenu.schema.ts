@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { aiSafetySchema } from './aiSafety.schema.js';
 
 const objectiveEnum = z.enum(['lose_weight', 'maintain', 'gain_muscle']);
 const planEnum = z.enum(['free', 'pro']);
@@ -7,7 +8,10 @@ export const aiMenuRequestSchema = z
   .object({
     userId: z.string().min(1, 'userId is required'),
     objective: objectiveEnum,
-    caloriesTarget: z.number().positive('caloriesTarget must be > 0'),
+    caloriesTarget: z
+      .number()
+      .min(1200, 'caloriesTarget must be at least 1200')
+      .max(4500, 'caloriesTarget must be at most 4500'),
     proteinTarget: z.number().nonnegative().optional(),
     carbsTarget: z.number().nonnegative().optional(),
     fatTarget: z.number().nonnegative().optional(),
@@ -49,5 +53,6 @@ export const aiMenuResponseSchema = z
   .object({
     responseText: z.string(),
     structuredData: aiMenuStructuredDataSchema,
+    safety: aiSafetySchema,
   })
   .strict();

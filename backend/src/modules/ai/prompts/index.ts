@@ -2,8 +2,11 @@ export {
   AI_CHAT_PROMPT_KEY,
   AI_MENU_PROMPT_KEY,
   AI_PLATE_ANALYSIS_PROMPT_KEY,
+  AI_PROFILE_EXPLANATION_PROMPT_KEY,
   AI_PROMPT_VERSION,
 } from './promptVersions.js';
+
+export { SHARED_SAFETY_RULES } from './sharedSafetyRules.prompt.js';
 
 export {
   aiChatSystemPrompt,
@@ -22,6 +25,12 @@ export {
   aiPlateAnalysisUserPromptTemplate,
   aiPlateAnalysisPromptTemplate,
 } from './aiPlateAnalysis.prompt.js';
+
+export {
+  aiProfileExplanationSystemPrompt,
+  aiProfileExplanationUserPromptTemplate,
+  aiProfileExplanationPromptTemplate,
+} from './aiProfileExplanation.prompt.js';
 
 export {
   defaultAiPromptTemplates,

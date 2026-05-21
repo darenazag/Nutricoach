@@ -1,3 +1,5 @@
+export { aiSafetySchema, type AiSafetyOutput } from './aiSafety.schema.js';
+
 export {
   aiChatRequestSchema,
   aiChatResponseSchema,
@@ -15,3 +17,9 @@ export {
   aiPlateAnalysisResponseSchema,
   aiPlateAnalysisStructuredDataSchema,
 } from './aiPlateAnalysis.schema.js';
+
+export {
+  aiProfileExplanationRequestSchema,
+  aiProfileExplanationResponseSchema,
+  aiProfileExplanationStructuredDataSchema,
+} from './aiProfileExplanation.schema.js';
