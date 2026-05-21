@@ -7,6 +7,7 @@ import { AiProviderError } from '../modules/ai/index.js';
  * Anything else (or anything not from the AI layer) falls back to 500.
  */
 const STATUS_BY_AI_SERVICE_CODE: Record<AiServiceErrorCode, number> = {
+  invalid_image: 400,
   validation_error: 400,
   prompt_not_found: 500,
   provider_error: 502,

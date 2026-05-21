@@ -1,6 +1,11 @@
 import { Schema, model, type InferSchemaType, type Model } from 'mongoose';
 import { AI_CONFIDENCE_LEVELS } from '../types/ai.types.js';
 
+// Breaking internal change: EstimatedNutrition now stores ranges (min/max)
+// instead of single values to match aiPlateAnalysisStructuredDataSchema.
+// Existing documents in the collection retain the old shape — this only
+// affects new documents written after this migration.
+
 const ImageMetadataSchema = new Schema(
   {
     mimeType: { type: String, default: '' },
@@ -24,12 +29,20 @@ const DetectedFoodSchema = new Schema(
   { _id: false },
 );
 
+const NutritionRangeSchema = new Schema(
+  {
+    min: { type: Number, default: 0 },
+    max: { type: Number, default: 0 },
+  },
+  { _id: false },
+);
+
 const EstimatedNutritionSchema = new Schema(
   {
-    calories: { type: Number, default: 0 },
-    protein: { type: Number, default: 0 },
-    carbs: { type: Number, default: 0 },
-    fat: { type: Number, default: 0 },
+    caloriesRange: { type: NutritionRangeSchema, default: () => ({}) },
+    proteinRange: { type: NutritionRangeSchema, default: () => ({}) },
+    carbsRange: { type: NutritionRangeSchema, default: () => ({}) },
+    fatRange: { type: NutritionRangeSchema, default: () => ({}) },
   },
   { _id: false },
 );
@@ -62,6 +75,8 @@ const AiPlateAnalysisSchema = new Schema(
     imageMetadata: { type: ImageMetadataSchema, default: () => ({}) },
     detectedFoods: { type: [DetectedFoodSchema], default: [] },
     estimatedNutrition: { type: EstimatedNutritionSchema, default: () => ({}) },
+    assumptions: { type: [String], default: [] },
+    confidenceReason: { type: String, default: '' },
     proportions: { type: ProportionsSchema, default: () => ({}) },
     confidence: {
       type: String,

@@ -2,7 +2,8 @@ export type AiServiceErrorCode =
   | 'prompt_not_found'
   | 'validation_error'
   | 'provider_error'
-  | 'persistence_error';
+  | 'persistence_error'
+  | 'invalid_image';
 
 /**
  * Thrown by the AI service layer.
