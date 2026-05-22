@@ -1,6 +1,115 @@
-.footer {
-  background: var(--color-deep);
+/* Pre-footer CTA */
+.pre-footer {
+  background: linear-gradient(135deg, var(--color-deep) 0%, #7a2a00 100%);
+  padding: 80px 24px;
+  text-align: center;
+}
+
+.pre-footer-container {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.pre-footer-title {
+  font-size: 38px;
+  font-weight: 800;
   color: var(--color-white);
+  margin: 0 0 16px;
+  letter-spacing: -1px;
+}
+
+.pre-footer-text {
+  font-size: 17px;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.8);
+  margin: 0 0 32px;
+}
+
+.pre-footer-cta {
+  display: inline-block;
+  background: var(--color-primary);
+  color: var(--color-white);
+  padding: 16px 40px;
+  border-radius: var(--radius-full);
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 17px;
+  transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 4px 14px rgba(254, 165, 10, 0.35);
+}
+
+.pre-footer-cta:hover {
+  background: #e89500;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(254, 165, 10, 0.5);
+}
+
+.pre-footer-badges {
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+  margin-top: 28px;
+  flex-wrap: wrap;
+}
+
+/* Store Badges (App Store / Google Play) */
+.pre-footer-badges .store-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: #0a0a0a;
+  border-radius: 9px;
+  padding: 7px 18px 7px 14px;
+  text-decoration: none;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  border: 1px solid #2a2a2a;
+  min-width: 150px;
+}
+
+.pre-footer-badges .store-badge:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+}
+
+.pre-footer-badges .store-badge--ios:hover {
+  border-color: #555;
+}
+
+.pre-footer-badges .store-badge--android:hover {
+  border-color: #34A853;
+}
+
+.pre-footer-badges .store-badge-icon {
+  width: 26px;
+  height: 26px;
+  flex-shrink: 0;
+  display: block;
+}
+
+.pre-footer-badges .store-badge-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.15;
+}
+
+.pre-footer-badges .store-badge-small {
+  font-size: 7.5px;
+  font-weight: 400;
+  color: #aaa;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.pre-footer-badges .store-badge-name {
+  font-size: 14.5px;
+  font-weight: 600;
+  color: #fff;
+  letter-spacing: -0.2px;
+}
+
+/* Footer main */
+.footer-main {
+  background: var(--color-deep);
   padding: 64px 24px 0;
 }
 
@@ -8,7 +117,7 @@
   max-width: 1200px;
   margin: 0 auto;
   display: grid;
-  grid-template-columns: 2fr 1fr 1fr 1fr;
+  grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
   gap: 40px;
   padding-bottom: 48px;
 }
@@ -22,17 +131,18 @@
 .footer-logo {
   font-size: 22px;
   font-weight: 700;
+  color: var(--color-white);
 }
 
 .footer-brand p {
   font-size: 14px;
-  color: rgba(255, 255, 255, 0.7);
+  color: rgba(255, 255, 255, 0.6);
   margin: 0;
   line-height: 1.5;
 }
 
 .footer-links h4 {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 1px;
@@ -47,7 +157,7 @@
 }
 
 .footer-links a {
-  color: rgba(255, 255, 255, 0.7);
+  color: rgba(255, 255, 255, 0.6);
   text-decoration: none;
   font-size: 14px;
   transition: color 0.2s;
@@ -58,18 +168,18 @@
 }
 
 .footer-bottom {
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-  padding: 20px 0;
+  background: #3d1500;
+  padding: 20px 24px;
   text-align: center;
 }
 
 .footer-bottom p {
   font-size: 13px;
-  color: rgba(255, 255, 255, 0.5);
+  color: rgba(255, 255, 255, 0.4);
   margin: 0;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 968px) {
   .footer-container {
     grid-template-columns: 1fr 1fr;
   }
@@ -77,10 +187,49 @@
   .footer-brand {
     grid-column: 1 / -1;
   }
+
+  .pre-footer-title {
+    font-size: 30px;
+  }
+}
+
+@media (max-width: 600px) {
+  .pre-footer {
+    padding: 56px 16px;
+  }
+
+  .pre-footer-title {
+    font-size: 26px;
+  }
+
+  .pre-footer-text {
+    font-size: 15px;
+    margin-bottom: 24px;
+  }
+
+  .pre-footer-cta {
+    padding: 14px 32px;
+    font-size: 15px;
+    width: 100%;
+  }
+
+  .pre-footer-badges {
+    flex-direction: column;
+    align-items: center;
+  }
 }
 
 @media (max-width: 480px) {
   .footer-container {
     grid-template-columns: 1fr;
+    gap: 28px;
+  }
+
+  .footer-main {
+    padding: 48px 20px 0;
+  }
+
+  .footer-bottom {
+    padding: 16px 20px;
   }
 }

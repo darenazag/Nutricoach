@@ -1,55 +1,177 @@
-import food1Img from '../../assets/food1.webp'
-import food2Img from '../../assets/food2.webp'
-import food3Img from '../../assets/food3.webp'
-import food4Img from '../../assets/food4.webp'
+import ensaladaImg from '../../assets/ensaladadepollo.png'
 import './Features.css'
-
-const features = [
-  {
-    title: 'Planes con IA',
-    desc: 'Recibe planes de alimentación personalizados generados por inteligencia artificial según tus objetivos.',
-    image: food1Img,
-  },
-  {
-    title: 'Escanea tu comida',
-    desc: 'Toma una foto de tu plato y obtén al instante las calorías y macronutrientes estimados.',
-    image: food2Img,
-  },
-  {
-    title: 'Seguimiento diario',
-    desc: 'Lleva un registro de tus comidas, calorías y progreso con gráficos interactivos.',
-    image: food3Img,
-  },
-  {
-    title: 'Chat nutricional',
-    desc: 'Consulta tus dudas sobre alimentación saludable con nuestro chat impulsado por IA.',
-    image: food4Img,
-  },
-]
 
 function Features() {
   return (
-    <section id="features" className="features">
-      <div className="features-container">
-        <h2 className="features-title">
-          Todo lo que necesitas para <span className="text-primary">alimentarte mejor</span>
+    <section className="features" id="features">
+      <div className="features__container">
+        <h2 className="features__title">
+          Planes de comida personalizados para ti
         </h2>
-        <p className="features-subtitle">
-          NutriCoach AI combina tecnología de punta con ciencia nutricional para ayudarte a alcanzar tus metas.
+        <p className="features__subtitle">
+          Menús adaptados a tus objetivos, gustos y estilo de vida. Cada plan se ajusta automáticamente a tu progreso.
         </p>
 
-        <div className="features-grid">
-          {features.map((f) => (
-            <article key={f.title} className="feature-card">
-              <div className="feature-card-image">
-                <img src={f.image} alt={f.title} />
+        <div className="features__grid">
+          <article className="feature-card feature-card--weekly">
+            <div className="feature-card__body">
+              <h3 className="feature-card__title">Tu plan semanal</h3>
+              <p className="feature-card__desc">
+                Diseñados para perder grasa o ganar músculo
+              </p>
+            </div>
+            <div className="feature-card__phone">
+              <div className="phone">
+                <div className="phone__notch" />
+                <div className="phone__status">
+                  <span>9:41</span>
+                  <div className="phone__status-icons">
+                    <span className="phone__dot" />
+                    <span className="phone__dot" />
+                    <span className="phone__dot" />
+                  </div>
+                </div>
+                <div className="phone__content">
+                  <div className="weekly-calendar">
+                    {['L','M','X','J','V','S','D'].map(d => (
+                      <div key={d} className="weekly-day">
+                        <span className="weekly-day__label">{d}</span>
+                        <span className="weekly-day__dot" />
+                      </div>
+                    ))}
+                  </div>
+                  <div className="weekly-progress">
+                    <div className="weekly-progress__header">
+                      <span>Calorías Planeadas</span>
+                      <span className="weekly-progress__nums">2,105/2,000 kcal</span>
+                    </div>
+                    <div className="weekly-progress__bar">
+                      <div className="weekly-progress__fill" />
+                    </div>
+                  </div>
+                  <div className="weekly-meals">
+                    <div className="weekly-meals__item">
+                      <div className="weekly-meals__left">
+                        <span className="weekly-meals__dot weekly-meals__dot--breakfast" />
+                        <div>
+                          <span className="weekly-meals__type">Desayuno</span>
+                          <span className="weekly-meals__name">Sandwich Doble de Huevos</span>
+                        </div>
+                      </div>
+                      <span className="weekly-meals__cal">520 kcal</span>
+                    </div>
+                    <div className="weekly-meals__item">
+                      <div className="weekly-meals__left">
+                        <span className="weekly-meals__dot weekly-meals__dot--lunch" />
+                        <div>
+                          <span className="weekly-meals__type">Almuerzo</span>
+                          <span className="weekly-meals__name">Wrap de Pollo Parrillero</span>
+                        </div>
+                      </div>
+                      <span className="weekly-meals__cal">680 kcal</span>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <div className="feature-card-body">
-                <h3>{f.title}</h3>
-                <p>{f.desc}</p>
+            </div>
+          </article>
+
+          <article className="feature-card feature-card--recipes">
+            <div className="feature-card__body">
+              <h3 className="feature-card__title">Recetas Inteligentes</h3>
+              <p className="feature-card__desc">
+                Miles de recetas para cumplir tus macros
+              </p>
+            </div>
+            <div className="feature-card__phone">
+              <div className="phone">
+                <div className="phone__notch" />
+                <div className="phone__status">
+                  <span>9:41</span>
+                  <div className="phone__status-icons">
+                    <span className="phone__dot" />
+                    <span className="phone__dot" />
+                    <span className="phone__dot" />
+                  </div>
+                </div>
+                <div className="phone__content">
+                  <div className="recipe-image">
+                    <img src={ensaladaImg} alt="Ensalada de Pollo, Palta y Col" />
+                  </div>
+                  <div className="recipe-details">
+                    <span className="recipe-name">Ensalada de Pollo, Palta y Col</span>
+                    <div className="recipe-macros">
+                      <span className="recipe-macro">511 kcal</span>
+                      <span className="recipe-macro__sep">|</span>
+                      <span className="recipe-macro">45P</span>
+                      <span className="recipe-macro__sep">|</span>
+                      <span className="recipe-macro">21C</span>
+                      <span className="recipe-macro__sep">|</span>
+                      <span className="recipe-macro">29G</span>
+                    </div>
+                    <button className="recipe-btn">Agregar a Almuerzo</button>
+                  </div>
+                </div>
               </div>
-            </article>
-          ))}
+            </div>
+          </article>
+
+          <article className="feature-card feature-card--shopping">
+            <div className="feature-card__body">
+              <h3 className="feature-card__title">Listas de compras</h3>
+              <p className="feature-card__desc">
+                Tu plan convertido en una lista para el súper
+              </p>
+            </div>
+            <div className="feature-card__phone">
+              <div className="phone">
+                <div className="phone__notch" />
+                <div className="phone__status">
+                  <span>9:41</span>
+                  <div className="phone__status-icons">
+                    <span className="phone__dot" />
+                    <span className="phone__dot" />
+                    <span className="phone__dot" />
+                  </div>
+                </div>
+                <div className="phone__content">
+                  <div className="shop-dates">
+                    <span>Lun, 6 Ene</span>
+                    <span className="shop-dates__arrow">→</span>
+                    <span>Mar, 14 Ene</span>
+                  </div>
+                  <div className="shop-list">
+                    <div className="shop-category">
+                      <span className="shop-category__title">Carnes, Aves y Pescados</span>
+                      <div className="shop-category__item">
+                        <span>Huevo (6 und - 330g)</span>
+                        <span className="shop-checkbox" />
+                      </div>
+                      <div className="shop-category__item">
+                        <span>Carne (225g)</span>
+                        <span className="shop-checkbox" />
+                      </div>
+                    </div>
+                    <div className="shop-category">
+                      <span className="shop-category__title">Frutas</span>
+                      <div className="shop-category__item">
+                        <span>Kiwi (4 und - 300g)</span>
+                        <span className="shop-checkbox" />
+                      </div>
+                      <div className="shop-category__item">
+                        <span>Naranja (3 und - 390g)</span>
+                        <span className="shop-checkbox" />
+                      </div>
+                      <div className="shop-category__item">
+                        <span>Plátano (7 und - 910g)</span>
+                        <span className="shop-checkbox" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </article>
         </div>
       </div>
     </section>

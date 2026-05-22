@@ -1,10 +1,17 @@
+@import "tailwindcss";
 @import './styles/variables.css';
+
+@theme {
+  --color-cream: #FAF6F0;
+  --color-accent: #FAA61A;
+  --color-dark-brown: #3D1D11;
+}
 
 *,
 *::before,
 *::after {
   box-sizing: border-box;
-  margin: 0;
+
   padding: 0;
 }
 
