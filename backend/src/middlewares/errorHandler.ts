@@ -9,6 +9,7 @@ import { AiProviderError } from '../modules/ai/index.js';
 const STATUS_BY_AI_SERVICE_CODE: Record<AiServiceErrorCode, number> = {
   invalid_image: 400,
   validation_error: 400,
+  not_found: 404,
   prompt_not_found: 500,
   provider_error: 502,
   persistence_error: 500,

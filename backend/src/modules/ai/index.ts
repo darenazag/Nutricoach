@@ -10,3 +10,4 @@ export { aiRouter } from './routes/ai.routes.js';
 export { postAiChat } from './controllers/aiChat.controller.js';
 export { postAiMenu } from './controllers/aiMenu.controller.js';
 export { postAiProfileExplanation } from './controllers/aiProfileExplanation.controller.js';
+export { getAiConversation } from './controllers/aiConversations.controller.js';

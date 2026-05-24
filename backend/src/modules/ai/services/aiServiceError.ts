@@ -3,7 +3,8 @@ export type AiServiceErrorCode =
   | 'validation_error'
   | 'provider_error'
   | 'persistence_error'
-  | 'invalid_image';
+  | 'invalid_image'
+  | 'not_found';
 
 /**
  * Thrown by the AI service layer.
