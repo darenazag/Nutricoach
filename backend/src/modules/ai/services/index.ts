@@ -19,6 +19,14 @@ export {
 export { getDefaultPromptTemplate } from './aiPrompt.service.js';
 export { validateAiResponse } from './aiValidation.service.js';
 export { generateConversationId, generateMessageId } from './aiId.service.js';
+export {
+  buildCacheKey,
+  getCacheTtlSeconds,
+  storeCache,
+  tryGetCached,
+  type BuildCacheKeyInput,
+  type StoreCacheInput,
+} from './aiCache.service.js';
 export { runAiChat, type AiChatServiceResult } from './aiChat.service.js';
 export { runAiMenu, type AiMenuServiceResult } from './aiMenu.service.js';
 export {

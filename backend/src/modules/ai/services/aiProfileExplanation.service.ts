@@ -20,11 +20,18 @@ import { AiServiceError } from './aiServiceError.js';
 import { getDefaultPromptTemplate } from './aiPrompt.service.js';
 import { validateAiResponse } from './aiValidation.service.js';
 import { generateConversationId, generateMessageId } from './aiId.service.js';
+import {
+  buildCacheKey,
+  getCacheTtlSeconds,
+  storeCache,
+  tryGetCached,
+} from './aiCache.service.js';
 import type {
   AiProfileExplanationRequest,
   AiProfileExplanationResponse,
   AiServiceResult,
 } from './aiResponse.types.js';
+import type { AiProvider } from '../types/index.js';
 
 export interface AiProfileExplanationServiceResult
   extends AiServiceResult<AiProfileExplanationResponse['structuredData']> {
@@ -178,27 +185,79 @@ export async function runAiProfileExplanation(
     variables: buildProfilePromptVariables(request),
   });
 
-  let providerResponse;
+  // Cache key only depends on what determines the output: rendered prompts +
+  // model + prompt version. See aiCache.service.ts for the contract.
+  const resolvedModel = process.env['GEMINI_MODEL'] ?? 'gemini-2.5-flash';
+  const cacheKey = buildCacheKey({
+    systemPrompt,
+    userPrompt,
+    model: resolvedModel,
+    promptVersion: template.version,
+  });
+
+  let cachedJson: unknown = null;
   try {
-    providerResponse = await generateGeminiJson<unknown>({
-      systemPrompt,
-      userPrompt,
-    });
+    cachedJson = await tryGetCached<unknown>(cacheKey);
   } catch (err) {
-    if (err instanceof AiProviderError) {
-      throw new AiServiceError(
-        `Gemini provider failed: ${err.message}`,
-        'provider_error',
-        { cause: err, details: { providerCode: err.code } },
-      );
-    }
-    throw err;
+    // The cache must never break the user flow. Log and fall through to Gemini.
+    console.warn('[aiCache] tryGetCached failed:', err);
   }
 
-  const aiResponse = validateAiResponse(
-    aiProfileExplanationResponseSchema,
-    providerResponse.parsed,
-  );
+  let aiResponse: AiProfileExplanationResponse;
+  let usedProvider: AiProvider;
+  let usedModel: string;
+  let cached: boolean;
+
+  if (cachedJson !== null) {
+    // HIT — validate the cached payload with the same schema.
+    aiResponse = validateAiResponse(aiProfileExplanationResponseSchema, cachedJson);
+    usedProvider = 'gemini';
+    usedModel = resolvedModel;
+    cached = true;
+  } else {
+    // MISS — call Gemini, validate, store in cache (best-effort).
+    let providerResponse;
+    try {
+      providerResponse = await generateGeminiJson<unknown>({
+        systemPrompt,
+        userPrompt,
+      });
+    } catch (err) {
+      if (err instanceof AiProviderError) {
+        throw new AiServiceError(
+          `Gemini provider failed: ${err.message}`,
+          'provider_error',
+          { cause: err, details: { providerCode: err.code } },
+        );
+      }
+      throw err;
+    }
+
+    aiResponse = validateAiResponse(
+      aiProfileExplanationResponseSchema,
+      providerResponse.parsed,
+    );
+
+    try {
+      await storeCache({
+        cacheKey,
+        type: 'profile_explanation',
+        inputHash: cacheKey,
+        resultText: providerResponse.text,
+        resultJson: aiResponse,
+        provider: providerResponse.metadata.provider,
+        model: providerResponse.metadata.model,
+        promptVersion: template.version,
+        ttlSeconds: getCacheTtlSeconds(),
+      });
+    } catch (err) {
+      console.warn('[aiCache] storeCache failed:', err);
+    }
+
+    usedProvider = providerResponse.metadata.provider;
+    usedModel = providerResponse.metadata.model;
+    cached = false;
+  }
 
   await persist(
     'addMessage (assistant, profile_explanation)',
@@ -210,8 +269,8 @@ export async function runAiProfileExplanation(
         role: 'assistant',
         content: aiResponse.responseText,
         structuredData: aiResponse.structuredData,
-        provider: providerResponse.metadata.provider,
-        model: providerResponse.metadata.model,
+        provider: usedProvider,
+        model: usedModel,
         promptVersion: template.version,
         safety: mapSafetyForPersistence(aiResponse.safety),
       }),
@@ -224,10 +283,10 @@ export async function runAiProfileExplanation(
     safety: aiResponse.safety,
     conversationId,
     metadata: {
-      provider: providerResponse.metadata.provider,
-      model: providerResponse.metadata.model,
+      provider: usedProvider,
+      model: usedModel,
       promptVersion: template.version,
-      cached: providerResponse.metadata.cached,
+      cached,
     },
   };
 }

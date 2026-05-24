@@ -17,11 +17,18 @@ import { AiServiceError } from './aiServiceError.js';
 import { getDefaultPromptTemplate } from './aiPrompt.service.js';
 import { validateAiResponse } from './aiValidation.service.js';
 import { generateConversationId, generateMessageId } from './aiId.service.js';
+import {
+  buildCacheKey,
+  getCacheTtlSeconds,
+  storeCache,
+  tryGetCached,
+} from './aiCache.service.js';
 import type {
   AiMenuRequest,
   AiMenuResponse,
   AiServiceResult,
 } from './aiResponse.types.js';
+import type { AiProvider } from '../types/index.js';
 
 export interface AiMenuServiceResult
   extends AiServiceResult<AiMenuResponse['structuredData']> {
@@ -164,24 +171,79 @@ export async function runAiMenu(input: unknown): Promise<AiMenuServiceResult> {
     variables: buildMenuPromptVariables(request),
   });
 
-  let providerResponse;
+  // Cache key only depends on what determines the output: rendered prompts +
+  // the model we are about to ask for + the prompt version. The "resolved"
+  // model is what the service requests; the provider may internally pin a
+  // sub-version (e.g. -001), but that does not affect cache identity.
+  const resolvedModel = process.env['GEMINI_MODEL'] ?? 'gemini-2.5-flash';
+  const cacheKey = buildCacheKey({
+    systemPrompt,
+    userPrompt,
+    model: resolvedModel,
+    promptVersion: template.version,
+  });
+
+  let cachedJson: unknown = null;
   try {
-    providerResponse = await generateGeminiJson<unknown>({
-      systemPrompt,
-      userPrompt,
-    });
+    cachedJson = await tryGetCached<unknown>(cacheKey);
   } catch (err) {
-    if (err instanceof AiProviderError) {
-      throw new AiServiceError(
-        `Gemini provider failed: ${err.message}`,
-        'provider_error',
-        { cause: err, details: { providerCode: err.code } },
-      );
-    }
-    throw err;
+    // The cache must never break the user flow. Log and fall through to Gemini.
+    console.warn('[aiCache] tryGetCached failed:', err);
   }
 
-  const aiResponse = validateAiResponse(aiMenuResponseSchema, providerResponse.parsed);
+  let aiResponse: AiMenuResponse;
+  let usedProvider: AiProvider;
+  let usedModel: string;
+  let cached: boolean;
+
+  if (cachedJson !== null) {
+    // HIT — validate the cached payload with the same schema we would use on a
+    // fresh response, so a poisoned entry surfaces as 'validation_error'.
+    aiResponse = validateAiResponse(aiMenuResponseSchema, cachedJson);
+    usedProvider = 'gemini';
+    usedModel = resolvedModel;
+    cached = true;
+  } else {
+    // MISS — call Gemini, validate, then store in cache (best-effort).
+    let providerResponse;
+    try {
+      providerResponse = await generateGeminiJson<unknown>({
+        systemPrompt,
+        userPrompt,
+      });
+    } catch (err) {
+      if (err instanceof AiProviderError) {
+        throw new AiServiceError(
+          `Gemini provider failed: ${err.message}`,
+          'provider_error',
+          { cause: err, details: { providerCode: err.code } },
+        );
+      }
+      throw err;
+    }
+
+    aiResponse = validateAiResponse(aiMenuResponseSchema, providerResponse.parsed);
+
+    try {
+      await storeCache({
+        cacheKey,
+        type: 'menu_generation',
+        inputHash: cacheKey,
+        resultText: providerResponse.text,
+        resultJson: aiResponse,
+        provider: providerResponse.metadata.provider,
+        model: providerResponse.metadata.model,
+        promptVersion: template.version,
+        ttlSeconds: getCacheTtlSeconds(),
+      });
+    } catch (err) {
+      console.warn('[aiCache] storeCache failed:', err);
+    }
+
+    usedProvider = providerResponse.metadata.provider;
+    usedModel = providerResponse.metadata.model;
+    cached = false;
+  }
 
   await persist(
     'addMessage (assistant, menu)',
@@ -193,8 +255,8 @@ export async function runAiMenu(input: unknown): Promise<AiMenuServiceResult> {
         role: 'assistant',
         content: aiResponse.responseText,
         structuredData: aiResponse.structuredData,
-        provider: providerResponse.metadata.provider,
-        model: providerResponse.metadata.model,
+        provider: usedProvider,
+        model: usedModel,
         promptVersion: template.version,
         safety: mapSafetyForPersistence(aiResponse.safety),
       }),
@@ -207,10 +269,10 @@ export async function runAiMenu(input: unknown): Promise<AiMenuServiceResult> {
     safety: aiResponse.safety,
     conversationId,
     metadata: {
-      provider: providerResponse.metadata.provider,
-      model: providerResponse.metadata.model,
+      provider: usedProvider,
+      model: usedModel,
       promptVersion: template.version,
-      cached: providerResponse.metadata.cached,
+      cached,
     },
   };
 }
