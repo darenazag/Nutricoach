@@ -1,3 +1,7 @@
+> **Documento histórico.** Describe el estado del módulo IA al final del primer sprint de infraestructura (antes de implementar endpoints, servicios ni integración con Gemini). Para el estado actual ver [docs/ai-module-current-status.md](ai-module-current-status.md).
+
+---
+
 # Sprint `integration/david-ai-stack` — Módulo IA backend de NutriCoach
 
 > Rama base personal: `integration/david-ai-stack`

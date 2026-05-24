@@ -296,6 +296,24 @@ Flujo recomendado:
 
 ---
 
+## Estado actual del módulo IA
+
+El módulo IA (`integration/david-ai-stack`) está operativo con 5 endpoints REST:
+
+| Método | Ruta | Descripción |
+|--------|------|-------------|
+| POST | `/api/ai/chat` | Chat conversacional con Gemini |
+| POST | `/api/ai/menu` | Generación de menú orientativo (con caché) |
+| POST | `/api/ai/profile-explanation` | Explicación del perfil nutricional (con caché) |
+| POST | `/api/ai/plate-analysis` | Análisis de imagen de plato con Gemini Vision |
+| GET  | `/api/ai/conversations/:conversationId` | Lectura de conversación y mensajes |
+
+Toda la persistencia IA usa MongoDB + Mongoose. PostgreSQL/Sequelize queda reservado para los datos de usuario.
+
+→ Documentación completa: [docs/ai-module-current-status.md](docs/ai-module-current-status.md)
+
+---
+
 ## Licencia
 
 Pendiente de definir.
