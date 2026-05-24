@@ -19,7 +19,7 @@ El módulo IA de NutriCoach está **completamente operativo** en su rama de inte
 | POST | `/api/ai/chat` | Chat conversacional multi-turno | ❌ No |
 | POST | `/api/ai/menu` | Generación de menú orientativo | ✅ 24 h |
 | POST | `/api/ai/profile-explanation` | Explicación del perfil nutricional | ✅ 24 h |
-| POST | `/api/ai/plate-analysis` | Análisis de imagen de plato | ❌ No |
+| POST | `/api/ai/plate-analysis` | Análisis de imagen de plato | ✅ 24 h |
 | GET  | `/api/ai/conversations/:conversationId` | Lectura de conversación + mensajes | — |
 
 Todos responden con la forma:
@@ -38,7 +38,7 @@ Todos responden con la forma:
 | POST /chat | `runAiChat` | `ai_conversations` + `ai_messages` | — | No |
 | POST /menu | `runAiMenu` | `ai_conversations` + `ai_messages` | `ai_cache_entries` | Sí |
 | POST /profile-explanation | `runAiProfileExplanation` | `ai_conversations` + `ai_messages` | `ai_cache_entries` | Sí |
-| POST /plate-analysis | `runAiPlateAnalysis` | `ai_plate_analyses` + `ai_conversations` + `ai_messages` | — | No |
+| POST /plate-analysis | `runAiPlateAnalysis` | `ai_plate_analyses` + `ai_conversations` + `ai_messages` | `ai_cache_entries` | Sí |
 | GET /conversations/:id | `getAiConversationById` | `ai_conversations` + `ai_messages` | — | — |
 
 ---
@@ -203,7 +203,7 @@ req.params.conversationId → aiConversations.controller
 | chat | No | — | — |
 | menu | Sí | SHA256({ systemPrompt, userPrompt, model, promptVersion }) | 24 h |
 | profile-explanation | Sí | SHA256({ systemPrompt, userPrompt, model, promptVersion }) | 24 h |
-| plate-analysis | No (pendiente) | SHA256 imagen + contexto | — |
+| plate-analysis | Sí | SHA256({ SHA256(imageBuffer), systemPrompt, userPrompt, model, promptVersion }) | 24 h |
 
 **Comportamiento del caché:**
 - `tryGetCached`: retorna `null` si no existe o ha expirado. Incrementa `hitCount` (best-effort, non-blocking).
@@ -312,7 +312,7 @@ npm run dev
 |------|-----------|
 | Autenticación | Los endpoints de IA no requieren JWT. Cualquier cliente puede llamarlos. |
 | Paginación | `GET /conversations/:id` devuelve todos los mensajes sin límite. |
-| Caché plate-analysis | No implementada todavía. Cada análisis de imagen llama a Gemini. |
+| Caché plate-analysis | Implementada. Cache key incluye SHA-256 del buffer de imagen. |
 | Usuarios reales | Los endpoints aceptan `userId` como string libre. No se valida contra la tabla `users` de PostgreSQL. |
 | Rate limiting | No hay rate limiting por usuario ni por IP. |
 | Tests | No existe suite de tests automatizados para el módulo IA. |
@@ -326,8 +326,7 @@ npm run dev
 
 En orden de menor a mayor riesgo:
 
-1. **`feat/ai-plate-analysis-cache`** — añadir caché a plate-analysis usando `sha256(imageBuffer)` como parte de la cache key (Node.js built-in `crypto`, sin nuevas dependencias).
-2. **`feat/ai-tests`** — Vitest + Supertest + `mongodb-memory-server` + mock del proveedor Gemini.
+1. **`feat/ai-tests`** — Vitest + Supertest + `mongodb-memory-server` + mock del proveedor Gemini.
 3. **`feat/ai-auth-guard`** — middleware JWT que proteja los endpoints de IA una vez que el módulo de usuarios esté operativo.
 4. **`feat/ai-db-schema-alignment`** — alinear el `userId` de los DTOs con la tabla `users` de PostgreSQL (requiere que el módulo de usuarios esté implementado).
 5. **`feat/ai-conversations-list`** — `GET /api/ai/conversations?userId=...` con paginación.
@@ -363,6 +362,6 @@ En orden de menor a mayor riesgo:
 ### Pendiente
 - [ ] Tests automatizados
 - [ ] Autenticación en endpoints de IA
-- [ ] Caché en plate-analysis
+- [x] Caché en plate-analysis (cache key incluye SHA-256 del buffer)
 - [ ] Paginación en lectura de conversaciones
 - [ ] Rate limiting
