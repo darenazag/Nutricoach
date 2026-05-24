@@ -1,4 +1,4 @@
-import { randomUUID } from 'node:crypto';
+import { createHash, randomUUID } from 'node:crypto';
 import { aiPlateAnalysisRequestSchema, aiPlateAnalysisResponseSchema } from '../schemas/index.js';
 import type { AiSafetyOutput } from '../schemas/index.js';
 import {
@@ -11,7 +11,9 @@ import { AiPlateAnalysis } from '../models/index.js';
 import { AiServiceError } from './aiServiceError.js';
 import { getDefaultPromptTemplate } from './aiPrompt.service.js';
 import { validateAiResponse } from './aiValidation.service.js';
-import type { AiServiceMetadata } from './aiResponse.types.js';
+import { tryGetCached, storeCache, getCacheTtlSeconds } from './aiCache.service.js';
+import type { AiPlateAnalysisResponse, AiServiceMetadata } from './aiResponse.types.js';
+import type { AiProvider } from '../types/index.js';
 
 // ── Input / Output types ───────────────────────────────────────────────────
 
@@ -54,6 +56,37 @@ export interface AiPlateAnalysisServiceResult {
 
 // ── Helpers ────────────────────────────────────────────────────────────────
 
+/**
+ * SHA-256 hex digest of the processed image buffer.
+ * Used as part of the plate-analysis cache key so that two different images
+ * with identical prompt parameters never collide in the cache.
+ */
+function buildImageBufferHash(imageBuffer: Buffer): string {
+  return createHash('sha256').update(imageBuffer).digest('hex');
+}
+
+/**
+ * Compound cache key for plate analysis.
+ *
+ * Unlike the one-shot text endpoints (menu, profile-explanation) whose output
+ * depends only on the rendered prompts + model + version, plate analysis is
+ * multimodal: the same prompt parameters with a different image must produce a
+ * different cache key. We include the image SHA-256 to guarantee that.
+ *
+ * A local function is used instead of extending `buildCacheKey` from
+ * aiCache.service.ts to avoid any risk of breaking the existing contract for
+ * menu and profile-explanation.
+ */
+function buildPlateAnalysisCacheKey(params: {
+  systemPrompt: string;
+  userPrompt: string;
+  model: string;
+  promptVersion: string;
+  imageHash: string;
+}): string {
+  return createHash('sha256').update(JSON.stringify(params)).digest('hex');
+}
+
 function buildPlateAnalysisVariables(
   input: AiPlateAnalysisInput,
 ): RenderPromptVariables {
@@ -71,7 +104,7 @@ function buildPlateAnalysisVariables(
 async function persistAnalysis(
   analysisId: string,
   input: AiPlateAnalysisInput,
-  aiResponse: ReturnType<typeof validateAiResponse<typeof aiPlateAnalysisResponseSchema>>,
+  aiResponse: AiPlateAnalysisResponse,
   rawResponse: unknown,
 ): Promise<void> {
   try {
@@ -105,19 +138,23 @@ async function persistAnalysis(
 // ── Main orchestrator ──────────────────────────────────────────────────────
 
 /**
- * Orchestrates a single plate-analysis turn:
+ * Orchestrates a single plate-analysis turn with cache support:
  *   1. Validates the request metadata with aiPlateAnalysisRequestSchema.
  *   2. Retrieves and renders the plate-analysis prompt template.
- *   3. Calls Gemini with the image as base64 inlineData.
- *   4. Validates the AI response with aiPlateAnalysisResponseSchema.
- *   5. Persists the result in AiPlateAnalysis (image binary is never stored).
- *   6. Returns the typed service result including analysisId.
+ *   3. Builds a compound cache key: SHA256({ prompts, model, version, imageHash }).
+ *   4. On CACHE HIT: validates cached JSON, skips Gemini call.
+ *   5. On CACHE MISS: calls Gemini with base64 image, validates, stores in cache.
+ *   6. Always persists a new AiPlateAnalysis document (audit trail per request).
+ *   7. Returns the typed service result including analysisId and metadata.cached.
  *
  * Errors are normalised to AiServiceError:
  *   - 'validation_error'  — request or AI response failed Zod.
  *   - 'prompt_not_found'  — no template registered.
  *   - 'provider_error'    — Gemini SDK failure.
  *   - 'persistence_error' — Mongo write failed.
+ *
+ * Cache errors (read or write) are swallowed as warnings so they never
+ * interrupt the user-facing flow.
  */
 export async function runAiPlateAnalysis(
   input: AiPlateAnalysisInput,
@@ -150,32 +187,88 @@ export async function runAiPlateAnalysis(
     variables: buildPlateAnalysisVariables(input),
   });
 
-  // 3. Call Gemini with image
-  let providerResponse;
+  // 3. Build cache key — includes image hash to avoid cross-image collisions
+  const imageHash = buildImageBufferHash(input.imageBuffer);
+  const resolvedModel = process.env['GEMINI_MODEL'] ?? 'gemini-2.5-flash';
+  const cacheKey = buildPlateAnalysisCacheKey({
+    systemPrompt,
+    userPrompt,
+    model: resolvedModel,
+    promptVersion: template.version,
+    imageHash,
+  });
+
+  // 4. Try cache
+  let cachedJson: unknown = null;
   try {
-    providerResponse = await generateGeminiJsonWithImage<unknown>({
-      systemPrompt,
-      userPrompt,
-      imageBuffer: input.imageBuffer,
-      mimeType: request.imageMetadata.mimeType,
-    });
+    cachedJson = await tryGetCached<unknown>(cacheKey);
   } catch (err) {
-    if (err instanceof AiProviderError) {
-      throw new AiServiceError(
-        `Gemini provider failed: ${err.message}`,
-        'provider_error',
-        { cause: err, details: { providerCode: err.code } },
-      );
-    }
-    throw err;
+    console.warn('[aiCache] tryGetCached (plate-analysis) failed:', err);
   }
 
-  // 4. Validate AI response
-  const aiResponse = validateAiResponse(aiPlateAnalysisResponseSchema, providerResponse.parsed);
+  let aiResponse: AiPlateAnalysisResponse;
+  let usedProvider: AiProvider;
+  let usedModel: string;
+  let cached: boolean;
+  let rawForPersistence: unknown;
 
-  // 5. Persist
+  if (cachedJson !== null) {
+    // HIT — validate cached payload with the same schema to catch poisoned entries
+    aiResponse = validateAiResponse(aiPlateAnalysisResponseSchema, cachedJson);
+    usedProvider = 'gemini';
+    usedModel = resolvedModel;
+    cached = true;
+    rawForPersistence = cachedJson;
+  } else {
+    // MISS — call Gemini, validate, then store in cache (best-effort)
+    let providerResponse;
+    try {
+      providerResponse = await generateGeminiJsonWithImage<unknown>({
+        systemPrompt,
+        userPrompt,
+        imageBuffer: input.imageBuffer,
+        mimeType: request.imageMetadata.mimeType,
+      });
+    } catch (err) {
+      if (err instanceof AiProviderError) {
+        throw new AiServiceError(
+          `Gemini provider failed: ${err.message}`,
+          'provider_error',
+          { cause: err, details: { providerCode: err.code } },
+        );
+      }
+      throw err;
+    }
+
+    aiResponse = validateAiResponse(aiPlateAnalysisResponseSchema, providerResponse.parsed);
+
+    try {
+      await storeCache({
+        cacheKey,
+        type: 'plate_analysis',
+        // inputHash stores the image SHA-256 (the primary discriminator).
+        // The cacheKey is a compound hash of image + prompts + model.
+        inputHash: imageHash,
+        resultText: aiResponse.responseText,
+        resultJson: aiResponse,
+        provider: providerResponse.metadata.provider,
+        model: providerResponse.metadata.model,
+        promptVersion: template.version,
+        ttlSeconds: getCacheTtlSeconds(),
+      });
+    } catch (err) {
+      console.warn('[aiCache] storeCache (plate-analysis) failed:', err);
+    }
+
+    usedProvider = providerResponse.metadata.provider;
+    usedModel = providerResponse.metadata.model;
+    cached = false;
+    rawForPersistence = providerResponse.parsed;
+  }
+
+  // 5. Persist AiPlateAnalysis — always, even on cache hit (new analysisId per request)
   const analysisId = `analysis_${randomUUID()}`;
-  await persistAnalysis(analysisId, input, aiResponse, providerResponse.parsed);
+  await persistAnalysis(analysisId, input, aiResponse, rawForPersistence);
 
   // 6. Return result
   return {
@@ -183,10 +276,10 @@ export async function runAiPlateAnalysis(
     structuredData: aiResponse.structuredData,
     safety: aiResponse.safety,
     metadata: {
-      provider: providerResponse.metadata.provider,
-      model: providerResponse.metadata.model,
+      provider: usedProvider,
+      model: usedModel,
       promptVersion: template.version,
-      cached: providerResponse.metadata.cached,
+      cached,
     },
     analysisId,
   };
