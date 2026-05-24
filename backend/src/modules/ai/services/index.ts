@@ -22,6 +22,10 @@ export { generateConversationId, generateMessageId } from './aiId.service.js';
 export { runAiChat, type AiChatServiceResult } from './aiChat.service.js';
 export { runAiMenu, type AiMenuServiceResult } from './aiMenu.service.js';
 export {
+  runAiProfileExplanation,
+  type AiProfileExplanationServiceResult,
+} from './aiProfileExplanation.service.js';
+export {
   runAiPlateAnalysis,
   type AiPlateAnalysisInput,
   type AiPlateAnalysisServiceResult,

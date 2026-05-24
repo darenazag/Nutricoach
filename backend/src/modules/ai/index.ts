@@ -9,3 +9,4 @@ export * as repositories from './repositories/index.js';
 export { aiRouter } from './routes/ai.routes.js';
 export { postAiChat } from './controllers/aiChat.controller.js';
 export { postAiMenu } from './controllers/aiMenu.controller.js';
+export { postAiProfileExplanation } from './controllers/aiProfileExplanation.controller.js';
