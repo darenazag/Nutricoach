@@ -38,3 +38,9 @@ export {
   type AiPlateAnalysisInput,
   type AiPlateAnalysisServiceResult,
 } from './aiPlateAnalysis.service.js';
+export {
+  getAiConversationById,
+  type GetAiConversationResult,
+  type ConversationDto,
+  type MessageDto,
+} from './aiConversations.service.js';
