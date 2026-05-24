@@ -46,16 +46,15 @@
   gap: 32px;
 }
 
-.header-nav a {
-  text-decoration: none;
-  color: var(--color-text);
-  font-size: 15px;
-  font-weight: 500;
-  transition: color 0.2s;
+.gooey-nav-container nav ul {
+  gap: 0.5em;
+  padding: 0 0.5em;
 }
 
-.header-nav a:hover {
-  color: var(--color-primary);
+.gooey-nav-container nav ul li a {
+  font-size: 15px;
+  font-weight: 500;
+  padding: 0.5em 1em;
 }
 
 .header-actions {
@@ -121,7 +120,8 @@
     height: 60px;
   }
 
-  .header-nav {
+  .header-nav,
+  .gooey-nav-container {
     display: none;
   }
 

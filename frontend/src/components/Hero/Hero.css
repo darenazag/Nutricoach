@@ -1,20 +1,7 @@
 .hero {
   padding: 140px 24px 100px;
-  background: linear-gradient(135deg, var(--color-bg) 0%, #fff5e6 50%, #ffedd5 100%);
-  overflow: hidden;
+  background-color: var(--color-bg);
   position: relative;
-}
-
-.hero::before {
-  content: '';
-  position: absolute;
-  top: -50%;
-  right: -20%;
-  width: 600px;
-  height: 600px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(254, 165, 10, 0.08) 0%, transparent 70%);
-  pointer-events: none;
 }
 
 .hero-container {
@@ -481,10 +468,5 @@
     display: none;
   }
 
-  .hero::before {
-    width: 300px;
-    height: 300px;
-    top: -20%;
-    right: -30%;
-  }
+
 }

@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { useAuth } from '../../context/useAuth'
+import GooeyNav from '../GooeyNav/GooeyNav'
 import './Header.css'
 
 function Header() {
@@ -13,11 +14,18 @@ function Header() {
           <span className="header-logo-text">Nutri<span className="highlight">Coach</span></span>
         </Link>
 
-        <nav className="header-nav">
-          <a href="/#hero">Inicio</a>
-          <a href="/#features">Características</a>
-          <a href="/#contact">Contacto</a>
-        </nav>
+        <GooeyNav
+          items={[
+            { label: 'Inicio', href: '/#hero' },
+            { label: 'Características', href: '/#features' },
+            { label: 'Contacto', href: '/#contact' },
+          ]}
+          particleCount={12}
+          particleDistances={[70, 15]}
+          animationTime={500}
+          timeVariance={250}
+          colors={[1, 2, 3, 4]}
+        />
 
         <div className="header-actions">
           {isAuthenticated ? (
