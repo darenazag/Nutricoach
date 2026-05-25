@@ -1,4 +1,4 @@
-export type AiProviderName = 'gemini';
+export type AiProviderName = 'gemini' | 'deepseek';
 
 export interface AiProviderRequest {
   systemPrompt: string;
@@ -13,12 +13,17 @@ export interface AiProviderJsonResponse<T = unknown> {
   parsed: T | null;
   raw: unknown;
   metadata: {
-    provider: 'gemini';
+    provider: AiProviderName;
     model: string;
     cached: false;
   };
 }
 
+/**
+ * Extended request type for providers that support image input.
+ * Image capability is NOT universal — currently only Gemini implements this.
+ * Text-only providers (e.g. DeepSeek) accept AiProviderRequest instead.
+ */
 export interface AiProviderImageRequest {
   systemPrompt: string;
   userPrompt: string;
