@@ -974,6 +974,196 @@
 }
 
 /* ================================================================
+   RECOMENDACIÓN DEL DÍA
+   ================================================================ */
+.pcard-recommend {
+  background: linear-gradient(135deg, #fff9f0, #fff3e0);
+  border-color: #fea50a44;
+}
+
+.prec-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.prec-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: var(--pradius-md);
+  background: var(--pcolor-white);
+  border-left: 4px solid var(--pcolor-border);
+}
+
+.prec-item--bajo {
+  border-left-color: #4caf50;
+}
+
+.prec-item--medio {
+  border-left-color: var(--pcolor-primary);
+}
+
+.prec-item--alto {
+  border-left-color: #f44336;
+}
+
+.prec-item-label {
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--pcolor-text);
+  min-width: 80px;
+}
+
+.prec-item-cat {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  padding: 3px 10px;
+  border-radius: var(--pradius-full);
+  background: var(--pcolor-bg);
+  color: var(--pcolor-text-light);
+}
+
+.prec-item-kcal {
+  margin-left: auto;
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--pcolor-text);
+}
+
+.prec-total {
+  text-align: center;
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--pcolor-primary);
+  padding: 8px;
+  background: rgba(254, 165, 10, 0.08);
+  border-radius: var(--pradius-md);
+}
+
+/* ================================================================
+   PROYECCIÓN 100 DÍAS
+   ================================================================ */
+.pproj-summary {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.pproj-stat {
+  background: var(--pcolor-bg);
+  border-radius: var(--pradius-md);
+  padding: 12px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.pproj-stat-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--pcolor-text-light);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.pproj-stat-value {
+  font-size: clamp(18px, 5vw, 22px);
+  font-weight: 800;
+  color: var(--pcolor-text);
+}
+
+.pproj-stat-value--diff {
+  color: var(--pcolor-primary);
+}
+
+.pproj-chart {
+  margin-bottom: 12px;
+}
+
+.pproj-chart .chart-card {
+  border: none;
+  padding: 0;
+  box-shadow: none;
+  background: transparent;
+}
+
+.pproj-chart .chart-card h3,
+.pproj-chart .chart-card p {
+  display: none;
+}
+
+.pproj-details {
+  margin-top: 8px;
+}
+
+.pproj-details summary {
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--pcolor-primary);
+  padding: 8px 0;
+  user-select: none;
+}
+
+.pproj-details summary:hover {
+  color: var(--pcolor-secondary);
+}
+
+.pproj-table-wrap {
+  overflow-x: auto;
+  margin-top: 8px;
+  border: 1px solid var(--pcolor-border);
+  border-radius: var(--pradius-md);
+}
+
+.pproj-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.pproj-table th {
+  background: var(--pcolor-bg);
+  padding: 8px 10px;
+  text-align: left;
+  font-weight: 700;
+  color: var(--pcolor-text-light);
+  text-transform: uppercase;
+  font-size: 11px;
+  letter-spacing: 0.3px;
+  border-bottom: 1px solid var(--pcolor-border);
+  position: sticky;
+  top: 0;
+}
+
+.pproj-table td {
+  padding: 7px 10px;
+  border-bottom: 1px solid var(--pcolor-border);
+  color: var(--pcolor-text);
+}
+
+.pproj-table tr:nth-child(even) td {
+  background: rgba(240, 230, 216, 0.2);
+}
+
+.pproj-table tr:hover td {
+  background: rgba(254, 165, 10, 0.06);
+}
+
+.pproj-cat {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+/* ================================================================
    DESKTOP XL (≥1400px)
    ================================================================ */
 @media (min-width: 1400px) {

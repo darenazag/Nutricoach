@@ -38,6 +38,37 @@ interface StreakData {
   mealCount: number
 }
 
+interface RecomendacionMenuComida {
+  categoria: string
+  kcal: number
+}
+
+interface RecomendacionMenu {
+  desayuno: RecomendacionMenuComida
+  almuerzo: RecomendacionMenuComida
+  cena: RecomendacionMenuComida
+}
+
+interface DiaProyeccion {
+  dia: number
+  calorias_consumidas: number
+  balance_energetico: number
+  peso_proyectado: number
+  recomendacion_menu: RecomendacionMenu
+}
+
+interface RecommendationData {
+  datos_usuario: { tmb: string; getd: string }
+  objetivo_usuario: string
+  proyeccion_diaria: DiaProyeccion[]
+}
+
+const objectiveForApi: Record<string, string> = {
+  P: 'bajar',
+  M: 'mantener',
+  G: 'subir',
+}
+
 const objectiveLabel: Record<string, string> = {
   P: 'Perder peso',
   M: 'Mantener peso',
@@ -76,6 +107,7 @@ function Profile() {
   const [profile, setProfile] = useState<ProfileData | null>(null)
   const [meals, setMeals] = useState<Meal[]>([])
   const [streak, setStreak] = useState<StreakData | null>(null)
+  const [recommendation, setRecommendation] = useState<RecommendationData | null>(null)
   const [loading, setLoading] = useState(true)
   const [tab, setTab] = useState<Tab>('dashboard')
 
@@ -124,6 +156,22 @@ function Profile() {
       })
       .finally(() => setLoading(false))
   }, [])
+
+  useEffect(() => {
+    if (!profile || !user?.id) return
+    const token = localStorage.getItem('token')
+    if (!token) return
+
+    const objective = objectiveForApi[profile.objective]
+    if (!objective) return
+
+    fetch(`${API_URL}/meals/recommend?userId=${user.id}&objective=${objective}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then(r => r.ok ? r.json() : Promise.reject())
+      .then(data => setRecommendation(data))
+      .catch(() => {})
+  }, [profile, user?.id])
 
   if (!isAuthenticated) return <Navigate to="/login" replace />
 
@@ -178,11 +226,17 @@ function Profile() {
     { name: 'Grasa', consumed: totalFat, goal: macroGoals.fat, color: '#ff5722' },
   ]
 
-  const baseWeight = profile?.weight ?? 70
-  const weeklyWeightData = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'].map((day, i) => ({
-    day,
-    weight: Math.round((baseWeight + (i - 6) * 0.2 + ((i * 7 + 3) % 10) * 0.03) * 10) / 10,
-  }))
+  const projectionDays = recommendation?.proyeccion_diaria ?? []
+  const weeklyWeightData = projectionDays.length > 0
+    ? projectionDays.slice(0, 7).map(d => ({
+        day: `Día ${d.dia}`,
+        weight: d.peso_proyectado,
+      }))
+    : []
+
+  const todayRecommendation = projectionDays[0]?.recomendacion_menu ?? null
+  const weightStart = projectionDays[0]?.peso_proyectado
+  const weightEnd = projectionDays[projectionDays.length - 1]?.peso_proyectado
 
   return (
     <>
@@ -341,6 +395,90 @@ function Profile() {
                 </div>
               </section>
 
+              {/* RECOMENDACIÓN DEL DÍA */}
+              {todayRecommendation && (
+                <section className="pcard pcard-recommend">
+                  <h2 className="pcard-title">
+                    <span className="pcard-title-icon">📋</span>
+                    Plan de comidas de hoy
+                  </h2>
+                  <div className="prec-grid">
+                    {Object.entries(todayRecommendation).map(([comida, info]) => (
+                      <div key={comida} className={`prec-item prec-item--${info.categoria}`}>
+                        <span className="prec-item-label">
+                          {comida.charAt(0).toUpperCase() + comida.slice(1)}
+                        </span>
+                        <span className="prec-item-cat">{info.categoria}</span>
+                        <span className="prec-item-kcal">{info.kcal} kcal</span>
+                      </div>
+                    ))}
+                    <div className="prec-total">
+                      Total: {Object.values(todayRecommendation).reduce((s, i) => s + i.kcal, 0)} kcal
+                    </div>
+                  </div>
+                </section>
+              )}
+
+              {/* PROYECCIÓN 100 DÍAS */}
+              {projectionDays.length > 0 && (
+                <section className="pcard pcard-projection">
+                  <h2 className="pcard-title">
+                    <span className="pcard-title-icon">📈</span>
+                    Proyección a 100 días
+                  </h2>
+                  <div className="pproj-summary">
+                    <div className="pproj-stat">
+                      <span className="pproj-stat-label">Peso inicial</span>
+                      <span className="pproj-stat-value">{weightStart?.toFixed(1)} kg</span>
+                    </div>
+                    <div className="pproj-stat">
+                      <span className="pproj-stat-label">Peso final estimado</span>
+                      <span className="pproj-stat-value">{weightEnd?.toFixed(1)} kg</span>
+                    </div>
+                    <div className="pproj-stat">
+                      <span className="pproj-stat-label">Cambio total</span>
+                      <span className="pproj-stat-value pproj-stat-value--diff">
+                        {weightStart && weightEnd ? (weightEnd - weightStart).toFixed(1) : '—'} kg
+                      </span>
+                    </div>
+                  </div>
+                  <div className="pproj-chart">
+                    <WeightLineChart data={weeklyWeightData} />
+                  </div>
+                  <details className="pproj-details">
+                    <summary>Ver tabla completa (100 días)</summary>
+                    <div className="pproj-table-wrap">
+                      <table className="pproj-table">
+                        <thead>
+                          <tr>
+                            <th>Día</th>
+                            <th>Calorías</th>
+                            <th>Balance</th>
+                            <th>Peso</th>
+                            <th>Desayuno</th>
+                            <th>Almuerzo</th>
+                            <th>Cena</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {projectionDays.map(d => (
+                            <tr key={d.dia}>
+                              <td>{d.dia}</td>
+                              <td>{d.calorias_consumidas}</td>
+                              <td>{d.balance_energetico}</td>
+                              <td>{d.peso_proyectado.toFixed(1)}</td>
+                              <td className="pproj-cat">{d.recomendacion_menu.desayuno.categoria}</td>
+                              <td className="pproj-cat">{d.recomendacion_menu.almuerzo.categoria}</td>
+                              <td className="pproj-cat">{d.recomendacion_menu.cena.categoria}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </details>
+                </section>
+              )}
+
               {/* MACROS DEL DÍA */}
               <section className="pcard pcard-macros">
                 <h2 className="pcard-title">
@@ -351,9 +489,6 @@ function Profile() {
 
               {/* GRÁFICO: CALORÍAS vs OBJETIVO */}
               <CaloriesBarChart consumed={totalCalories} goal={calorieGoal} />
-
-              {/* GRÁFICO: EVOLUCIÓN SEMANAL */}
-              <WeightLineChart data={weeklyWeightData} />
 
               {/* COMIDAS REGISTRADAS */}
               <section className="pcard pcard-meals">

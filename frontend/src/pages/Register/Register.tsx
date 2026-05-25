@@ -60,7 +60,10 @@ function Register() {
         return
       }
 
-      login(data.token, data.user)
+
+      /*login(data.token, data.user)*/
+      
+      login(data.token, { ...data.user, user_id: data.user.id })
       navigate('/objetivo')
     } catch {
       setError('Error de conexión con el servidor')
