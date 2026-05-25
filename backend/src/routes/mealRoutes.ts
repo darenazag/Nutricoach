@@ -28,6 +28,7 @@ router.post(
 );
 
 router.get('/', asyncHandler(controller.list));
+router.get('/recommend', authenticate, asyncHandler(controller.recommend));
 router.get('/:id', validate(idParamSchema, 'params'), asyncHandler(controller.getById));
 router.post(
   '/',
