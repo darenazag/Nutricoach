@@ -5,7 +5,9 @@ import {
   type AiWeeklyMenuRequest,
 } from '../schemas/index.js';
 import { AI_WEEKLY_MENU_DAY_PROMPT_KEY, buildRenderedPrompt } from '../prompts/index.js';
-import { AiProviderError, generateGeminiJson } from '../providers/index.js';
+import { AiProviderError } from '../providers/index.js';
+import { generateTextJson } from './aiProviderRouter.service.js';
+import type { AiProvider } from '../types/index.js';
 import {
   createPlan,
   createDay,
@@ -258,6 +260,7 @@ async function generateWeeklyMenuDay(
   }
 
   let responseData: AiMenuResponse;
+  let usedProvider: AiProvider;
   let usedModel: string;
   let fromCache: boolean;
 
@@ -265,6 +268,7 @@ async function generateWeeklyMenuDay(
     const validated = aiWeeklyMenuDayGeminiResponseSchema.safeParse(cachedJson);
     if (validated.success) {
       responseData = validated.data;
+      usedProvider = 'gemini';
       usedModel = resolvedModel;
       fromCache = true;
       await incrementPlanCacheHit(planId);
@@ -277,11 +281,11 @@ async function generateWeeklyMenuDay(
   if (cachedJson === null) {
     let providerResponse;
     try {
-      providerResponse = await generateGeminiJson<unknown>({ systemPrompt, userPrompt });
+      providerResponse = await generateTextJson<unknown>({ systemPrompt, userPrompt });
     } catch (err) {
       if (err instanceof AiProviderError) {
         throw new AiServiceError(
-          `Gemini provider failed on day ${String(dayNumber)}: ${err.message}`,
+          `AI provider failed on day ${String(dayNumber)}: ${err.message}`,
           'provider_error',
           { cause: err, details: { providerCode: err.code, dayNumber } },
         );
@@ -307,6 +311,7 @@ async function generateWeeklyMenuDay(
       console.warn('[aiWeeklyMenu] storeCache failed:', err);
     }
 
+    usedProvider = providerResponse.metadata.provider;
     usedModel = providerResponse.metadata.model;
     fromCache = false;
     await incrementPlanCacheMiss(planId);
@@ -324,7 +329,7 @@ async function generateWeeklyMenuDay(
       recommendations: responseData!.structuredData.recommendations,
       warnings:        responseData!.structuredData.warnings,
       safety:          responseData!.safety,
-      provider:        'gemini',
+      provider:        usedProvider!,
       model:           usedModel!,
       promptVersion:   template.version,
     }),

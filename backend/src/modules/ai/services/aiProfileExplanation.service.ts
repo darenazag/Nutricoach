@@ -8,10 +8,8 @@ import {
   buildRenderedPrompt,
   type RenderPromptVariables,
 } from '../prompts/index.js';
-import {
-  AiProviderError,
-  generateGeminiJson,
-} from '../providers/index.js';
+import { AiProviderError } from '../providers/index.js';
+import { generateTextJson } from './aiProviderRouter.service.js';
 import {
   addMessage,
   createConversation,
@@ -218,14 +216,14 @@ export async function runAiProfileExplanation(
     // MISS — call Gemini, validate, store in cache (best-effort).
     let providerResponse;
     try {
-      providerResponse = await generateGeminiJson<unknown>({
+      providerResponse = await generateTextJson<unknown>({
         systemPrompt,
         userPrompt,
       });
     } catch (err) {
       if (err instanceof AiProviderError) {
         throw new AiServiceError(
-          `Gemini provider failed: ${err.message}`,
+          `AI provider failed: ${err.message}`,
           'provider_error',
           { cause: err, details: { providerCode: err.code } },
         );
