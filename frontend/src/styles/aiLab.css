@@ -668,3 +668,302 @@
   color: #4a4455;
   word-break: break-all;
 }
+
+/* ── Dashboard additions ──────────────────────────────────────────────────── */
+
+/* Tab navigation */
+.lab-tabs {
+  display: flex;
+  gap: 2px;
+  border-bottom: 2px solid #e5e4e7;
+  flex-wrap: wrap;
+}
+.lab-tab {
+  padding: 8px 14px;
+  border-radius: 8px 8px 0 0;
+  font-size: 13px;
+  font-weight: 600;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #6b6375;
+  transition: background 0.1s, color 0.1s;
+  white-space: nowrap;
+}
+.lab-tab:hover { background: #f0eff2; color: #1a1523; }
+.lab-tab-active {
+  background: #fff;
+  color: #aa3bff;
+  border-bottom: 2px solid #aa3bff;
+  margin-bottom: -2px;
+}
+
+/* Cache hit / miss badges */
+.lab-cached-true  { background: #d1fae5; color: #065f46; border-radius: 4px; }
+.lab-cached-false { background: #fef3c7; color: #92400e; border-radius: 4px; }
+
+/* Usage panel */
+.lab-usage { display: flex; flex-direction: column; gap: 10px; }
+.lab-usage-counters { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; }
+.lab-usage-counter {
+  background: #f8f7fb;
+  border: 1px solid #e5e4e7;
+  border-radius: 8px;
+  padding: 8px 6px;
+  text-align: center;
+}
+.lab-usage-counter-value { font-size: 22px; font-weight: 700; color: #1a1523; line-height: 1; }
+.lab-usage-counter-label { font-size: 10px; text-transform: uppercase; color: #8a8590; margin-top: 2px; }
+.lab-usage-counter-hits { border-color: #bbf7d0; background: #f0fdf4; }
+.lab-usage-counter-hits .lab-usage-counter-value { color: #065f46; }
+.lab-usage-footer { font-size: 11px; color: #9e99a8; font-style: italic; text-align: center; }
+
+/* Last operation */
+.lab-last-op { display: flex; flex-direction: column; gap: 5px; padding-top: 4px; border-top: 1px solid #f0eff2; }
+.lab-last-op-row { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+
+/* Menu days / meals */
+.lab-days { display: flex; flex-direction: column; gap: 12px; }
+.lab-day-card { border: 1px solid #e5e4e7; border-radius: 10px; overflow: hidden; }
+.lab-day-header {
+  background: #f8f7fb;
+  padding: 7px 14px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #4a4455;
+  letter-spacing: 0.5px;
+}
+.lab-meal-list { display: flex; flex-direction: column; }
+.lab-meal-item { padding: 10px 14px; border-top: 1px solid #f0eff2; }
+.lab-meal-name { font-size: 13px; font-weight: 600; color: #1a1523; }
+.lab-meal-desc { font-size: 12px; color: #6b6375; margin-top: 3px; line-height: 1.5; }
+.lab-meal-macros { display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap; }
+.lab-macro {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 4px;
+  background: #f0eff2;
+  color: #4a4455;
+}
+.lab-macro-kcal { background: #fef3c7; color: #92400e; }
+.lab-macro-prot { background: #dbeafe; color: #1e40af; }
+
+/* Conversation messages */
+.lab-messages { display: flex; flex-direction: column; gap: 10px; }
+.lab-msg { border: 1px solid #e5e4e7; border-radius: 10px; padding: 12px; }
+.lab-msg-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.lab-msg-role {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.lab-msg-role-user      { background: #f0eff2; color: #4a4455; }
+.lab-msg-role-assistant { background: #f3e8ff; color: #7e22ce; }
+.lab-msg-time  { font-size: 11px; color: #b0aab8; }
+.lab-msg-content { font-size: 13px; color: #2d2840; line-height: 1.6; white-space: pre-wrap; }
+.lab-msg-structured { margin-top: 8px; }
+
+/* Conversation metadata grid */
+.lab-conv-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+.lab-conv-meta-item { background: #f8f7fb; border-radius: 8px; padding: 8px 10px; }
+.lab-conv-meta-key { font-size: 10px; text-transform: uppercase; color: #8a8590; }
+.lab-conv-meta-val { font-size: 13px; font-weight: 600; color: #1a1523; margin-top: 2px; }
+
+/* Mock image hint */
+.lab-mock-hint {
+  font-size: 11px;
+  color: #9e99a8;
+  font-style: italic;
+  padding: 6px 10px;
+  background: #f8f7fb;
+  border-radius: 6px;
+  border-left: 3px solid #e5e4e7;
+}
+
+/* ── Weekly menu tab ─────────────────────────────────────────────────────── */
+
+.weekly-plan-id {
+  font-size: 12px;
+  color: #8a8590;
+  margin-bottom: 12px;
+  word-break: break-all;
+}
+
+.weekly-status-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.weekly-status-badge {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.weekly-status-generating { background: #fff4cc; color: #7a5800; }
+.weekly-status-completed   { background: #d4f5e2; color: #1a5c38; }
+.weekly-status-partial_failed { background: #ffe9cc; color: #7a3800; }
+.weekly-status-failed      { background: #fde4e4; color: #7a1818; }
+.weekly-status-pending     { background: #eee; color: #555; }
+
+.weekly-polling-indicator {
+  font-size: 11px;
+  color: #8a8590;
+  font-style: italic;
+}
+
+.weekly-progress-bar-wrap {
+  height: 10px;
+  background: #e5e4e7;
+  border-radius: 5px;
+  overflow: hidden;
+  margin-bottom: 6px;
+}
+.weekly-progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #7c3aed, #a855f7);
+  border-radius: 5px;
+  transition: width 0.4s ease;
+}
+.weekly-progress-label {
+  font-size: 12px;
+  color: #8a8590;
+  margin: 0 0 4px;
+}
+
+/* Day cards */
+.weekly-days-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.weekly-day-card {
+  border: 1px solid #e5e4e7;
+  border-radius: 10px;
+  padding: 14px 16px;
+  background: #fff;
+}
+.weekly-day-completed  { border-left: 4px solid #22c55e; }
+.weekly-day-generating { border-left: 4px solid #f59e0b; }
+.weekly-day-failed     { border-left: 4px solid #ef4444; }
+.weekly-day-pending    { border-left: 4px solid #d1d5db; }
+
+.weekly-day-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+
+.weekly-day-calories {
+  font-size: 12px;
+  color: #8a8590;
+  margin-left: auto;
+}
+
+.weekly-cache-badge {
+  font-size: 10px;
+  font-weight: 700;
+  background: #e0e7ff;
+  color: #3730a3;
+  padding: 1px 7px;
+  border-radius: 12px;
+  letter-spacing: 0.06em;
+}
+
+.weekly-day-error {
+  font-size: 12px;
+  color: #b91c1c;
+  margin: 0 0 8px;
+}
+
+.weekly-meals-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.weekly-meal-item {
+  padding: 10px 12px;
+  background: #f8f7fb;
+  border-radius: 8px;
+}
+.weekly-meal-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1a1523;
+  margin-bottom: 3px;
+}
+.weekly-meal-desc {
+  font-size: 12px;
+  color: #5c5869;
+  margin-bottom: 5px;
+  line-height: 1.45;
+}
+.weekly-meal-macros {
+  font-size: 11px;
+  color: #7c3aed;
+  font-weight: 500;
+}
+
+.weekly-recommendations {
+  margin: 6px 0 0;
+  padding-left: 18px;
+  font-size: 12px;
+  color: #5c5869;
+  line-height: 1.6;
+}
+
+/* Usage estimation grid */
+.weekly-usage-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 10px;
+}
+.weekly-usage-item {
+  background: #f8f7fb;
+  border-radius: 8px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.weekly-usage-note {
+  grid-column: 1 / -1;
+}
+.weekly-usage-label {
+  font-size: 11px;
+  color: #8a8590;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.weekly-usage-value {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1a1523;
+}
+.weekly-usage-note .weekly-usage-value {
+  font-size: 12px;
+  font-weight: 400;
+  color: #8a8590;
+  font-style: italic;
+}
+.lab-mock-hint code { font-size: 11px; color: #6b6375; }

@@ -137,6 +137,19 @@ describe('createWeeklyMenuPlan', () => {
     expect(result.status).toBe('generating');
     expect(result.totalDays).toBe(7);
     expect(result.message).toBeTruthy();
+
+    // Drain the background before this test ends.
+    // createWeeklyMenuPlan fires `void generateWeeklyMenuPlan()` which runs async.
+    // Without this, it leaks into subsequent tests' mockResolvedValueOnce queues,
+    // causing the happy-path generateWeeklyMenuPlan test to see only 6 provider
+    // calls instead of 7 (one stolen by this background).
+    await vi.waitFor(
+      async () => {
+        const dto = await getWeeklyMenuPlanById(result.planId);
+        expect(dto.status).not.toBe('generating');
+      },
+      { timeout: 5000 },
+    );
   });
 
   it('throws validation_error when objective is missing', async () => {
