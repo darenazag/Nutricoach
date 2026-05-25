@@ -11,6 +11,10 @@ import Login from './pages/Login/Login'
 import Register from './pages/Register/Register'
 import Profile from './pages/Profile/Profile'
 import ProfileForm from './pages/ProfileForm/ProfileForm'
+import ObjectiveStep from './pages/ObjectiveStep/ObjectiveStep'
+import AboutYouStep from './pages/AboutYouStep/AboutYouStep'
+import RegistrarComida from './pages/RegistrarComida/RegistrarComida'
+import EditProfile from './pages/EditProfile/EditProfile'
 import './App.css'
 
 function HomePage() {
@@ -37,6 +41,10 @@ function App() {
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
       <Route path="/perfil" element={<Profile />} />
+      <Route path="/objetivo" element={<ObjectiveStep />} />
+      <Route path="/sobre-ti" element={<AboutYouStep />} />
+      <Route path="/registrar-comida" element={<RegistrarComida />} />
+      <Route path="/editar-perfil" element={<EditProfile />} />
       <Route path="/completar-perfil" element={<ProfileForm />} />
     </Routes>
   )

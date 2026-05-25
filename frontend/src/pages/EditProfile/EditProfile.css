@@ -1,0 +1,254 @@
+.ep-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 20px;
+  background: linear-gradient(135deg, #fffaf2 0%, #fff5e6 50%, #ffedd5 100%);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+.ep-card {
+  width: 100%;
+  max-width: 580px;
+  background: #fff;
+  border-radius: 24px;
+  padding: 40px 36px;
+  box-shadow: 0 1px 3px rgba(87, 23, 0, 0.06), 0 8px 30px rgba(87, 23, 0, 0.1);
+  animation: epCardIn 0.4s ease-out;
+}
+
+@keyframes epCardIn {
+  from { opacity: 0; transform: translateY(20px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.ep-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 28px;
+}
+
+.ep-back {
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 50%;
+  background: #F5F0EB;
+  color: #7A6B5A;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+  flex-shrink: 0;
+}
+
+.ep-back:hover {
+  background: #FAA61A;
+  color: #fff;
+}
+
+.ep-title {
+  font-size: 22px;
+  font-weight: 800;
+  color: #3D2C1A;
+  margin: 0;
+}
+
+.ep-loading {
+  text-align: center;
+  color: #7A6B5A;
+  padding: 40px 0;
+}
+
+.ep-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.ep-error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 12px;
+  font-size: 13px;
+  color: #991b1b;
+}
+
+.ep-row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+.ep-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ep-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #3D2C1A;
+}
+
+.ep-input {
+  width: 100%;
+  padding: 14px 16px;
+  border: 2px solid #F0E8DE;
+  border-radius: 12px;
+  font-size: 15px;
+  font-family: inherit;
+  color: #3D2C1A;
+  background: #FFFAF2;
+  outline: none;
+  transition: border-color 0.25s, box-shadow 0.25s;
+  box-sizing: border-box;
+}
+
+.ep-input:focus {
+  border-color: #FAA61A;
+  box-shadow: 0 0 0 4px rgba(250, 166, 26, 0.12);
+}
+
+.ep-radio-group {
+  display: flex;
+  gap: 10px;
+}
+
+.ep-radio-group--col {
+  flex-direction: column;
+}
+
+.ep-radio-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 18px;
+  border: 2px solid #F0E8DE;
+  border-radius: 12px;
+  background: #FFFAF2;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: inherit;
+  color: #7A6B5A;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.ep-radio-btn:hover {
+  border-color: #FAA61A;
+  color: #3D2C1A;
+}
+
+.ep-radio-btn--active {
+  border-color: #FAA61A;
+  background: rgba(250, 166, 26, 0.08);
+  color: #571700;
+  box-shadow: 0 0 0 3px rgba(250, 166, 26, 0.15);
+}
+
+.ep-radio-btn--wide {
+  justify-content: flex-start;
+  text-align: left;
+}
+
+.ep-radio-icon {
+  font-size: 20px;
+}
+
+.ep-results {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 20px;
+  background: #FFFAF2;
+  border-radius: 16px;
+  border: 1px solid #F0E8DE;
+}
+
+.ep-result {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background: #fff;
+  border-radius: 10px;
+}
+
+.ep-result--primary {
+  background: rgba(250, 166, 26, 0.1);
+  border: 1px solid rgba(250, 166, 26, 0.2);
+}
+
+.ep-result-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #7A6B5A;
+}
+
+.ep-result-value {
+  font-size: 18px;
+  font-weight: 800;
+  color: #3D2C1A;
+}
+
+.ep-result--primary .ep-result-value {
+  color: #FAA61A;
+}
+
+.ep-submit {
+  width: 100%;
+  padding: 15px;
+  border: none;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 700;
+  font-family: inherit;
+  color: #fff;
+  background: #FAA61A;
+  cursor: pointer;
+  transition: background 0.25s, transform 0.2s;
+  box-shadow: 0 4px 14px rgba(250, 166, 26, 0.35);
+}
+
+.ep-submit:hover:not(:disabled) {
+  background: #E09508;
+  transform: translateY(-2px);
+}
+
+.ep-submit:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+@media (min-width: 600px) {
+  .ep-row {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .ep-results {
+    flex-direction: row;
+  }
+  .ep-result {
+    flex: 1;
+  }
+}
+
+@media (max-width: 480px) {
+  .ep-card {
+    padding: 28px 20px;
+    border-radius: 20px;
+  }
+  .ep-title {
+    font-size: 18px;
+  }
+}

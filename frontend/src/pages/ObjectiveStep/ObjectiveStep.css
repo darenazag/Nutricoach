@@ -1,0 +1,249 @@
+.os-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 20px;
+  background: #FDF8F3;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+.os-card {
+  width: 100%;
+  max-width: 520px;
+  background: #FFFFFF;
+  border-radius: 28px;
+  padding: 32px 32px 36px;
+  box-shadow: 0 1px 3px rgba(87, 23, 0, 0.05), 0 8px 32px rgba(87, 23, 0, 0.08);
+  position: relative;
+  animation: osCardIn 0.4s ease-out;
+}
+
+@keyframes osCardIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.os-back {
+  position: absolute;
+  top: 24px;
+  left: 24px;
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 50%;
+  background: #F5F0EB;
+  color: #7A6B5A;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+
+.os-back:hover {
+  background: #FAA61A;
+  color: #FFFFFF;
+}
+
+.os-progress-track {
+  width: 100%;
+  height: 6px;
+  background: #F0E8DE;
+  border-radius: 3px;
+  margin-bottom: 36px;
+  overflow: hidden;
+}
+
+.os-progress-fill {
+  height: 100%;
+  background: #FAA61A;
+  border-radius: 3px;
+  transition: width 0.5s ease;
+}
+
+.os-icon-circle {
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  background: rgba(250, 166, 26, 0.10);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 20px;
+}
+
+.os-title {
+  font-size: 24px;
+  font-weight: 800;
+  color: #3D2C1A;
+  text-align: center;
+  margin: 0 0 6px;
+  letter-spacing: -0.4px;
+}
+
+.os-subtitle {
+  font-size: 14px;
+  color: #7A6B5A;
+  text-align: center;
+  margin: 0 0 32px;
+  line-height: 1.5;
+}
+
+.os-options {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 32px;
+}
+
+.os-option {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  padding: 18px 20px;
+  border: 2px solid transparent;
+  border-radius: 16px;
+  background: #F5F0EB;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  text-align: left;
+  font-family: inherit;
+}
+
+.os-option:hover {
+  border-color: #FAA61A;
+  background: #FDF6EC;
+}
+
+.os-option--selected {
+  border-color: #FAA61A;
+  background: #FDF6EC;
+  box-shadow: 0 0 0 3px rgba(250, 166, 26, 0.15);
+}
+
+.os-option-icon {
+  flex-shrink: 0;
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  background: #EDE6DC;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.25s;
+}
+
+.os-option-icon--selected {
+  background: rgba(250, 166, 26, 0.15);
+}
+
+.os-option-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.os-option-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #3D2C1A;
+  line-height: 1.3;
+}
+
+.os-option-desc {
+  font-size: 13px;
+  color: #7A6B5A;
+  line-height: 1.4;
+}
+
+.os-footnote {
+  font-size: 13px;
+  color: #A09686;
+  text-align: center;
+  margin: -20px 0 28px;
+  line-height: 1.4;
+}
+
+.os-continue {
+  width: 100%;
+  padding: 16px;
+  border: none;
+  border-radius: 14px;
+  font-size: 16px;
+  font-weight: 700;
+  font-family: inherit;
+  color: #FFFFFF;
+  background: #FAA61A;
+  cursor: pointer;
+  transition: background 0.25s, transform 0.2s, box-shadow 0.25s, opacity 0.25s;
+  box-shadow: 0 4px 16px rgba(250, 166, 26, 0.35);
+}
+
+.os-continue:hover:not(:disabled) {
+  background: #E09508;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(250, 166, 26, 0.45);
+}
+
+.os-continue:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.os-continue:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+@media (max-width: 480px) {
+  .os-card {
+    padding: 24px 20px 28px;
+    border-radius: 24px;
+  }
+
+  .os-title {
+    font-size: 20px;
+  }
+
+  .os-subtitle {
+    font-size: 13px;
+    margin-bottom: 24px;
+  }
+
+  .os-option {
+    padding: 14px 16px;
+    gap: 14px;
+  }
+
+  .os-option-icon {
+    width: 46px;
+    height: 46px;
+  }
+
+  .os-option-title {
+    font-size: 15px;
+  }
+
+  .os-option-desc {
+    font-size: 12px;
+  }
+
+  .os-icon-circle {
+    width: 76px;
+    height: 76px;
+  }
+
+  .os-icon-circle svg {
+    width: 40px;
+    height: 40px;
+  }
+}

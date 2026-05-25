@@ -35,7 +35,7 @@ function Login() {
       }
 
       login(data.token, data.user)
-      navigate('/')
+      navigate('/perfil')
     } catch {
       setError('Error de conexión con el servidor')
     } finally {

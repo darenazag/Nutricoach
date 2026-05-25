@@ -1,0 +1,187 @@
+.ml-page {
+  min-height: 100vh;
+  background: #FDF8F3;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  padding: 24px 20px 40px;
+}
+
+.ml-container {
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.ml-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.ml-back {
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 50%;
+  background: #F5F0EB;
+  color: #7A6B5A;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+  flex-shrink: 0;
+}
+
+.ml-back:hover {
+  background: #FAA61A;
+  color: #FFFFFF;
+}
+
+.ml-title {
+  font-size: 22px;
+  font-weight: 800;
+  color: #3D2C1A;
+  margin: 0;
+}
+
+.ml-subtitle {
+  font-size: 14px;
+  color: #7A6B5A;
+  margin: 0 0 24px 52px;
+}
+
+.ml-empty {
+  text-align: center;
+  color: #A09686;
+  padding: 60px 0;
+  font-size: 15px;
+}
+
+.ml-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ml-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: #FFFFFF;
+  border-radius: 16px;
+  padding: 16px 18px;
+  box-shadow: 0 1px 3px rgba(87, 23, 0, 0.05), 0 4px 12px rgba(87, 23, 0, 0.06);
+  transition: box-shadow 0.2s;
+}
+
+.ml-card:hover {
+  box-shadow: 0 2px 8px rgba(87, 23, 0, 0.1), 0 6px 20px rgba(87, 23, 0, 0.08);
+}
+
+.ml-card-icon {
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: #F5F0EB;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+}
+
+.ml-card-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.ml-card-name {
+  font-size: 15px;
+  font-weight: 700;
+  color: #3D2C1A;
+  margin: 0 0 2px;
+}
+
+.ml-card-source {
+  font-size: 12px;
+  color: #A09686;
+  margin: 0 0 6px;
+}
+
+.ml-card-macros {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.ml-macro {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 6px;
+}
+
+.ml-macro--kcal {
+  background: rgba(250, 166, 26, 0.12);
+  color: #E09508;
+}
+
+.ml-macro--protein {
+  background: rgba(33, 150, 243, 0.1);
+  color: #1976D2;
+}
+
+.ml-macro--carbs {
+  background: rgba(156, 39, 176, 0.1);
+  color: #7B1FA2;
+}
+
+.ml-macro--fat {
+  background: rgba(255, 87, 34, 0.1);
+  color: #D84315;
+}
+
+.ml-add-btn {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border: 2px solid #FAA61A;
+  border-radius: 50%;
+  background: #FFFFFF;
+  color: #FAA61A;
+  font-size: 20px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: inherit;
+  line-height: 1;
+}
+
+.ml-add-btn:hover:not(:disabled) {
+  background: #FAA61A;
+  color: #FFFFFF;
+}
+
+.ml-add-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+@media (max-width: 480px) {
+  .ml-page {
+    padding: 16px 14px 32px;
+  }
+
+  .ml-card {
+    padding: 14px 14px;
+  }
+
+  .ml-card-icon {
+    width: 42px;
+    height: 42px;
+    font-size: 20px;
+  }
+}

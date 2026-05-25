@@ -180,6 +180,34 @@
   line-height: 1;
 }
 
+/* ---- SUMMARY ---- */
+.pf-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px 18px;
+  background: #F5F0EB;
+  border-radius: 14px;
+  margin-bottom: 4px;
+}
+
+.pf-summary-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.pf-summary-label {
+  font-size: 13px;
+  color: #A09686;
+}
+
+.pf-summary-value {
+  font-size: 13px;
+  font-weight: 600;
+  color: #3D2C1A;
+}
+
 /* ---- RESULTS ---- */
 .pf-results {
   display: flex;

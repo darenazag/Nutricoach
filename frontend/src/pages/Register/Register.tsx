@@ -61,7 +61,7 @@ function Register() {
       }
 
       login(data.token, data.user)
-      navigate('/completar-perfil')
+      navigate('/objetivo')
     } catch {
       setError('Error de conexión con el servidor')
     } finally {
