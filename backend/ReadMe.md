@@ -1,3 +1,5 @@
+Bases
+
 1. Los límites Biológicos (Entrada de Datos)
 
 La base del sistema es la personalización. En lugar de configuraciones genéricas, el algoritmo extrae la información directamente de la Base de Datos (Tabla Profile) con lo que se calcula las siguientes métricas.
