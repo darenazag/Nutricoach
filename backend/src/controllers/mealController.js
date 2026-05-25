@@ -2,30 +2,23 @@ import { Profile } from '../models/index.js';
 
 export const getRecommendedMeals = async (req, res) => {
   try {
-    const { userId, objective } = req.query;
-    const objetivo = objective || 'bajar';
+    const { userId } = req.query;
 
     if (!userId) {
       return res.status(400).json({ error: "Falta el parámetro 'userId'." });
     }
 
-    // 1. Obtener perfil biológico
+    // 1. Obtener perfil biológico desde la BD
     const perfil = await Profile.findOne({ where: { user_id: userId } });
     if (!perfil) {
       return res.status(404).json({ error: "Perfil no encontrado." });
     }
 
-    const { age, gender, weight, height, activity_level } = perfil;
-    const pesoInicial = parseFloat(weight);
-
-    // 2. Cálculos metabólicos (Mifflin-St. Jeor)
-    let TMB = (gender?.toLowerCase() === 'masculino') 
-      ? (10 * pesoInicial) + (6.25 * parseFloat(height)) - (5 * parseInt(age)) + 5
-      : (10 * pesoInicial) + (6.25 * parseFloat(height)) - (5 * parseInt(age)) - 161;
-
-    const factores = { sedentario: 1.2, ligero: 1.375, moderado: 1.55, intenso: 1.725 };
-    const factorActividad = factores[activity_level?.toLowerCase()] || 1.2;
-    const GETD = TMB * factorActividad;
+    // 2. Extraer datos ya calculados y almacenados
+    const TMB = parseFloat(perfil.basalMetabolicRate);
+    const GETD = parseFloat(perfil.totalDailyEnergyExpenditure);
+    const objetivoChar = perfil.objective; // 'P', 'G', o 'M'
+    const pesoInicial = parseFloat(perfil.weight);
 
     // 3. Motor de Simulación
     const categorias = [
@@ -43,7 +36,7 @@ export const getRecommendedMeals = async (req, res) => {
       let totalCaloriasDia = 0;
       let balanceDiario = 0;
 
-      // Intenta encontrar una combinación aleatoria válida para este día
+      // Intentar encontrar combinación aleatoria válida
       for (let intento = 0; intento < 500; intento++) {
         const d = categorias[Math.floor(Math.random() * categorias.length)];
         const a = categorias[Math.floor(Math.random() * categorias.length)];
@@ -53,10 +46,12 @@ export const getRecommendedMeals = async (req, res) => {
         balanceDiario = totalCaloriasDia - GETD;
 
         let esValido = false;
-        if (objetivo === 'bajar') {
+        if (objetivoChar === 'P') { // Perder
           if (totalCaloriasDia < GETD && totalCaloriasDia >= TMB) esValido = true;
-        } else if (objetivo === 'subir') {
+        } else if (objetivoChar === 'G') { // Ganar
           if (totalCaloriasDia >= GETD * 1.10 && totalCaloriasDia <= GETD * 1.15) esValido = true;
+        } else { // Mantener
+          if (Math.abs(balanceDiario) <= 100) esValido = true;
         }
 
         if (esValido) {
@@ -85,8 +80,7 @@ export const getRecommendedMeals = async (req, res) => {
     }
 
     res.json({
-      datos_usuario: { tmb: TMB.toFixed(0), getd: GETD.toFixed(0) },
-      objetivo_usuario: objetivo,
+      datos_biometricos: { tmb: TMB, getd: GETD, objetivo: objetivoChar },
       proyeccion_diaria: trayectoria100Dias
     });
 
