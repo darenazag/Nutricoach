@@ -1,81 +1,108 @@
-import bcrypt from 'bcryptjs'
-import { User } from '../models/index.js'
-import { generateToken } from '../middleware/authMiddleware.js'
+import { User, Profile, sequelize } from '../models/index.js';
 
-export async function register(req, res) {
+// Función auxiliar para calcular TMB (Mifflin-St Jeor) y GETD en el servidor
+const calculateMetabolism = (weight, height, age, gender, activityFactor) => {
+  const w = parseFloat(weight);
+  const h = parseFloat(height);
+  const a = parseInt(age);
+
+  // 1. Tasa Metabólica Basal (TMB)
+  let bmr = (10 * w) + (6.25 * h) - (5 * a);
+  if (gender === 'M') bmr += 5;       // Masculino
+  if (gender === 'F') bmr -= 161;     // Femenino
+
+  // 2. Gasto Energético Total Diario (GETD) basado en el activityFactor del SQL
+  let factorMultiplier = 1.2; // 'S' - Sedentario por defecto
+  if (activityFactor === 'L') factorMultiplier = 1.375; // Ligero
+  if (activityFactor === 'A') factorMultiplier = 1.55;  // Activo (Moderado)
+  if (activityFactor === 'V') factorMultiplier = 1.725; // Muy Activo
+
+  const tdee = bmr * factorMultiplier;
+  return { bmr: Math.round(bmr), tdee: Math.round(tdee) };
+};
+
+export const register = async (req, res) => {
+  // Iniciamos una transacción de Sequelize para asegurar que si falla el usuario, 
+  // tampoco se cree el perfil (consistencia de datos)
+  const transaction = await sequelize.transaction();
+  
   try {
-    const { name, email, password } = req.body
+    const { name, email, password, weight, age, height, gender, activityFactor, objective } = req.body;
 
-    if (!name || !email || !password) {
-      return res.status(400).json({ error: 'Todos los campos son obligatorios' })
-    }
-
-    if (password.length < 5) {
-      return res.status(400).json({ error: 'La contraseña debe tener al menos 5 caracteres' })
-    }
-
-    if (!/[A-Z]/.test(password)) {
-      return res.status(400).json({ error: 'La contraseña debe contener al menos una mayúscula' })
-    }
-
-    if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
-      return res.status(400).json({ error: 'La contraseña debe contener al menos un signo (!@#$%^&*)' })
-    }
-
-    const existingUser = await User.findOne({ where: { email } })
+    // Verificar si el email ya existe
+    const existingUser = await User.findOne({ where: { email } });
     if (existingUser) {
-      return res.status(409).json({ error: 'El email ya está registrado' })
+      return res.status(400).json({ error: 'El correo electrónico ya está registrado.' });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10)
-    const user = await User.create({ name, email, password: hashedPassword })
+    // Generar un ID numérico único (simulando secuencia para el campo NUMERIC del SQL)
+    const userId = Math.floor(100000 + Math.random() * 900000);
 
-    const token = generateToken(user.user_id)
+    // Calcular las métricas metabólicas científicas automáticamente
+    const { bmr, tdee } = calculateMetabolism(weight, height, age, gender, activityFactor);
+
+    // 1. Crear el Perfil (Obligatorio primero por restricción de FK del init.sql)
+    const profile = await Profile.create({
+      user_id: userId,
+      weight,
+      age,
+      height,
+      gender,
+      activityFactor,
+      objective,
+      basalMetabolicRate: bmr,
+      totalDailyEnergyExpenditure: tdee
+    }, { transaction });
+
+    // 2. Crear el Usuario vinculado
+    const user = await User.create({
+      user_id: userId,
+      name,
+      email,
+      password, 
+    }, { transaction });
+
+    await transaction.commit();
 
     res.status(201).json({
-      token,
-      user: {
-        id: user.user_id,
-        name: user.name,
-        email: user.email,
-      },
-    })
+      success: true,
+      message: 'Usuario registrado exitosamente',
+      user: { id: user.user_id, name: user.name, email: user.email },
+      profile
+    });
+
   } catch (error) {
-    console.error('Register error:', error)
-    res.status(500).json({ error: 'Error interno del servidor' })
+    await transaction.rollback();
+    res.status(500).json({ error: error.message });
   }
-}
+};
 
-export async function login(req, res) {
+export const login = async (req, res) => {
   try {
-    const { email, password } = req.body
+    const { email, password } = req.body;
 
-    if (!email || !password) {
-      return res.status(400).json({ error: 'Email y contraseña son obligatorios' })
+    // Buscar usuario incluyendo su perfil metabólico asignado
+    const user = await User.findOne({
+      where: { email },
+      include: [{ model: Profile }]
+    });
+
+    if (!user || user.password !== password) {
+      return res.status(401).json({ error: 'Credenciales inválidas.' });
     }
-
-    const user = await User.findOne({ where: { email } })
-    if (!user) {
-      return res.status(401).json({ error: 'Credenciales inválidas' })
-    }
-
-    const validPassword = await bcrypt.compare(password, user.password)
-    if (!validPassword) {
-      return res.status(401).json({ error: 'Credenciales inválidas' })
-    }
-
-    const token = generateToken(user.user_id)
 
     res.json({
-      token,
+      success: true,
+      message: 'Inicio de sesión exitoso',
       user: {
         id: user.user_id,
         name: user.name,
         email: user.email,
-      },
-    })
+        profile: user.Profile 
+      }
+    });
+
   } catch (error) {
-    console.error('Login error:', error)
-    res.status(500).json({ error: 'Error interno del servidor' })
+    res.status(500).json({ error: error.message });
   }
-}
+};

@@ -1,49 +1,37 @@
-import { DataTypes } from 'sequelize'
-import sequelize from '../database/config.js'
+import { DataTypes } from 'sequelize';
+import sequelize from '../config/database.js';
 
 const Profile = sequelize.define('Profile', {
-  user_id: {
-    type: DataTypes.INTEGER,
-    primaryKey: true,
+  user_id: { 
+    type: DataTypes.NUMERIC, 
+    primaryKey: true 
   },
-  weight: {
-    type: DataTypes.NUMERIC,
+  weight: { type: DataTypes.NUMERIC, allowNull: false },
+  age: { type: DataTypes.NUMERIC, allowNull: false },
+  height: { type: DataTypes.NUMERIC, allowNull: false },
+  gender: { type: DataTypes.CHAR(1), allowNull: false },
+  activityFactor: { 
+    type: DataTypes.CHAR(1), 
     allowNull: false,
+    field: 'activityFactor'
   },
-  age: {
-    type: DataTypes.NUMERIC,
+  objective: { 
+    type: DataTypes.CHAR(1), 
     allowNull: false,
+    field: 'objective'
   },
-  height: {
-    type: DataTypes.NUMERIC,
+  basalMetabolicRate: { 
+    type: DataTypes.NUMERIC, 
     allowNull: false,
+    field: 'basalMetabolicRate'
   },
-  gender: {
-    type: DataTypes.CHAR(1),
+  totalDailyEnergyExpenditure: { 
+    type: DataTypes.NUMERIC, 
     allowNull: false,
-  },
-  activityFactor: {
-    type: DataTypes.CHAR(1),
-    allowNull: false,
-    field: 'activityFactor',
-  },
-  objective: {
-    type: DataTypes.CHAR(1),
-    allowNull: false,
-  },
-  basalMetabolicRate: {
-    type: DataTypes.NUMERIC,
-    allowNull: false,
-    field: 'basalMetabolicRate',
-  },
-  totalDailyEnergyExpenditure: {
-    type: DataTypes.NUMERIC,
-    allowNull: false,
-    field: 'totalDailyEnergyExpenditure',
-  },
+    field: 'totalDailyEnergyExpenditure'
+  }
 }, {
-  tableName: 'Profile',
-  timestamps: false,
-})
+  tableName: 'Profile'
+});
 
-export default Profile
+export default Profile;
