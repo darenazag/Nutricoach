@@ -1,10 +1,32 @@
-import { Link } from 'react-router-dom'
+import { useState, useRef, useEffect } from 'react'
+import { Link, useLocation } from 'react-router-dom'
 import { useAuth } from '../../context/useAuth'
 import GooeyNav from '../GooeyNav/GooeyNav'
 import './Header.css'
 
 function Header() {
   const { user, isAuthenticated, logout } = useAuth()
+  const location = useLocation()
+  const isDashboard = location.pathname === '/perfil'
+  const [open, setOpen] = useState(false)
+  const ref = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClick)
+    return () => document.removeEventListener('mousedown', handleClick)
+  }, [])
+
+  const initials = user?.name
+    ?.split(' ')
+    .map(w => w[0])
+    .join('')
+    .slice(0, 2)
+    .toUpperCase() ?? '?'
 
   return (
     <header className="header">
@@ -14,25 +36,41 @@ function Header() {
           <span className="header-logo-text">Nutri<span className="highlight">Coach</span></span>
         </Link>
 
-        <GooeyNav
-          items={[
-            { label: 'Inicio', href: '/#hero' },
-            { label: 'Características', href: '/#features' },
-            { label: 'Contacto', href: '/#contact' },
-          ]}
-          particleCount={12}
-          particleDistances={[70, 15]}
-          animationTime={500}
-          timeVariance={250}
-          colors={[1, 2, 3, 4]}
-        />
+        {!isDashboard && (
+          <GooeyNav
+            items={[
+              { label: 'Inicio', href: '/#hero' },
+              { label: 'Características', href: '/#features' },
+              { label: 'Contacto', href: '/#contact' },
+            ]}
+            particleCount={12}
+            particleDistances={[70, 15]}
+            animationTime={500}
+            timeVariance={250}
+            colors={[1, 2, 3, 4]}
+          />
+        )}
 
         <div className="header-actions">
           {isAuthenticated ? (
-            <>
-              <span className="header-user">{user?.name}</span>
-              <button onClick={logout} className="header-logout">Cerrar sesión</button>
-            </>
+            <div className="header-user-wrap" ref={ref}>
+              <button className="header-user-btn" onClick={() => setOpen(o => !o)}>
+                <span className="header-user-avatar">{initials}</span>
+                <span className="header-user-name">{user?.name}</span>
+                <span className={`header-user-chevron ${open ? 'header-user-chevron--open' : ''}`}>▾</span>
+              </button>
+
+              {open && (
+                <div className="header-dropdown">
+                  <Link to="/perfil" className="header-dropdown-item" onClick={() => setOpen(false)}>
+                    <span>👤</span> Mi Perfil
+                  </Link>
+                  <button className="header-dropdown-item header-dropdown-item--danger" onClick={() => { setOpen(false); logout() }}>
+                    <span>🚪</span> Cerrar sesión
+                  </button>
+                </div>
+              )}
+            </div>
           ) : (
             <>
               <Link to="/login" className="header-login">Iniciar sesión</Link>

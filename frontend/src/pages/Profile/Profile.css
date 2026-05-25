@@ -1,0 +1,526 @@
+/* ================================================================
+   PERFIL DE USUARIO — CSS PURO (sin Tailwind)
+   Bento Grid · Mobile-First · Responsive
+   ================================================================ */
+
+/* ---- VARIABLES LOCALES ---- */
+.profile-page {
+  --pcolor-primary: #fea50a;
+  --pcolor-secondary: #d48208;
+  --pcolor-tertiary: #ab5e05;
+  --pcolor-dark: #813b03;
+  --pcolor-deep: #571700;
+
+  --pcolor-bg: #fdf6ec;
+  --pcolor-text: #3d2c1a;
+  --pcolor-text-light: #7a6b5a;
+  --pcolor-white: #ffffff;
+  --pcolor-border: #f0e6d8;
+
+  --pcolor-protein: #2196f3;
+  --pcolor-carbs: #9c27b0;
+  --pcolor-fat: #ff5722;
+
+  --pshadow-sm: 0 1px 3px rgba(87, 23, 0, 0.08);
+  --pshadow-md: 0 4px 16px rgba(87, 23, 0, 0.10);
+  --pshadow-lg: 0 8px 30px rgba(87, 23, 0, 0.12);
+
+  --pradius-sm: 8px;
+  --pradius-md: 12px;
+  --pradius-lg: 20px;
+  --pradius-xl: 24px;
+  --pradius-full: 9999px;
+
+  --pff-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --pff-heading: 'Inter', system-ui, -apple-system, sans-serif;
+
+  min-height: 100vh;
+  background: var(--pcolor-bg);
+  font-family: var(--pff-sans);
+  color: var(--pcolor-text);
+  padding: 92px 20px 24px;
+}
+
+@media (max-width: 768px) {
+  .profile-page {
+    padding: 84px 16px 20px;
+  }
+}
+
+/* ---- BENTO GRID (Mobile-First: 1 columna) ---- */
+.profile-dashboard {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+}
+
+/* ---- CARDS ---- */
+.pcard {
+  background: var(--pcolor-white);
+  border-radius: var(--pradius-xl);
+  padding: 24px;
+  box-shadow: var(--pshadow-md);
+  border: 1px solid var(--pcolor-border);
+  transition: box-shadow 0.25s ease;
+}
+
+.pcard:hover {
+  box-shadow: var(--pshadow-lg);
+}
+
+.pcard-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--pff-heading);
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 20px;
+  color: var(--pcolor-text);
+}
+
+.pcard-title-icon {
+  font-size: 22px;
+  line-height: 1;
+}
+
+/* ---- CARD 1: DATOS DEL USUARIO ---- */
+.pcard-header-top {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.pcard-avatar-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.pcard-avatar {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--pcolor-primary), var(--pcolor-secondary));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--pcolor-white);
+  flex-shrink: 0;
+}
+
+.pcard-name {
+  font-family: var(--pff-heading);
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0;
+  color: var(--pcolor-text);
+}
+
+.pcard-email {
+  font-size: 14px;
+  color: var(--pcolor-text-light);
+  margin: 2px 0 0;
+}
+
+.pcard-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.pcard-tag {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: var(--pradius-full);
+  color: var(--pcolor-white);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.pcard-tag--obj {
+  background: var(--pcolor-primary);
+}
+
+.pcard-tag--act {
+  background: var(--pcolor-tertiary);
+}
+
+.pcard-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.pcard-stat {
+  background: var(--pcolor-bg);
+  border-radius: var(--pradius-md);
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.pcard-stat-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--pcolor-text-light);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.pcard-stat-value {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--pcolor-text);
+}
+
+.pcard-stat-value small {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--pcolor-text-light);
+  margin-left: 2px;
+}
+
+/* ---- CARD 2: ANILLO CALÓRICO ---- */
+.pcard-ring-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+.pcard-ring {
+  position: relative;
+  width: 150px;
+  height: 150px;
+  flex-shrink: 0;
+}
+
+.pcard-ring svg {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.pcard-ring-bg {
+  fill: none;
+  stroke: var(--pcolor-border);
+  stroke-width: 10;
+}
+
+.pcard-ring-fg {
+  fill: none;
+  stroke: var(--pcolor-primary);
+  stroke-width: 10;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.6s ease;
+}
+
+.pcard-ring-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+}
+
+.pcard-ring-number {
+  display: block;
+  font-size: 30px;
+  font-weight: 800;
+  color: var(--pcolor-text);
+  line-height: 1;
+}
+
+.pcard-ring-label {
+  font-size: 13px;
+  color: var(--pcolor-text-light);
+  font-weight: 500;
+}
+
+.pcard-ring-meta {
+  font-size: 14px;
+  color: var(--pcolor-text-light);
+  text-align: center;
+  line-height: 1.7;
+}
+
+.pcard-ring-meta strong {
+  color: var(--pcolor-primary);
+  font-weight: 700;
+}
+
+.pcard-ring-hint {
+  margin: 12px 0 0;
+  font-size: 13px;
+  color: var(--pcolor-text-light);
+  text-align: center;
+  background: var(--pcolor-bg);
+  border-radius: var(--pradius-md);
+  padding: 10px 14px;
+}
+
+/* ---- CARD 3: BARRAS DE MACROS ---- */
+.pcard-macros-list {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.pmacro {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.pmacro-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.pmacro-name {
+  font-size: 14px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--pcolor-text);
+}
+
+.pmacro-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.pmacro-values {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--pcolor-text);
+}
+
+.pmacro-bar {
+  width: 100%;
+  height: 10px;
+  background: var(--pcolor-border);
+  border-radius: var(--pradius-full);
+  overflow: hidden;
+}
+
+.pmacro-fill {
+  height: 100%;
+  border-radius: var(--pradius-full);
+  transition: width 0.5s ease;
+}
+
+/* ---- CARD 4: LISTA DE COMIDAS ---- */
+.pcard-meals-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+}
+
+.pcard-meal {
+  display: flex;
+  gap: 14px;
+  padding: 14px;
+  background: var(--pcolor-bg);
+  border-radius: var(--pradius-md);
+  border: 1px solid var(--pcolor-border);
+  transition: box-shadow 0.2s ease;
+}
+
+.pcard-meal:hover {
+  box-shadow: var(--pshadow-sm);
+}
+
+.pcard-meal-img {
+  width: 68px;
+  height: 68px;
+  border-radius: var(--pradius-md);
+  background: linear-gradient(135deg, var(--pcolor-border), #f5ede3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  flex-shrink: 0;
+}
+
+.pcard-meal-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.pcard-meal-name {
+  font-size: 15px;
+  font-weight: 700;
+  margin: 0 0 2px;
+  color: var(--pcolor-text);
+}
+
+.pcard-meal-source {
+  font-size: 13px;
+  color: var(--pcolor-text-light);
+  margin: 0 0 8px;
+}
+
+.pcard-meal-macros {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.pcard-meal-macro {
+  font-size: 12px;
+  font-weight: 700;
+  padding: 2px 10px;
+  border-radius: var(--pradius-full);
+}
+
+.pcard-meal-macro--kcal {
+  background: rgba(254, 165, 10, 0.12);
+  color: var(--pcolor-dark);
+}
+
+.pcard-meal-macro--protein {
+  background: rgba(33, 150, 243, 0.12);
+  color: #1565c0;
+}
+
+.pcard-meal-macro--carbs {
+  background: rgba(156, 39, 176, 0.12);
+  color: #7b1fa2;
+}
+
+.pcard-meal-macro--fat {
+  background: rgba(255, 87, 34, 0.12);
+  color: #d84315;
+}
+
+/* ================================================================
+   RESPONSIVE: Tablet (≥600px)
+   ================================================================ */
+@media (min-width: 600px) {
+  .profile-page {
+    padding: 92px 32px 28px;
+  }
+
+  .profile-dashboard {
+    gap: 24px;
+  }
+
+  .pcard {
+    padding: 28px;
+  }
+
+  .pcard-stats-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .pcard-meals-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .pcard-ring {
+    width: 170px;
+    height: 170px;
+  }
+
+  .pcard-ring-number {
+    font-size: 34px;
+  }
+}
+
+/* ================================================================
+   RESPONSIVE: Desktop (≥1024px)
+   ================================================================ */
+@media (min-width: 1024px) {
+  .profile-page {
+    padding: 100px 40px 32px;
+  }
+
+  .profile-dashboard {
+    grid-template-columns: 2fr 1fr;
+    gap: 28px;
+  }
+
+  .pcard {
+    padding: 32px;
+  }
+
+  /* User card → columna izquierda grande */
+  .pcard-user {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  /* Calorías → columna derecha */
+  .pcard-calories {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  /* Macros → fila 2, columna izquierda */
+  .pcard-macros {
+    grid-column: 1;
+    grid-row: 2;
+  }
+
+  /* Comidas → fila 2, columna derecha (o span completo) */
+  .pcard-meals {
+    grid-column: 2;
+    grid-row: 2;
+  }
+
+  .pcard-header-top {
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: space-between;
+  }
+
+  .pcard-stats-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .pcard-ring {
+    width: 180px;
+    height: 180px;
+  }
+
+  .pcard-ring-number {
+    font-size: 36px;
+  }
+
+  .pcard-meals-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ================================================================
+   RESPONSIVE: Desktop XL (≥1400px) — las comidas en grid ancho
+   ================================================================ */
+@media (min-width: 1400px) {
+  .profile-dashboard {
+    grid-template-columns: 2fr 1fr;
+  }
+
+  .pcard-meals {
+    grid-column: 1 / -1;
+    grid-row: 3;
+  }
+
+  .pcard-meals-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
