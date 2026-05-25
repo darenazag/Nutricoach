@@ -1,0 +1,39 @@
+extends layout
+
+block content
+  main.perfil-page
+    .perfil-card
+      //- Cabecera: avatar grande + nombre + email
+      .perfil-header
+        .perfil-avatar-lg= user.initials
+        h1.perfil-name= user.name
+        p.perfil-email= user.email
+
+      //- Badges: objetivo + actividad
+      .perfil-badges
+        span.perfil-badge.perfil-badge--obj= user.objective_label
+        span.perfil-badge.perfil-badge--act= user.activity_label
+
+      //- Grid de 4 métricas: peso, altura, edad, género
+      .perfil-metrics
+        .perfil-metric
+          span.perfil-metric-label Peso
+          span.perfil-metric-value
+            = user.metrics.weight
+            small.perfil-metric-unit kg
+
+        .perfil-metric
+          span.perfil-metric-label Altura
+          span.perfil-metric-value
+            = user.metrics.height
+            small.perfil-metric-unit cm
+
+        .perfil-metric
+          span.perfil-metric-label Edad
+          span.perfil-metric-value
+            = user.metrics.age
+            small.perfil-metric-unit años
+
+        .perfil-metric
+          span.perfil-metric-label Género
+          span.perfil-metric-value= user.metrics.gender_label

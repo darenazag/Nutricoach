@@ -79,6 +79,24 @@ function Profile() {
   const [loading, setLoading] = useState(true)
   const [tab, setTab] = useState<Tab>('dashboard')
 
+  const reloadMeals = useCallback(() => {
+    const token = localStorage.getItem('token')
+    if (!token) return
+    Promise.all([
+      fetch(`${API_URL}/meals/profile/mine`, {
+        headers: { Authorization: `Bearer ${token}` },
+      }).then(r => r.ok ? r.json() : Promise.reject()),
+      fetch(`${API_URL}/profile/streak`, {
+        headers: { Authorization: `Bearer ${token}` },
+      }).then(r => r.ok ? r.json() : Promise.reject()),
+    ])
+      .then(([mealsData, streakData]) => {
+        setMeals(mealsData.meals || [])
+        setStreak(streakData)
+      })
+      .catch(() => {})
+  }, [])
+
   useEffect(() => {
     const token = localStorage.getItem('token')
     if (!token) return
@@ -125,24 +143,6 @@ function Profile() {
     fat: Math.round(calorieGoal * 0.3 / 9),
   }
 
-  const reloadMeals = useCallback(() => {
-    const token = localStorage.getItem('token')
-    if (!token) return
-    Promise.all([
-      fetch(`${API_URL}/meals/profile/mine`, {
-        headers: { Authorization: `Bearer ${token}` },
-      }).then(r => r.ok ? r.json() : Promise.reject()),
-      fetch(`${API_URL}/profile/streak`, {
-        headers: { Authorization: `Bearer ${token}` },
-      }).then(r => r.ok ? r.json() : Promise.reject()),
-    ])
-      .then(([mealsData, streakData]) => {
-        setMeals(mealsData.meals || [])
-        setStreak(streakData)
-      })
-      .catch(() => {})
-  }, [])
-
   const mealsByCategory: Record<string, Meal[]> = {
     Desayuno: [],
     Almuerzo: [],
@@ -181,7 +181,7 @@ function Profile() {
   const baseWeight = profile?.weight ?? 70
   const weeklyWeightData = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'].map((day, i) => ({
     day,
-    weight: Math.round((baseWeight + (i - 6) * 0.2 + (Math.random() - 0.5) * 0.3) * 10) / 10,
+    weight: Math.round((baseWeight + (i - 6) * 0.2 + ((i * 7 + 3) % 10) * 0.03) * 10) / 10,
   }))
 
   return (

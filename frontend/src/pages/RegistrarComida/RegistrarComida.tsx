@@ -45,7 +45,7 @@ function RegistrarComida() {
   const [tab, setTab] = useState<Tab>('foto')
 
   const [meals, setMeals] = useState<Meal[]>([])
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(true)
   const [assigning, setAssigning] = useState<number | null>(null)
 
   const [preview, setPreview] = useState<string | null>(null)
@@ -65,7 +65,6 @@ function RegistrarComida() {
 
   useEffect(() => {
     if (!token) return
-    setLoading(true)
     fetch(`${API_URL}/meals`, {
       headers: { Authorization: `Bearer ${token}` },
     })
