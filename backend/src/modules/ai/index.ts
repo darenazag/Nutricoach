@@ -11,3 +11,7 @@ export { postAiChat } from './controllers/aiChat.controller.js';
 export { postAiMenu } from './controllers/aiMenu.controller.js';
 export { postAiProfileExplanation } from './controllers/aiProfileExplanation.controller.js';
 export { getAiConversation } from './controllers/aiConversations.controller.js';
+export {
+  postAiWeeklyMenu,
+  getAiWeeklyMenuPlan,
+} from './controllers/aiWeeklyMenu.controller.js';

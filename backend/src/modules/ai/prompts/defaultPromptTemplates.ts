@@ -3,6 +3,7 @@ import { aiChatPromptTemplate } from './aiChat.prompt.js';
 import { aiMenuPromptTemplate } from './aiMenu.prompt.js';
 import { aiPlateAnalysisPromptTemplate } from './aiPlateAnalysis.prompt.js';
 import { aiProfileExplanationPromptTemplate } from './aiProfileExplanation.prompt.js';
+import { aiWeeklyMenuDayPromptTemplate } from './aiWeeklyMenuDay.prompt.js';
 
 export interface DefaultAiPromptTemplate {
   promptKey: string;
@@ -14,6 +15,36 @@ export interface DefaultAiPromptTemplate {
   isActive: boolean;
   notes: string;
 }
+
+// Output schema shared by both menu_generation and weekly_menu_generation
+const aiMenuDayOutputSchema: Record<string, unknown> = {
+  responseText: 'string',
+  structuredData: {
+    dailyCalories: 'number',
+    days: [
+      {
+        day: 'number',
+        meals: [
+          {
+            name: 'string',
+            description: 'string',
+            estimatedCalories: 'number',
+            estimatedProtein: 'number',
+            estimatedCarbs: 'number',
+            estimatedFat: 'number',
+          },
+        ],
+      },
+    ],
+    recommendations: 'string[]',
+    warnings: 'string[]',
+  },
+  safety: {
+    isOutOfScope: 'boolean',
+    flags: 'string[]',
+    escalationMessage: 'string | null',
+  },
+};
 
 const aiChatOutputSchema: Record<string, unknown> = {
   responseText: 'string',
@@ -149,5 +180,15 @@ export const defaultAiPromptTemplates: DefaultAiPromptTemplate[] = [
     outputSchema: aiProfileExplanationOutputSchema,
     isActive: true,
     notes: 'Explica al usuario el perfil nutricional calculado por el backend tras el onboarding. Salida JSON validada por aiProfileExplanationResponseSchema.',
+  },
+  {
+    promptKey: aiWeeklyMenuDayPromptTemplate.promptKey,
+    version: aiWeeklyMenuDayPromptTemplate.version,
+    type: 'weekly_menu_generation',
+    systemPrompt: aiWeeklyMenuDayPromptTemplate.systemPrompt,
+    userPromptTemplate: aiWeeklyMenuDayPromptTemplate.userPromptTemplate,
+    outputSchema: aiMenuDayOutputSchema,
+    isActive: true,
+    notes: 'Genera un día de menú dentro de un plan semanal asíncrono. Salida JSON validada por aiWeeklyMenuDayGeminiResponseSchema (1 día exacto).',
   },
 ];

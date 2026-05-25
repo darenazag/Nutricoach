@@ -3,6 +3,7 @@ export {
   AI_MENU_PROMPT_KEY,
   AI_PLATE_ANALYSIS_PROMPT_KEY,
   AI_PROFILE_EXPLANATION_PROMPT_KEY,
+  AI_WEEKLY_MENU_DAY_PROMPT_KEY,
   AI_PROMPT_VERSION,
 } from './promptVersions.js';
 
@@ -31,6 +32,12 @@ export {
   aiProfileExplanationUserPromptTemplate,
   aiProfileExplanationPromptTemplate,
 } from './aiProfileExplanation.prompt.js';
+
+export {
+  aiWeeklyMenuDaySystemPrompt,
+  aiWeeklyMenuDayUserPromptTemplate,
+  aiWeeklyMenuDayPromptTemplate,
+} from './aiWeeklyMenuDay.prompt.js';
 
 export {
   defaultAiPromptTemplates,
