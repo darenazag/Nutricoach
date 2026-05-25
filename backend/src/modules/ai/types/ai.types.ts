@@ -20,7 +20,7 @@ export type AiRole = 'user' | 'assistant' | 'system';
 
 export type AiConfidence = 'low' | 'medium' | 'high';
 
-export type AiProvider = 'gemini';
+export type AiProvider = 'gemini' | 'deepseek';
 
 export type AiPlan = 'free' | 'pro';
 
@@ -55,7 +55,7 @@ export const AI_ROLES: AiRole[] = ['user', 'assistant', 'system'];
 
 export const AI_CONFIDENCE_LEVELS: AiConfidence[] = ['low', 'medium', 'high'];
 
-export const AI_PROVIDERS: AiProvider[] = ['gemini'];
+export const AI_PROVIDERS: AiProvider[] = ['gemini', 'deepseek'];
 
 export const AI_PLANS: AiPlan[] = ['free', 'pro'];
 
