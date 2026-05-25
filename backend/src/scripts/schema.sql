@@ -5,8 +5,17 @@ DROP TABLE IF EXISTS public."Profile_Meal" CASCADE;
 DROP TABLE IF EXISTS public."Meal_Food_item" CASCADE;
 DROP TABLE IF EXISTS public."Food_item" CASCADE;
 DROP TABLE IF EXISTS public."Meal" CASCADE;
-DROP TABLE IF EXISTS public."User" CASCADE;
 DROP TABLE IF EXISTS public."Profile" CASCADE;
+DROP TABLE IF EXISTS public."User" CASCADE;
+
+CREATE TABLE IF NOT EXISTS public."User"
+(
+    user_id numeric NOT NULL,
+    name character varying(50) NOT NULL,
+    password character varying(255) NOT NULL,
+    email character varying(50) NOT NULL,
+    PRIMARY KEY (user_id)
+);
 
 CREATE TABLE IF NOT EXISTS public."Profile"
 (
@@ -19,17 +28,8 @@ CREATE TABLE IF NOT EXISTS public."Profile"
     "objective" "char" NOT NULL,         -- 'P' (Perder), 'M' (Mantener), 'G' (Ganar)
     "basalMetabolicRate" numeric NOT NULL,
     "totalDailyEnergyExpenditure" numeric NOT NULL,
-    PRIMARY KEY (user_id)
-);
-
-CREATE TABLE IF NOT EXISTS public."User"
-(
-    user_id numeric NOT NULL,
-    name character varying(50) NOT NULL,
-    password character varying(50) NOT NULL,
-    email character varying(50) NOT NULL,
     PRIMARY KEY (user_id),
-    FOREIGN KEY (user_id) REFERENCES public."Profile" (user_id)
+    FOREIGN KEY (user_id) REFERENCES public."User" (user_id)
 );
 
 CREATE TABLE IF NOT EXISTS public."Meal"
@@ -74,17 +74,17 @@ CREATE TABLE IF NOT EXISTS public."Profile_Meal"
 
 
 
+-- Usuarios
+INSERT INTO public."User" (user_id, name, password, email) VALUES
+(1, 'Carlos Entrenador', 'claveloca123', 'carlos@nutricoach.com'),
+(2, 'Elena Runner', 'securepass99', 'elena@nutricoach.com'),
+(3, 'Sofia Health', 'sofia2026', 'sofia@nutricoach.com');
+
 -- Perfiles: Carlos (Volumen), Elena (Definición), Sofía (Mantenimiento)
 INSERT INTO public."Profile" (user_id, weight, age, height, gender, "activityFactor", "objective", "basalMetabolicRate", "totalDailyEnergyExpenditure") VALUES
 (1, 80.5, 28, 180, 'M', 'A', 'G', 1800, 2800), -- Activo, Objetivo: Ganar masa
 (2, 62.0, 32, 165, 'F', 'M', 'P', 1400, 2100), -- Moderado, Objetivo: Perder grasa
 (3, 70.0, 24, 172, 'F', 'S', 'M', 1500, 1850); -- Sedentario, Objetivo: Mantener
-
--- Usuarios vinculados a sus perfiles
-INSERT INTO public."User" (user_id, name, password, email) VALUES
-(1, 'Carlos Entrenador', 'claveloca123', 'carlos@nutricoach.com'),
-(2, 'Elena Runner', 'securepass99', 'elena@nutricoach.com'),
-(3, 'Sofia Health', 'sofia2026', 'sofia@nutricoach.com');
 
 -- Alimentos base (por porción estándar, ej: 100g)
 -- food_id, protein, calories, carbs, fat, source
