@@ -6,7 +6,7 @@ import {
   type RenderPromptVariables,
 } from '../prompts/index.js';
 import { AiProviderError } from '../providers/index.js';
-import { generateTextJson } from './aiProviderRouter.service.js';
+import { generateTextJsonWithFallback } from './aiProviderRouter.service.js';
 import {
   addMessage,
   createConversation,
@@ -190,12 +190,12 @@ export async function runAiChat(input: unknown): Promise<AiChatServiceResult> {
     variables: buildChatPromptVariables(request),
   });
 
-  let providerResponse;
+  let providerResult;
   try {
-    providerResponse = await generateTextJson<unknown>({
-      systemPrompt,
-      userPrompt,
-    });
+    providerResult = await generateTextJsonWithFallback(
+      { systemPrompt, userPrompt },
+      (parsed) => validateAiResponse(aiChatResponseSchema, parsed),
+    );
   } catch (err) {
     if (err instanceof AiProviderError) {
       throw new AiServiceError(
@@ -207,7 +207,7 @@ export async function runAiChat(input: unknown): Promise<AiChatServiceResult> {
     throw err;
   }
 
-  const aiResponse = validateAiResponse(aiChatResponseSchema, providerResponse.parsed);
+  const aiResponse = providerResult.parsed;
 
   await persist(
     'addMessage (assistant)',
@@ -219,8 +219,8 @@ export async function runAiChat(input: unknown): Promise<AiChatServiceResult> {
         role: 'assistant',
         content: aiResponse.responseText,
         structuredData: aiResponse.structuredData,
-        provider: providerResponse.metadata.provider,
-        model: providerResponse.metadata.model,
+        provider: providerResult.metadata.provider,
+        model: providerResult.metadata.model,
         promptVersion: template.version,
         safety: mapSafetyForPersistence(aiResponse.safety),
       }),
@@ -233,10 +233,10 @@ export async function runAiChat(input: unknown): Promise<AiChatServiceResult> {
     safety: aiResponse.safety,
     conversationId,
     metadata: {
-      provider: providerResponse.metadata.provider,
-      model: providerResponse.metadata.model,
+      provider: providerResult.metadata.provider,
+      model: providerResult.metadata.model,
       promptVersion: template.version,
-      cached: providerResponse.metadata.cached,
+      cached: providerResult.metadata.cached,
     },
   };
 }
