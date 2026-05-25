@@ -1,0 +1,102 @@
+BEGIN;
+
+
+CREATE TABLE IF NOT EXISTS public."User"
+(
+    user_id numeric NOT NULL,
+    name character varying(50) NOT NULL,
+    password character varying(50) NOT NULL,
+    email character varying(50) NOT NULL,
+    PRIMARY KEY (user_id)
+);
+
+CREATE TABLE IF NOT EXISTS public."Profile"
+(
+    user_id numeric NOT NULL,
+    weight numeric NOT NULL,
+    age numeric NOT NULL,
+    height numeric NOT NULL,
+    gender "char" NOT NULL,
+    "activityFactor" "char" NOT NULL,
+    "objective " "char" NOT NULL,
+    "basalMetabolicRate," numeric NOT NULL,
+    "totalDailyEnergy Expenditure" numeric NOT NULL,
+    PRIMARY KEY (user_id)
+);
+
+CREATE TABLE IF NOT EXISTS public."Meal"
+(
+    meal_id numeric NOT NULL,
+    name "char" NOT NULL,
+    calories numeric NOT NULL,
+    protein numeric NOT NULL,
+    fat numeric NOT NULL,
+    img character varying,
+    carbs numeric NOT NULL,
+    source character varying,
+    PRIMARY KEY (meal_id)
+);
+
+CREATE TABLE IF NOT EXISTS public."Food_item"
+(
+    food_id numeric NOT NULL,
+    protein numeric NOT NULL,
+    calories numeric NOT NULL,
+    carbs numeric NOT NULL,
+    fat numeric NOT NULL,
+    source character varying NOT NULL,
+    PRIMARY KEY (food_id)
+);
+
+CREATE TABLE IF NOT EXISTS public."Meal_Food_item"
+(
+    "Meal_meal_id" numeric NOT NULL,
+    "Food_item_food_id" numeric NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS public."Profile_Meal"
+(
+    "Profile_user_id" numeric NOT NULL,
+    "Meal_meal_id" numeric NOT NULL
+);
+
+ALTER TABLE IF EXISTS public."User"
+    ADD FOREIGN KEY (user_id)
+    REFERENCES public."Profile" (user_id) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION
+    NOT VALID;
+
+
+ALTER TABLE IF EXISTS public."Meal_Food_item"
+    ADD FOREIGN KEY ("Meal_meal_id")
+    REFERENCES public."Meal" (meal_id) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION
+    NOT VALID;
+
+
+ALTER TABLE IF EXISTS public."Meal_Food_item"
+    ADD FOREIGN KEY ("Food_item_food_id")
+    REFERENCES public."Food_item" (food_id) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION
+    NOT VALID;
+
+
+ALTER TABLE IF EXISTS public."Profile_Meal"
+    ADD FOREIGN KEY ("Profile_user_id")
+    REFERENCES public."Profile" (user_id) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION
+    NOT VALID;
+
+
+ALTER TABLE IF EXISTS public."Profile_Meal"
+    ADD FOREIGN KEY ("Meal_meal_id")
+    REFERENCES public."Meal" (meal_id) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION
+    NOT VALID;
+
+END;
