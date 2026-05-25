@@ -44,3 +44,12 @@ export {
   type ConversationDto,
   type MessageDto,
 } from './aiConversations.service.js';
+export {
+  createWeeklyMenuPlan,
+  getWeeklyMenuPlanById,
+  generateWeeklyMenuPlan,
+  type CreateWeeklyMenuPlanResult,
+  type WeeklyMenuPlanDto,
+  type WeeklyMenuDayDto,
+  type WeeklyMenuMealDto,
+} from './aiWeeklyMenu.service.js';

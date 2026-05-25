@@ -2,7 +2,19 @@ export type AiInteractionType =
   | 'chat'
   | 'menu_generation'
   | 'plate_analysis'
-  | 'profile_explanation';
+  | 'profile_explanation'
+  | 'weekly_menu_generation';
+
+export type AiObjective = 'lose_weight' | 'maintain' | 'gain_muscle';
+
+export type AiWeeklyMenuPlanStatus =
+  | 'pending'
+  | 'generating'
+  | 'completed'
+  | 'failed'
+  | 'partial_failed';
+
+export type AiWeeklyMenuDayStatus = 'pending' | 'generating' | 'completed' | 'failed';
 
 export type AiRole = 'user' | 'assistant' | 'system';
 
@@ -19,6 +31,24 @@ export const AI_INTERACTION_TYPES: AiInteractionType[] = [
   'menu_generation',
   'plate_analysis',
   'profile_explanation',
+  'weekly_menu_generation',
+];
+
+export const AI_OBJECTIVES: AiObjective[] = ['lose_weight', 'maintain', 'gain_muscle'];
+
+export const AI_WEEKLY_PLAN_STATUSES: AiWeeklyMenuPlanStatus[] = [
+  'pending',
+  'generating',
+  'completed',
+  'failed',
+  'partial_failed',
+];
+
+export const AI_WEEKLY_DAY_STATUSES: AiWeeklyMenuDayStatus[] = [
+  'pending',
+  'generating',
+  'completed',
+  'failed',
 ];
 
 export const AI_ROLES: AiRole[] = ['user', 'assistant', 'system'];

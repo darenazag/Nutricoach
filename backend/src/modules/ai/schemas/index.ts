@@ -23,3 +23,9 @@ export {
   aiProfileExplanationResponseSchema,
   aiProfileExplanationStructuredDataSchema,
 } from './aiProfileExplanation.schema.js';
+
+export {
+  aiWeeklyMenuRequestSchema,
+  aiWeeklyMenuDayGeminiResponseSchema,
+  type AiWeeklyMenuRequest,
+} from './aiWeeklyMenu.schema.js';

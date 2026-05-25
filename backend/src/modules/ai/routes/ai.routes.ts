@@ -4,11 +4,21 @@ import { postAiMenu } from '../controllers/aiMenu.controller.js';
 import { postAiProfileExplanation } from '../controllers/aiProfileExplanation.controller.js';
 import { handlePlateAnalysis } from '../controllers/aiPlateAnalysis.controller.js';
 import { getAiConversation } from '../controllers/aiConversations.controller.js';
+import {
+  postAiWeeklyMenu,
+  getAiWeeklyMenuPlan,
+} from '../controllers/aiWeeklyMenu.controller.js';
 
 export const aiRouter: Router = Router();
 
 // POST /api/ai/chat
 aiRouter.post('/chat', postAiChat);
+
+// POST /api/ai/menu/weekly — must be before /menu to avoid Express route ambiguity
+aiRouter.post('/menu/weekly', postAiWeeklyMenu);
+
+// GET /api/ai/menu/weekly/:planId
+aiRouter.get('/menu/weekly/:planId', getAiWeeklyMenuPlan);
 
 // POST /api/ai/menu
 aiRouter.post('/menu', postAiMenu);
