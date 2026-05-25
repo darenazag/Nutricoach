@@ -72,7 +72,7 @@ export const createProfileSchema = z.object({
   age: numeric.int().positive(),
   height: numeric.positive(),
   gender: z.enum(['M', 'F']),
-  activityFactor: z.enum(['S', 'A']),
+  activityFactor: z.enum(['S', 'A', 'M']),
   objective: z.enum(['P', 'M', 'G']),
   basalMetabolicRate: numeric.min(0).default(0),
   totalDailyEnergyExpenditure: numeric.min(0).default(0),
