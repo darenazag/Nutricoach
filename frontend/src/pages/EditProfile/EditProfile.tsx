@@ -15,7 +15,7 @@ const ACTIVITY_LABELS: Record<string, string> = {
 const ACTIVITY_MULTIPLIER: Record<string, number> = {
   S: 1.2,
   A: 1.55,
-  M: 1.725,
+  M: 1.9,
 }
 
 const OBJECTIVE_LABELS: Record<string, string> = {
@@ -283,7 +283,7 @@ const ACTIVITY_LABELS: Record<string, string> = {
 const ACTIVITY_MULTIPLIER: Record<string, number> = {
   S: 1.2,
   A: 1.55,
-  M: 1.725,
+  M: 1.9,
 }
 
 const OBJECTIVE_LABELS: Record<string, string> = {

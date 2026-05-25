@@ -6,7 +6,7 @@ import '../auth.css'
 
 
 const requirements = [
-  { label: 'Mínimo 5 caracteres', test: (p: string) => p.length >= 5 },
+  { label: 'Mínimo 8 caracteres', test: (p: string) => p.length >= 8 },
   { label: 'Al menos una mayúscula', test: (p: string) => /[A-Z]/.test(p) },
   { label: 'Al menos un signo (!@#$%^&*)', test: (p: string) => /[!@#$%^&*(),.?":{}|<>]/.test(p) },
 ]

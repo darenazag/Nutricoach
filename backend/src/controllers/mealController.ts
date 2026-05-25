@@ -19,7 +19,7 @@ import type { Objective } from '../types/domain.js';
  */
 export async function list(_req: Request, res: Response): Promise<void> {
   const meals = await mealModel.findAll();
-  res.json(meals);
+  res.json({ meals });
 }
 
 /**
