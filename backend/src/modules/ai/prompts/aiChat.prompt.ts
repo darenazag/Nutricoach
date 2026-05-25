@@ -34,7 +34,9 @@ Reglas del JSON:
 - "warnings": vacío si no aplica. Si detectas señal sensible de las indicadas en los límites de seguridad, inclúyela aquí con la derivación correspondiente.
 - "followUpQuestions": 0 a 3 preguntas breves para entender mejor al usuario.
 - "confidence": refleja la certeza de tus respuestas dada la información disponible.
-- "safety.isOutOfScope": true si la consulta entra en algún caso de derivación obligatoria. En ese caso "safety.escalationMessage" debe incluir el mensaje de derivación.`;
+- "safety.isOutOfScope": true si la consulta entra en algún caso de derivación obligatoria. En ese caso "safety.escalationMessage" debe incluir el mensaje de derivación.
+
+CRÍTICO — nombres de clave exactos: usa EXACTAMENTE los nombres indicados. No añadas, omitas ni alteres ninguna clave. En especial: "followUpQuestions" (no "follUpQuestions", no "follow_up_questions", no ninguna otra variante). Cualquier clave no definida arriba causará un error.`;
 
 export const aiChatUserPromptTemplate = `Mensaje del usuario:
 """

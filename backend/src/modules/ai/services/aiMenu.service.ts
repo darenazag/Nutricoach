@@ -6,7 +6,7 @@ import {
   type RenderPromptVariables,
 } from '../prompts/index.js';
 import { AiProviderError } from '../providers/index.js';
-import { generateTextJson } from './aiProviderRouter.service.js';
+import { generateTextJsonWithFallback } from './aiProviderRouter.service.js';
 import {
   addMessage,
   createConversation,
@@ -203,12 +203,12 @@ export async function runAiMenu(input: unknown): Promise<AiMenuServiceResult> {
     cached = true;
   } else {
     // MISS — call Gemini, validate, then store in cache (best-effort).
-    let providerResponse;
+    let providerResult;
     try {
-      providerResponse = await generateTextJson<unknown>({
-        systemPrompt,
-        userPrompt,
-      });
+      providerResult = await generateTextJsonWithFallback(
+        { systemPrompt, userPrompt },
+        (parsed) => validateAiResponse(aiMenuResponseSchema, parsed),
+      );
     } catch (err) {
       if (err instanceof AiProviderError) {
         throw new AiServiceError(
@@ -220,17 +220,17 @@ export async function runAiMenu(input: unknown): Promise<AiMenuServiceResult> {
       throw err;
     }
 
-    aiResponse = validateAiResponse(aiMenuResponseSchema, providerResponse.parsed);
+    aiResponse = providerResult.parsed;
 
     try {
       await storeCache({
         cacheKey,
         type: 'menu_generation',
         inputHash: cacheKey,
-        resultText: providerResponse.text,
+        resultText: providerResult.text,
         resultJson: aiResponse,
-        provider: providerResponse.metadata.provider,
-        model: providerResponse.metadata.model,
+        provider: providerResult.metadata.provider,
+        model: providerResult.metadata.model,
         promptVersion: template.version,
         ttlSeconds: getCacheTtlSeconds(),
       });
@@ -238,8 +238,8 @@ export async function runAiMenu(input: unknown): Promise<AiMenuServiceResult> {
       console.warn('[aiCache] storeCache failed:', err);
     }
 
-    usedProvider = providerResponse.metadata.provider;
-    usedModel = providerResponse.metadata.model;
+    usedProvider = providerResult.metadata.provider;
+    usedModel = providerResult.metadata.model;
     cached = false;
   }
 

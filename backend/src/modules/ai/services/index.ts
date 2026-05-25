@@ -44,7 +44,7 @@ export {
   type ConversationDto,
   type MessageDto,
 } from './aiConversations.service.js';
-export { generateTextJson, generateImageJson } from './aiProviderRouter.service.js';
+export { generateTextJson, generateTextJsonWithFallback, generateImageJson } from './aiProviderRouter.service.js';
 
 export {
   createWeeklyMenuPlan,

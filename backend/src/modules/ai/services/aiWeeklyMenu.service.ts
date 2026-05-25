@@ -6,7 +6,7 @@ import {
 } from '../schemas/index.js';
 import { AI_WEEKLY_MENU_DAY_PROMPT_KEY, buildRenderedPrompt } from '../prompts/index.js';
 import { AiProviderError } from '../providers/index.js';
-import { generateTextJson } from './aiProviderRouter.service.js';
+import { generateTextJsonWithFallback } from './aiProviderRouter.service.js';
 import type { AiProvider } from '../types/index.js';
 import {
   createPlan,
@@ -279,9 +279,12 @@ async function generateWeeklyMenuDay(
   }
 
   if (cachedJson === null) {
-    let providerResponse;
+    let providerResult;
     try {
-      providerResponse = await generateTextJson<unknown>({ systemPrompt, userPrompt });
+      providerResult = await generateTextJsonWithFallback(
+        { systemPrompt, userPrompt },
+        (parsed) => validateAiResponse(aiWeeklyMenuDayGeminiResponseSchema, parsed),
+      );
     } catch (err) {
       if (err instanceof AiProviderError) {
         throw new AiServiceError(
@@ -293,17 +296,17 @@ async function generateWeeklyMenuDay(
       throw err;
     }
 
-    responseData = validateAiResponse(aiWeeklyMenuDayGeminiResponseSchema, providerResponse.parsed);
+    responseData = providerResult.parsed;
 
     try {
       await storeCache({
         cacheKey,
         type: 'weekly_menu_generation',
         inputHash: cacheKey,
-        resultText: providerResponse.text,
+        resultText: providerResult.text,
         resultJson: responseData,
-        provider: providerResponse.metadata.provider,
-        model: providerResponse.metadata.model,
+        provider: providerResult.metadata.provider,
+        model: providerResult.metadata.model,
         promptVersion: template.version,
         ttlSeconds: getCacheTtlSeconds(),
       });
@@ -311,8 +314,8 @@ async function generateWeeklyMenuDay(
       console.warn('[aiWeeklyMenu] storeCache failed:', err);
     }
 
-    usedProvider = providerResponse.metadata.provider;
-    usedModel = providerResponse.metadata.model;
+    usedProvider = providerResult.metadata.provider;
+    usedModel = providerResult.metadata.model;
     fromCache = false;
     await incrementPlanCacheMiss(planId);
   }
