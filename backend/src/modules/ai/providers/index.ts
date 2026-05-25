@@ -13,3 +13,5 @@ export {
 } from './geminiClient.js';
 
 export { type AiProviderImageRequest } from './aiProvider.types.js';
+
+export { generateDeepSeekJson } from './deepseekClient.js';
