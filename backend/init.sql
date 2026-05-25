@@ -13,14 +13,24 @@ DROP TABLE IF EXISTS public."Profile_Meal" CASCADE;
 DROP TABLE IF EXISTS public."Meal_Food_item" CASCADE;
 DROP TABLE IF EXISTS public."Food_item" CASCADE;
 DROP TABLE IF EXISTS public."Meal" CASCADE;
-DROP TABLE IF EXISTS public."User" CASCADE;
 DROP TABLE IF EXISTS public."Profile" CASCADE;
+DROP TABLE IF EXISTS public."User" CASCADE;
 
 -- ======================================================================
 -- 2. CREAR TABLAS
 -- ======================================================================
 
--- 2.1 Profile
+-- 2.1 User
+CREATE TABLE IF NOT EXISTS public."User"
+(
+    user_id numeric NOT NULL,
+    name character varying(50) NOT NULL,
+    password character varying(255) NOT NULL,
+    email character varying(50) NOT NULL,
+    PRIMARY KEY (user_id)
+);
+
+-- 2.2 Profile (FK → User)
 CREATE TABLE IF NOT EXISTS public."Profile"
 (
     user_id numeric NOT NULL,
@@ -32,18 +42,8 @@ CREATE TABLE IF NOT EXISTS public."Profile"
     "objective" "char" NOT NULL,
     "basalMetabolicRate" numeric NOT NULL,
     "totalDailyEnergyExpenditure" numeric NOT NULL,
-    PRIMARY KEY (user_id)
-);
-
--- 2.2 User (FK → Profile)
-CREATE TABLE IF NOT EXISTS public."User"
-(
-    user_id numeric NOT NULL,
-    name character varying(50) NOT NULL,
-    password character varying(50) NOT NULL,
-    email character varying(50) NOT NULL,
     PRIMARY KEY (user_id),
-    FOREIGN KEY (user_id) REFERENCES public."Profile" (user_id)
+    FOREIGN KEY (user_id) REFERENCES public."User" (user_id)
 );
 
 -- 2.3 Food_item
@@ -159,17 +159,17 @@ CREATE TABLE IF NOT EXISTS public."Goal"
 -- 3. INSERTAR DATOS
 -- ======================================================================
 
--- 3.1 Profiles (Carlos, Elena, Sofía)
-INSERT INTO public."Profile" (user_id, weight, age, height, gender, "activityFactor", "objective", "basalMetabolicRate", "totalDailyEnergyExpenditure") VALUES
-(1, 80.5, 28, 180, 'M', 'A', 'G', 1800, 2800),
-(2, 62.0, 32, 165, 'F', 'M', 'P', 1400, 2100),
-(3, 70.0, 24, 172, 'F', 'S', 'M', 1500, 1850);
-
--- 3.2 Users
+-- 3.1 Users
 INSERT INTO public."User" (user_id, name, password, email) VALUES
 (1, 'Carlos Entrenador', 'claveloca123', 'carlos@nutricoach.com'),
 (2, 'Elena Runner',     'securepass99', 'elena@nutricoach.com'),
 (3, 'Sofia Health',     'sofia2026',    'sofia@nutricoach.com');
+
+-- 3.2 Profiles (Carlos, Elena, Sofía)
+INSERT INTO public."Profile" (user_id, weight, age, height, gender, "activityFactor", "objective", "basalMetabolicRate", "totalDailyEnergyExpenditure") VALUES
+(1, 80.5, 28, 180, 'M', 'A', 'G', 1800, 2800),
+(2, 62.0, 32, 165, 'F', 'M', 'P', 1400, 2100),
+(3, 70.0, 24, 172, 'F', 'S', 'M', 1500, 1850);
 
 -- 3.3 Food_items
 INSERT INTO public."Food_item" (food_id, protein, calories, carbs, fat, source) VALUES

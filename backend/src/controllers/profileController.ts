@@ -100,3 +100,122 @@ export async function assignMeal(req: Request, res: Response): Promise<void> {
   await profileModel.assignMeal(id, mealId);
   res.status(201).json({ message: 'Comida asignada', userId: id, mealId });
 }
+
+/**
+ * GET /api/profile - Devuelve el perfil del usuario autenticado.
+ *
+ * Alias de compatibilidad para el frontend, usando req.auth.sub.
+ *
+ * @param {Request} req - Peticion autenticada.
+ * @param {Response} res - Respuesta.
+ * @returns {Promise<void>}
+ */
+export async function getMine(req: Request, res: Response): Promise<void> {
+  const id = req.auth!.sub;
+  const profile = await profileModel.findById(id);
+  if (!profile) {
+    throw HttpError.notFound(`No existe el perfil ${id}`);
+  }
+  res.json({ profile });
+}
+
+/**
+ * POST /api/profile - Crea o actualiza el perfil del usuario autenticado.
+ *
+ * Alias de compatibilidad para el frontend. El user_id se toma del JWT,
+ * no del body.
+ *
+ * @param {Request} req - Peticion autenticada.
+ * @param {Response} res - Respuesta.
+ * @returns {Promise<void>}
+ */
+export async function createMine(req: Request, res: Response): Promise<void> {
+  const input = {
+    ...(req.body as Omit<CreateProfileInput, 'user_id'>),
+    user_id: req.auth!.sub,
+  } as CreateProfileInput;
+
+  const profile = await profileModel.create(input);
+  res.status(201).json({ profile });
+}
+
+/**
+ * GET /api/meals/profile/mine - Devuelve las comidas del usuario autenticado.
+ *
+ * Alias de compatibilidad para el frontend, usando req.auth.sub.
+ *
+ * @param {Request} req - Peticion autenticada.
+ * @param {Response} res - Respuesta.
+ * @returns {Promise<void>}
+ */
+export async function getMyMeals(req: Request, res: Response): Promise<void> {
+  const id = req.auth!.sub;
+  const profile = await profileModel.findById(id);
+  if (!profile) {
+    throw HttpError.notFound(`No existe el perfil ${id}`);
+  }
+
+  const mealIds = await profileModel.findMealIds(id);
+  const meals: MealWithItems[] = [];
+  for (const mealId of mealIds) {
+    const meal = await mealModel.findByIdWithItems(mealId);
+    if (meal) {
+      meals.push(meal);
+    }
+  }
+
+  res.json({ meals });
+}
+
+/**
+ * POST /api/meals/profile/assign - Asigna una comida al usuario autenticado.
+ *
+ * Alias de compatibilidad para el frontend. `mealType` se acepta pero se ignora
+ * de momento porque la tabla puente actual no tiene columna para tipo de comida.
+ *
+ * @param {Request} req - Peticion autenticada.
+ * @param {Response} res - Respuesta.
+ * @returns {Promise<void>}
+ */
+export async function assignMealToMe(req: Request, res: Response): Promise<void> {
+  const id = req.auth!.sub;
+  const { mealId } = req.body as AssignMealInput;
+  const profile = await profileModel.findById(id);
+  if (!profile) {
+    throw HttpError.notFound(`No existe el perfil ${id}`);
+  }
+
+  await profileModel.assignMeal(id, mealId);
+  res.status(201).json({ message: 'Comida asignada', userId: id, mealId });
+}
+
+/**
+ * GET /api/profile/streak - Devuelve una racha mínima para el dashboard.
+ *
+ * Implementación MVP: calcula si el usuario tiene comidas asignadas y devuelve
+ * una estructura compatible con el frontend. La racha real por días requiere
+ * añadir timestamps a Profile_Meal.
+ *
+ * @param {Request} req - Peticion autenticada.
+ * @param {Response} res - Respuesta.
+ * @returns {Promise<void>}
+ */
+export async function getMyStreak(req: Request, res: Response): Promise<void> {
+  const id = req.auth!.sub;
+  const mealIds = await profileModel.findMealIds(id);
+  const hasMeals = mealIds.length > 0;
+
+  res.json({
+    streak: hasMeals ? 1 : 0,
+    mealCount: mealIds.length,
+    history: [
+      { label: 'L', done: hasMeals },
+      { label: 'M', done: false },
+      { label: 'M', done: false },
+      { label: 'J', done: false },
+      { label: 'V', done: false },
+      { label: 'S', done: false },
+      { label: 'D', done: false },
+    ],
+  });
+}

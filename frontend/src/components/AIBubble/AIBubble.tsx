@@ -1,7 +1,7 @@
+import { API_URL } from '../../config/api';
 import { useState, useRef } from 'react'
 import './AIBubble.css'
 
-const API_URL = 'http://localhost:3001/api'
 
 interface Props {
   onMealAdded: () => void

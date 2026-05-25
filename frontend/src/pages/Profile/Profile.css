@@ -1044,6 +1044,46 @@
   border-radius: var(--pradius-md);
 }
 
+.prec-summary {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.prec-summary-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px;
+  border-radius: var(--pradius-md);
+  background: var(--pcolor-white);
+  text-align: center;
+}
+
+.prec-summary-item span {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--pcolor-text-light);
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+}
+
+.prec-summary-item strong {
+  font-size: 18px;
+  color: var(--pcolor-text);
+}
+
+.prec-empty {
+  margin: 0;
+  padding: 18px;
+  border-radius: var(--pradius-md);
+  background: var(--pcolor-white);
+  color: var(--pcolor-text-light);
+  font-size: 14px;
+  text-align: center;
+}
+
 /* ================================================================
    PROYECCIÓN 100 DÍAS
    ================================================================ */

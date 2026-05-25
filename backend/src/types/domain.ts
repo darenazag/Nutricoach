@@ -11,9 +11,9 @@ export type Role = 'user' | 'admin';
 
 /**
  * Factor de actividad fisica.
- * 'S' = Sedentario, 'A' = Activo. Ampliable segun la logica de negocio.
+ * 'S' = Sedentario, 'A' = Activo, 'M' = Muy activo.
  */
-export type ActivityFactor = 'S' | 'A';
+export type ActivityFactor = 'S' | 'A' | 'M';
 
 /**
  * Objetivo nutricional.

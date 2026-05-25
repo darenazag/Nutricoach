@@ -1,12 +1,12 @@
+import { API_URL } from '../../config/api';
 import { useState, useMemo } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/useAuth'
 import '../auth.css'
 
-const API_URL = 'http://localhost:3001/api'
 
 const requirements = [
-  { label: 'Mínimo 5 caracteres', test: (p: string) => p.length >= 5 },
+  { label: 'Mínimo 8 caracteres', test: (p: string) => p.length >= 8 },
   { label: 'Al menos una mayúscula', test: (p: string) => /[A-Z]/.test(p) },
   { label: 'Al menos un signo (!@#$%^&*)', test: (p: string) => /[!@#$%^&*(),.?":{}|<>]/.test(p) },
 ]
@@ -61,9 +61,7 @@ function Register() {
       }
 
 
-      /*login(data.token, data.user)*/
-      
-      login(data.token, { ...data.user, user_id: data.user.id })
+      login(data.token, data.user)
       navigate('/objetivo')
     } catch {
       setError('Error de conexión con el servidor')

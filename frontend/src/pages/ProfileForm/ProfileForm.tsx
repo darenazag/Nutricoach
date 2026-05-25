@@ -1,3 +1,4 @@
+import { API_URL } from '../../config/api';
 import { useState, useMemo, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/useAuth'
@@ -62,7 +63,7 @@ function ProfileForm() {
     setLoading(true)
     try {
       const token = localStorage.getItem('token')
-      const res = await fetch('http://localhost:3001/api/profile', {
+      const res = await fetch(`${API_URL}/profile`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -1,7 +1,14 @@
 import { createContext } from 'react'
 
-interface User {
+export interface User {
   id: number
+  name: string
+  email: string
+}
+
+export interface RawUser {
+  id?: number
+  user_id?: number
   name: string
   email: string
 }
@@ -9,7 +16,7 @@ interface User {
 interface AuthContextType {
   user: User | null
   token: string | null
-  login: (token: string, user: User) => void
+  login: (token: string, user: RawUser) => void
   logout: () => void
   isAuthenticated: boolean
 }

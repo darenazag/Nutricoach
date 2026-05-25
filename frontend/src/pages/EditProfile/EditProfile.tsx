@@ -1,10 +1,10 @@
 
+import { API_URL } from '../../config/api';
 import { useState, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/useAuth'
 import './EditProfile.css'
 
-const API_URL = 'http://localhost:3001/api'
 
 const ACTIVITY_LABELS: Record<string, string> = {
   S: 'Sedentario (poco o ningún ejercicio)',
@@ -15,7 +15,7 @@ const ACTIVITY_LABELS: Record<string, string> = {
 const ACTIVITY_MULTIPLIER: Record<string, number> = {
   S: 1.2,
   A: 1.55,
-  M: 1.725,
+  M: 1.9,
 }
 
 const OBJECTIVE_LABELS: Record<string, string> = {
@@ -273,7 +273,6 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/useAuth'
 import './EditProfile.css'
 
-const API_URL = 'http://localhost:3001/api'
 
 const ACTIVITY_LABELS: Record<string, string> = {
   S: 'Sedentario (poco o ningún ejercicio)',
@@ -284,7 +283,7 @@ const ACTIVITY_LABELS: Record<string, string> = {
 const ACTIVITY_MULTIPLIER: Record<string, number> = {
   S: 1.2,
   A: 1.55,
-  M: 1.725,
+  M: 1.9,
 }
 
 const OBJECTIVE_LABELS: Record<string, string> = {

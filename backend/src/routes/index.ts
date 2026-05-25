@@ -7,6 +7,7 @@ import authRoutes from './authRoutes.js';
 import foodItemRoutes from './foodItemRoutes.js';
 import mealRoutes from './mealRoutes.js';
 import profileRoutes from './profileRoutes.js';
+import profileAliasRoutes from './profileAliasRoutes.js';
 import userRoutes from './userRoutes.js';
 
 const router = Router();
@@ -14,6 +15,7 @@ const router = Router();
 router.use('/auth', authRoutes);
 router.use('/foods', foodItemRoutes);
 router.use('/meals', mealRoutes);
+router.use('/profile', profileAliasRoutes);
 router.use('/profiles', profileRoutes);
 router.use('/users', userRoutes);
 

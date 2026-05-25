@@ -1,3 +1,4 @@
+import { API_URL } from '../../config/api';
 import { useState, useEffect, useCallback } from 'react'
 import { useAuth } from '../../context/useAuth'
 import { Navigate, useNavigate } from 'react-router-dom'
@@ -8,7 +9,6 @@ import { MacroPieChart } from '../../components/charts/MacroPieChart'
 import { WeightLineChart } from '../../components/charts/WeightLineChart'
 import './Profile.css'
 
-const API_URL = 'http://localhost:3001/api'
 
 interface ProfileData {
   weight: number
@@ -230,13 +230,24 @@ function Profile() {
   const weeklyWeightData = projectionDays.length > 0
     ? projectionDays.slice(0, 7).map(d => ({
         day: `Día ${d.dia}`,
-        weight: d.peso_proyectado,
+        weight: Number(d.peso_proyectado ?? 0),
       }))
     : []
 
-  const todayRecommendation = projectionDays[0]?.recomendacion_menu ?? null
-  const weightStart = projectionDays[0]?.peso_proyectado
-  const weightEnd = projectionDays[projectionDays.length - 1]?.peso_proyectado
+  const todayProjection = projectionDays[0]
+  const todayRecommendation = todayProjection?.recomendacion_menu ?? null
+  const suggestedMeals = todayRecommendation
+    ? [
+        { key: 'desayuno', label: 'Desayuno', info: todayRecommendation.desayuno },
+        { key: 'almuerzo', label: 'Almuerzo', info: todayRecommendation.almuerzo },
+        { key: 'cena', label: 'Cena', info: todayRecommendation.cena },
+      ]
+    : []
+  const todayCalories = Number(todayProjection?.calorias_consumidas ?? 0)
+  const todayBalance = Number(todayProjection?.balance_energetico ?? 0)
+  const todayProjectedWeight = Number(todayProjection?.peso_proyectado ?? 0)
+  const weightStart = Number(projectionDays[0]?.peso_proyectado ?? 0)
+  const weightEnd = Number(projectionDays[projectionDays.length - 1]?.peso_proyectado ?? 0)
 
   return (
     <>
@@ -396,28 +407,42 @@ function Profile() {
               </section>
 
               {/* RECOMENDACIÓN DEL DÍA */}
-              {todayRecommendation && (
-                <section className="pcard pcard-recommend">
-                  <h2 className="pcard-title">
-                    <span className="pcard-title-icon">📋</span>
-                    Plan de comidas de hoy
-                  </h2>
+              <section className="pcard pcard-recommend">
+                <h2 className="pcard-title">
+                  <span className="pcard-title-icon">📋</span>
+                  Menú sugerido de hoy
+                </h2>
+                {todayRecommendation ? (
+                  <>
                   <div className="prec-grid">
-                    {Object.entries(todayRecommendation).map(([comida, info]) => (
-                      <div key={comida} className={`prec-item prec-item--${info.categoria}`}>
-                        <span className="prec-item-label">
-                          {comida.charAt(0).toUpperCase() + comida.slice(1)}
-                        </span>
+                    {suggestedMeals.map(({ key, label, info }) => (
+                      <div key={key} className={`prec-item prec-item--${info.categoria}`}>
+                        <span className="prec-item-label">{label}</span>
                         <span className="prec-item-cat">{info.categoria}</span>
-                        <span className="prec-item-kcal">{info.kcal} kcal</span>
+                        <span className="prec-item-kcal">{Number(info.kcal ?? 0)} kcal</span>
                       </div>
                     ))}
                     <div className="prec-total">
-                      Total: {Object.values(todayRecommendation).reduce((s, i) => s + i.kcal, 0)} kcal
+                      Total: {todayCalories} kcal
                     </div>
                   </div>
-                </section>
-              )}
+                  <div className="prec-summary">
+                    <div className="prec-summary-item">
+                      <span>Balance</span>
+                      <strong>{todayBalance} kcal</strong>
+                    </div>
+                    <div className="prec-summary-item">
+                      <span>Peso proyectado</span>
+                      <strong>{todayProjectedWeight.toFixed(1)} kg</strong>
+                    </div>
+                  </div>
+                  </>
+                ) : (
+                  <p className="prec-empty">
+                    {profile ? 'Generando recomendación…' : 'Completa tu perfil para generar una recomendación'}
+                  </p>
+                )}
+              </section>
 
               {/* PROYECCIÓN 100 DÍAS */}
               {projectionDays.length > 0 && (
@@ -429,11 +454,11 @@ function Profile() {
                   <div className="pproj-summary">
                     <div className="pproj-stat">
                       <span className="pproj-stat-label">Peso inicial</span>
-                      <span className="pproj-stat-value">{weightStart?.toFixed(1)} kg</span>
+                      <span className="pproj-stat-value">{weightStart.toFixed(1)} kg</span>
                     </div>
                     <div className="pproj-stat">
                       <span className="pproj-stat-label">Peso final estimado</span>
-                      <span className="pproj-stat-value">{weightEnd?.toFixed(1)} kg</span>
+                      <span className="pproj-stat-value">{weightEnd.toFixed(1)} kg</span>
                     </div>
                     <div className="pproj-stat">
                       <span className="pproj-stat-label">Cambio total</span>
@@ -466,7 +491,7 @@ function Profile() {
                               <td>{d.dia}</td>
                               <td>{d.calorias_consumidas}</td>
                               <td>{d.balance_energetico}</td>
-                              <td>{d.peso_proyectado.toFixed(1)}</td>
+                              <td>{Number(d.peso_proyectado ?? 0).toFixed(1)}</td>
                               <td className="pproj-cat">{d.recomendacion_menu.desayuno.categoria}</td>
                               <td className="pproj-cat">{d.recomendacion_menu.almuerzo.categoria}</td>
                               <td className="pproj-cat">{d.recomendacion_menu.cena.categoria}</td>
