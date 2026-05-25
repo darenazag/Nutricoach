@@ -1,9 +1,9 @@
+import { API_URL } from '../../config/api';
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/useAuth'
 import '../auth.css'
 
-const API_URL = 'http://localhost:3001/api'
 
 function Login() {
   const [email, setEmail] = useState('')

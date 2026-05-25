@@ -1,9 +1,9 @@
+import { API_URL } from '../../config/api';
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Header from '../../components/Header/Header'
 import './MealLog.css'
 
-const API_URL = 'http://localhost:3001/api'
 
 interface Meal {
   meal_id: number

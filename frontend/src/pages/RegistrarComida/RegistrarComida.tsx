@@ -1,9 +1,9 @@
+import { API_URL } from '../../config/api';
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import Header from '../../components/Header/Header'
 import './RegistrarComida.css'
 
-const API_URL = 'http://localhost:3001/api'
 
 const CATEGORIES = [
   { id: 'Desayuno', icon: '🌅' },

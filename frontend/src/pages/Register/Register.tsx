@@ -1,9 +1,9 @@
+import { API_URL } from '../../config/api';
 import { useState, useMemo } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/useAuth'
 import '../auth.css'
 
-const API_URL = 'http://localhost:3001/api'
 
 const requirements = [
   { label: 'Mínimo 5 caracteres', test: (p: string) => p.length >= 5 },

@@ -1,10 +1,10 @@
 
+import { API_URL } from '../../config/api';
 import { useState, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/useAuth'
 import './EditProfile.css'
 
-const API_URL = 'http://localhost:3001/api'
 
 const ACTIVITY_LABELS: Record<string, string> = {
   S: 'Sedentario (poco o ningún ejercicio)',
@@ -273,7 +273,6 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/useAuth'
 import './EditProfile.css'
 
-const API_URL = 'http://localhost:3001/api'
 
 const ACTIVITY_LABELS: Record<string, string> = {
   S: 'Sedentario (poco o ningún ejercicio)',

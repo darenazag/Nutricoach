@@ -1,3 +1,4 @@
+import { API_URL } from '../../config/api';
 import { useState, useEffect, useCallback } from 'react'
 import { useAuth } from '../../context/useAuth'
 import { Navigate, useNavigate } from 'react-router-dom'
@@ -8,7 +9,6 @@ import { MacroPieChart } from '../../components/charts/MacroPieChart'
 import { WeightLineChart } from '../../components/charts/WeightLineChart'
 import './Profile.css'
 
-const API_URL = 'http://localhost:3001/api'
 
 interface ProfileData {
   weight: number
