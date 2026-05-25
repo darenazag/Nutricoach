@@ -120,6 +120,14 @@ const OBJECTIVE_LABEL: Record<Objective, string> = {
   G: 'Ganar masa muscular',
 };
 
+function toFiniteProfileNumber(value: unknown, field: string): number {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed)) {
+    throw new HttpError(422, `El perfil tiene un valor numerico invalido en ${field}`);
+  }
+  return parsed;
+}
+
 /**
  * GET /api/meals/recommend - Proyeccion de 100 dias personalizada. Requiere auth.
  *
@@ -136,7 +144,13 @@ export async function recommend(req: Request, res: Response): Promise<void> {
     throw HttpError.notFound('El usuario no tiene perfil registrado');
   }
 
-  const { basalMetabolicRate: tmb, totalDailyEnergyExpenditure: getd, objective, weight } = profile;
+  const tmb = toFiniteProfileNumber(profile.basalMetabolicRate, 'basalMetabolicRate');
+  const getd = toFiniteProfileNumber(
+    profile.totalDailyEnergyExpenditure,
+    'totalDailyEnergyExpenditure'
+  );
+  const weight = toFiniteProfileNumber(profile.weight, 'weight');
+  const { objective } = profile;
 
   const combo = pickCombo(tmb, getd, objective);
   const dailyKcal = comboTotal(combo);

@@ -466,7 +466,7 @@ function Profile() {
                               <td>{d.dia}</td>
                               <td>{d.calorias_consumidas}</td>
                               <td>{d.balance_energetico}</td>
-                              <td>{d.peso_proyectado.toFixed(1)}</td>
+                              <td>{Number(d.peso_proyectado ?? 0).toFixed(1)}</td>
                               <td className="pproj-cat">{d.recomendacion_menu.desayuno.categoria}</td>
                               <td className="pproj-cat">{d.recomendacion_menu.almuerzo.categoria}</td>
                               <td className="pproj-cat">{d.recomendacion_menu.cena.categoria}</td>
