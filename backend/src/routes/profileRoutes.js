@@ -9,4 +9,4 @@ router.post('/', verifyToken, createProfile)
 router.get('/', verifyToken, getProfile)
 router.get('/streak', verifyToken, getStreak)
 
-export default router */
+export default router 
