@@ -8,6 +8,15 @@ interface MealCardProps {
   onEdit: (meal: Meal) => void
 }
 
+function getStableConfidence(meal: Meal): number {
+  const seed = `${meal.meal_id}-${meal.name}`
+  let hash = 0
+  for (let i = 0; i < seed.length; i += 1) {
+    hash = (hash * 31 + seed.charCodeAt(i)) % 15
+  }
+  return hash + 82
+}
+
 export default function MealCard({ meal, icon, onDelete, onEdit }: MealCardProps) {
   const [expanded, setExpanded] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
@@ -49,7 +58,7 @@ export default function MealCard({ meal, icon, onDelete, onEdit }: MealCardProps
     'Guarnición',
   ].filter(Boolean)
 
-  const confidence = meal.confidence ?? Math.floor(Math.random() * 15) + 82
+  const confidence = meal.confidence ?? getStableConfidence(meal)
 
   return (
     <article
