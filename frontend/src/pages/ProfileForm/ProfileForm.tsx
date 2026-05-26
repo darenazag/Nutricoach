@@ -1,7 +1,7 @@
-import { useState, useMemo, useEffect } from 'react'
+import { API_URL } from '../../config/api';
+import { useState, useMemo, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/useAuth'
-import { profileService } from '../../services/profileService'
 import './ProfileForm.css'
 
 const ACTIVITY_LABELS: Record<string, string> = {
@@ -29,8 +29,10 @@ function ProfileForm() {
   const [activityFactor, setActivityFactor] = useState<'' | 'S' | 'A' | 'M'>('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const submittedRef = useRef(false)
 
   useEffect(() => {
+    if (submittedRef.current) return
     if (!objective || !gender || !age || !height || !weight) {
       navigate('/objetivo', { replace: true })
     }
@@ -62,17 +64,32 @@ function ProfileForm() {
 
     setLoading(true)
     try {
-      await profileService.create({
-        weight: w,
-        height: h,
-        age: a,
-        gender,
-        activityFactor,
-        objective,
-        basalMetabolicRate: bmr,
-        totalDailyEnergyExpenditure: tdee,
+      const token = localStorage.getItem('token')
+      const res = await fetch(`${API_URL}/profile`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          weight: w,
+          height: h,
+          age: a,
+          gender,
+          activityFactor,
+          objective,
+          basalMetabolicRate: bmr,
+          totalDailyEnergyExpenditure: tdee,
+        }),
       })
 
+      if (!res.ok) {
+        const data = await res.json()
+        setError(data.error || 'Error al guardar')
+        return
+      }
+
+      submittedRef.current = true
       sessionStorage.removeItem('objective')
       sessionStorage.removeItem('gender')
       sessionStorage.removeItem('age')
@@ -80,8 +97,8 @@ function ProfileForm() {
       sessionStorage.removeItem('weight')
 
       navigate('/perfil')
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error de conexión con el servidor')
+    } catch {
+      setError('Error de conexión con el servidor')
     } finally {
       setLoading(false)
     }
@@ -108,7 +125,7 @@ function ProfileForm() {
 
         <form onSubmit={handleSubmit} className="pf-form">
           {error && (
-            <div className="pf-error error-banner">
+            <div className="pf-error">
               <span>⚠️</span> {error}
             </div>
           )}

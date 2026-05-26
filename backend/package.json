@@ -1,7 +1,7 @@
 {
   "name": "nutricoach-backend",
   "version": "1.0.0",
-  "description": "Backend MVC para NutriCoach: gestion de perfiles, comidas y alimentos con integracion de Open Food Facts y TheMealDB",
+  "description": "Backend NutriCoach: PostgreSQL P0 + módulo IA (Mongo, Gemini, DeepSeek)",
   "main": "dist/server.js",
   "type": "module",
   "scripts": {
@@ -11,7 +11,10 @@
     "dev": "tsx watch src/server.ts",
     "db:init": "tsx src/scripts/initDb.ts",
     "db:seed": "tsx src/scripts/seedFromApis.ts",
-    "lint": "tsc --noEmit"
+    "lint": "tsc --noEmit",
+    "check": "tsc --noEmit",
+    "seed:ai-prompts": "tsx src/modules/ai/seeders/seedAiPromptTemplates.ts",
+    "test": "vitest run"
   },
   "keywords": [
     "nutrition",
@@ -25,22 +28,31 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
+    "@google/genai": "^2.4.0",
     "bcryptjs": "^2.4.3",
-    "cors": "^2.8.5",
-    "dotenv": "^16.4.5",
-    "express": "^4.19.2",
-    "jsonwebtoken": "^9.0.2",
-    "pg": "^8.12.0",
-    "zod": "^3.23.8"
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3",
+    "mongoose": "^9.6.2",
+    "multer": "^2.1.1",
+    "pg": "^8.21.0",
+    "sharp": "^0.34.5",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
-    "@types/cors": "^2.8.17",
-    "@types/express": "^4.17.21",
-    "@types/jsonwebtoken": "^9.0.6",
-    "@types/node": "^20.14.10",
+    "@types/cookie-parser": "^1.4.10",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/multer": "^2.1.0",
+    "@types/node": "^25.9.0",
     "@types/pg": "^8.11.6",
-    "tsx": "^4.19.2",
-    "typescript": "^5.5.3"
+    "mongodb-memory-server": "^11.1.0",
+    "tsx": "^4.22.3",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.7"
   }
 }
