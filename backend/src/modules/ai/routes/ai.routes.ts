@@ -15,6 +15,7 @@ import {
 import {
   handleAnalyze,
   handleAnalyzePreview,
+  handleSaveAnalyzedMeal,
 } from '../controllers/aiLegacyAnalyze.controller.js';
 
 export const aiRouter: Router = Router();
@@ -55,3 +56,6 @@ aiRouter.get('/conversations/:conversationId', getAiConversation);
 // POST /api/ai/analyze-preview — RegistrarComida.tsx (reads { analysis: {...} })
 aiRouter.post('/analyze', ...handleAnalyze);
 aiRouter.post('/analyze-preview', ...handleAnalyzePreview);
+
+// POST /api/ai/save-analyzed-meal — RegistrarComida.tsx save flow (bypasses requireAdmin)
+aiRouter.post('/save-analyzed-meal', handleSaveAnalyzedMeal);

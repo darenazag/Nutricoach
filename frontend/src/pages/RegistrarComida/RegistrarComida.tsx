@@ -63,7 +63,21 @@ function RegistrarComida() {
     try {
       const data = await mealService.analyzeImage(file)
       const a = data.analysis
-      setAnalysis(a)
+      setAnalysis({
+        name: a.name,
+        calories: a.calories,
+        protein: a.protein,
+        fat: a.fat,
+        carbs: a.carbs,
+        source: a.source,
+        analysisId: data.analysisId,
+        responseText: data.responseText,
+        detectedFoods: data.detectedFoods,
+        proportions: data.proportions,
+        recommendations: data.recommendations,
+        warnings: data.warnings,
+        confidence: data.confidence,
+      })
       setEditName(a.name)
       setEditCalories(String(Math.round(a.calories)))
       setEditProtein(String(Math.round(a.protein)))
@@ -98,14 +112,22 @@ function RegistrarComida() {
     setSaving(true)
 
     try {
-      const data = await mealService.create({
-        name, calories, protein, fat, carbs,
-        source: `Registrado manualmente - ${selectedCategory.toLowerCase()}`,
+      await mealService.saveAnalyzedMeal({
+        name,
+        calories,
+        protein,
+        fat,
+        carbs,
+        mealType: selectedCategory,
+        analysisId: analysis?.analysisId,
       })
-      await mealService.assign(data.meal.meal_id)
       navigate('/perfil')
-    } catch {
-      alert('Error al guardar la comida. Intenta de nuevo.')
+    } catch (err) {
+      console.error('[handleSave] Error al guardar comida:', err)
+      const msg = err instanceof Error && err.message && err.message !== '[object Object]'
+        ? err.message
+        : 'Error al guardar la comida. Intenta de nuevo.'
+      alert(msg)
     } finally {
       setSaving(false)
     }
@@ -203,6 +225,58 @@ function RegistrarComida() {
                     <img src={preview} alt="Comida" className="rc-result-img" />
                     <button className="rc-result-rephoto" onClick={resetPhoto} type="button">✕ Cambiar foto</button>
                   </div>
+
+                  {analysis.responseText && (
+                    <div className="rc-ai-summary">
+                      <span className="rc-ai-summary-icon">🤖</span>
+                      <p className="rc-ai-summary-text">{analysis.responseText}</p>
+                    </div>
+                  )}
+
+                  {analysis.detectedFoods && analysis.detectedFoods.length > 0 && (
+                    <div className="rc-detected-foods">
+                      <p className="rc-section-label">Alimentos detectados</p>
+                      <div className="rc-food-tags">
+                        {analysis.detectedFoods.map((f, i) => (
+                          <span key={i} className={`rc-food-tag rc-food-tag--${f.confidence}`}>
+                            {f.name}
+                            {f.estimatedQuantity ? ` · ${f.estimatedQuantity}` : ''}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {analysis.proportions && (
+                    <div className="rc-proportions">
+                      <p className="rc-section-label">Proporción estimada</p>
+                      <div className="rc-prop-row">
+                        <span className="rc-prop rc-prop--protein">P {analysis.proportions.protein}</span>
+                        <span className="rc-prop rc-prop--carbs">HC {analysis.proportions.carbs}</span>
+                        <span className="rc-prop rc-prop--veg">Veg {analysis.proportions.vegetables}</span>
+                        <span className="rc-prop rc-prop--fat">G {analysis.proportions.fats}</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {analysis.warnings && analysis.warnings.length > 0 && (
+                    <div className="rc-warnings">
+                      {analysis.warnings.map((w, i) => (
+                        <p key={i} className="rc-warning-item">⚠️ {w}</p>
+                      ))}
+                    </div>
+                  )}
+
+                  {analysis.recommendations && analysis.recommendations.length > 0 && (
+                    <div className="rc-recommendations">
+                      <p className="rc-section-label">Recomendaciones</p>
+                      <ul className="rc-rec-list">
+                        {analysis.recommendations.map((r, i) => (
+                          <li key={i} className="rc-rec-item">✓ {r}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
 
                   <div className="rc-result-form">
                     <div className="rc-field">
