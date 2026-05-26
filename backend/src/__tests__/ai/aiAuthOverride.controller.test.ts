@@ -17,6 +17,10 @@ vi.mock('../../modules/ai/services/index.js', () => ({
   createWeeklyMenuPlan: vi.fn(),
   getWeeklyMenuPlanById: vi.fn(),
   getAiConversationById: vi.fn(),
+  listAiConversationsForUser: vi.fn(),
+  // Constants the controller imports from the barrel.
+  AI_CONVERSATIONS_LIST_DEFAULT_PAGE: 1,
+  AI_CONVERSATIONS_LIST_DEFAULT_LIMIT: 10,
 }));
 
 vi.mock('../../modules/ai/services/aiPlateAnalysis.service.js', () => ({
@@ -40,6 +44,7 @@ import {
   runAiProfileExplanation,
   createWeeklyMenuPlan,
   getAiConversationById,
+  listAiConversationsForUser,
 } from '../../modules/ai/services/index.js';
 import { runAiPlateAnalysis } from '../../modules/ai/services/aiPlateAnalysis.service.js';
 
@@ -48,7 +53,10 @@ import { postAiMenu } from '../../modules/ai/controllers/aiMenu.controller.js';
 import { postAiProfileExplanation } from '../../modules/ai/controllers/aiProfileExplanation.controller.js';
 import { postAiWeeklyMenu } from '../../modules/ai/controllers/aiWeeklyMenu.controller.js';
 import { handlePlateAnalysis } from '../../modules/ai/controllers/aiPlateAnalysis.controller.js';
-import { getAiConversation } from '../../modules/ai/controllers/aiConversations.controller.js';
+import {
+  getAiConversation,
+  listAiConversations,
+} from '../../modules/ai/controllers/aiConversations.controller.js';
 
 // ── Test helpers ──────────────────────────────────────────────────────────────
 
@@ -56,10 +64,12 @@ function makeReq(
   body: Record<string, unknown> = {},
   sub = 123,
   params: Record<string, string> = {},
+  query: Record<string, string> = {},
 ): Request {
   return {
     body,
     params,
+    query,
     auth: { sub, email: 'demo@nutricoach.com', role: 'user' },
   } as unknown as Request;
 }
@@ -100,6 +110,10 @@ describe('AI controllers anchor userId to req.auth.sub (never trust body.userId)
     vi.mocked(runAiMenu).mockResolvedValue({} as never);
     vi.mocked(runAiProfileExplanation).mockResolvedValue({} as never);
     vi.mocked(createWeeklyMenuPlan).mockResolvedValue({} as never);
+    vi.mocked(listAiConversationsForUser).mockResolvedValue({
+      items: [],
+      pagination: { page: 1, limit: 10, total: 0, totalPages: 0 },
+    } as never);
     vi.mocked(getAiConversationById).mockResolvedValue({
       conversation: {
         conversationId: 'conv-x',
@@ -176,6 +190,28 @@ describe('AI controllers anchor userId to req.auth.sub (never trust body.userId)
     );
     const call = vi.mocked(runAiPlateAnalysis).mock.calls[0]![0] as { userId: string };
     expect(call.userId).not.toBe('hacker');
+  });
+
+  it('listAiConversations: uses req.auth.sub as userId, ignores query.userId', async () => {
+    await listAiConversations(
+      makeReq({}, 123, {}, { userId: 'hacker', page: '2', limit: '5' }),
+      makeRes(),
+      next,
+    );
+    expect(listAiConversationsForUser).toHaveBeenCalledWith('123', { page: 2, limit: 5 });
+  });
+
+  it('listAiConversations: defaults page=1 limit=10 when query missing', async () => {
+    await listAiConversations(makeReq({}, 123), makeRes(), next);
+    expect(listAiConversationsForUser).toHaveBeenCalledWith('123', { page: 1, limit: 10 });
+  });
+
+  it('listAiConversations: different JWT subjects produce different ownership scopes', async () => {
+    await listAiConversations(makeReq({}, 7), makeRes(), next);
+    expect(listAiConversationsForUser).toHaveBeenLastCalledWith('7', { page: 1, limit: 10 });
+
+    await listAiConversations(makeReq({}, 42), makeRes(), next);
+    expect(listAiConversationsForUser).toHaveBeenLastCalledWith('42', { page: 1, limit: 10 });
   });
 
   it('getAiConversation: passes req.auth.sub as userId to the service (ownership scope)', async () => {
