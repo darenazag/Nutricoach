@@ -48,3 +48,32 @@ export async function findMessagesByConversation(
     .lean<AiMessageDocument[]>()
     .exec();
 }
+
+/**
+ * Owner-scoped paginated list of a user's conversations.
+ *
+ * Sort: most-recent first by `updatedAt`, with `createdAt` as a stable
+ * tiebreaker (Mongoose `timestamps: true` guarantees both fields exist).
+ *
+ * Returns both the page items and the total count in a single round trip,
+ * so the service can compute totalPages without a second query path.
+ */
+export async function findConversationsByUserPaginated(
+  userId: string,
+  options: { page: number; limit: number },
+): Promise<{ items: AiConversationDocument[]; total: number }> {
+  const { page, limit } = options;
+  const skip = (page - 1) * limit;
+
+  const [items, total] = await Promise.all([
+    AiConversation.find({ userId })
+      .sort({ updatedAt: -1, createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .lean<AiConversationDocument[]>()
+      .exec(),
+    AiConversation.countDocuments({ userId }).exec(),
+  ]);
+
+  return { items, total };
+}

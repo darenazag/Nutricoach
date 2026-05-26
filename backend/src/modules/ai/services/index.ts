@@ -40,9 +40,15 @@ export {
 } from './aiPlateAnalysis.service.js';
 export {
   getAiConversationById,
+  listAiConversationsForUser,
+  AI_CONVERSATIONS_LIST_MAX_LIMIT,
+  AI_CONVERSATIONS_LIST_DEFAULT_LIMIT,
+  AI_CONVERSATIONS_LIST_DEFAULT_PAGE,
   type GetAiConversationResult,
+  type ListAiConversationsResult,
   type ConversationDto,
   type MessageDto,
+  type PaginationDto,
 } from './aiConversations.service.js';
 export { generateTextJson, generateTextJsonWithFallback, generateImageJson } from './aiProviderRouter.service.js';
 

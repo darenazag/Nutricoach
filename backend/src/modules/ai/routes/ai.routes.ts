@@ -4,7 +4,10 @@ import { postAiChat } from '../controllers/aiChat.controller.js';
 import { postAiMenu } from '../controllers/aiMenu.controller.js';
 import { postAiProfileExplanation } from '../controllers/aiProfileExplanation.controller.js';
 import { handlePlateAnalysis } from '../controllers/aiPlateAnalysis.controller.js';
-import { getAiConversation } from '../controllers/aiConversations.controller.js';
+import {
+  getAiConversation,
+  listAiConversations,
+} from '../controllers/aiConversations.controller.js';
 import {
   postAiWeeklyMenu,
   getAiWeeklyMenuPlan,
@@ -39,6 +42,10 @@ aiRouter.post('/profile-explanation', postAiProfileExplanation);
 
 // POST /api/ai/plate-analysis  — multipart/form-data with field "image"
 aiRouter.post('/plate-analysis', ...handlePlateAnalysis);
+
+// GET /api/ai/conversations?page=&limit=  — MUST be registered before the
+// :conversationId variant so it matches the bare path.
+aiRouter.get('/conversations', listAiConversations);
 
 // GET /api/ai/conversations/:conversationId
 aiRouter.get('/conversations/:conversationId', getAiConversation);
