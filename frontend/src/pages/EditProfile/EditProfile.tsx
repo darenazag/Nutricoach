@@ -1,8 +1,8 @@
 
+import { API_URL } from '../../config/api';
 import { useState, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/useAuth'
-import { profileService } from '../../services/profileService'
 import './EditProfile.css'
 
 
@@ -35,7 +35,7 @@ function EditProfile() {
   const [activityFactor, setActivityFactor] = useState<'' | 'S' | 'A' | 'M'>('')
   const [objective, setObjective] = useState<'' | 'P' | 'M' | 'G'>('')
   const [error, setError] = useState('')
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(() => Boolean(localStorage.getItem('token')))
   const [saving, setSaving] = useState(false)
 
   // Redirección si el usuario no está autenticado globalmente
@@ -47,9 +47,35 @@ function EditProfile() {
 
   // Carga de datos segura desde el servidor
   useEffect(() => {
+    // 1. ESPERAR: Si el sistema no está autenticado todavía, no hacemos fetch
     if (!isAuthenticated) return
 
-    profileService.get()
+    const token = localStorage.getItem('token')
+    if (!token) {
+      return
+    }
+
+    fetch(`${API_URL}/profile`, {
+      method: 'GET',
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}` 
+      },
+    })
+      .then(async (res) => {
+        if (res.status === 401) {
+          throw new Error('Sesión expirada. Por favor, vuelve a iniciar sesión.')
+        }
+        if (res.status === 404) {
+          // Si no hay perfil guardado aún, no es un error trágico, dejamos que lo rellene
+          return null
+        }
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}))
+          throw new Error(data.error || 'Error al obtener el perfil')
+        }
+        return res.json()
+      })
       .then(data => {
         if (data && data.profile) {
           const p = data.profile
@@ -61,11 +87,14 @@ function EditProfile() {
           setObjective(p.objective || '')
         }
       })
-      .catch(() => {
-        // 404 = no profile yet, not an error
+      .catch((err) => {
+        setError(err.message)
+        if (err.message.includes('Sesión expirada')) {
+          navigate('/login')
+        }
       })
       .finally(() => setLoading(false))
-  }, [isAuthenticated, navigate])
+  }, [isAuthenticated, navigate]) // <-- Dependencia clave: isAuthenticated
 
   const w = parseFloat(weight)
   const h = parseFloat(height)
@@ -94,20 +123,34 @@ function EditProfile() {
 
     setSaving(true)
     try {
-      await profileService.create({
-        weight: w,
-        height: h,
-        age: a,
-        gender,
-        activityFactor,
-        objective,
-        basalMetabolicRate: bmr,
-        totalDailyEnergyExpenditure: tdee,
+      const token = localStorage.getItem('token')
+      const res = await fetch(`${API_URL}/profile`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          weight: w,
+          height: h,
+          age: a,
+          gender,
+          activityFactor,
+          objective,
+          basalMetabolicRate: bmr,
+          totalDailyEnergyExpenditure: tdee,
+        }),
       })
 
+      if (!res.ok) {
+        const data = await res.json()
+        setError(data.error || 'Error al guardar')
+        return
+      }
+
       navigate('/perfil')
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error de conexión con el servidor')
+    } catch {
+      setError('Error de conexión con el servidor')
     } finally {
       setSaving(false)
     }
@@ -128,7 +171,7 @@ function EditProfile() {
     <div className="ep-page">
       <div className="ep-card">
         <div className="ep-header">
-          <button className="btn-back-circle" onClick={() => navigate(-1)} aria-label="Volver">
+          <button className="ep-back" onClick={() => navigate(-1)} aria-label="Volver">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M19 12H5" />
               <path d="M12 19l-7-7 7-7" />
@@ -139,7 +182,7 @@ function EditProfile() {
 
         <form onSubmit={handleSubmit} className="ep-form">
           {error && (
-            <div className="error-banner">
+            <div className="ep-error">
               <span>⚠️</span> {error}
             </div>
           )}
@@ -362,7 +405,7 @@ function EditProfile() {
     <div className="ep-page">
       <div className="ep-card">
         <div className="ep-header">
-          <button className="btn-back-circle" onClick={() => navigate(-1)} aria-label="Volver">
+          <button className="ep-back" onClick={() => navigate(-1)} aria-label="Volver">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M19 12H5" />
               <path d="M12 19l-7-7 7-7" />
@@ -373,7 +416,7 @@ function EditProfile() {
 
         <form onSubmit={handleSubmit} className="ep-form">
           {error && (
-            <div className="error-banner">
+            <div className="ep-error">
               <span>⚠️</span> {error}
             </div>
           )}

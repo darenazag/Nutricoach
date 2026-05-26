@@ -15,6 +15,7 @@ import ObjectiveStep from './pages/ObjectiveStep/ObjectiveStep'
 import AboutYouStep from './pages/AboutYouStep/AboutYouStep'
 import RegistrarComida from './pages/RegistrarComida/RegistrarComida'
 import EditProfile from './pages/EditProfile/EditProfile'
+import { AiLabPage } from './pages/AiLabPage'
 import './App.css'
 
 function HomePage() {
@@ -46,6 +47,7 @@ function App() {
       <Route path="/registrar-comida" element={<RegistrarComida />} />
       <Route path="/editar-perfil" element={<EditProfile />} />
       <Route path="/completar-perfil" element={<ProfileForm />} />
+      <Route path="/ai-lab" element={<AiLabPage />} />
     </Routes>
   )
 }
