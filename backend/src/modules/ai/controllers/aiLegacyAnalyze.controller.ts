@@ -1,9 +1,12 @@
 import type { Request, Response, NextFunction, RequestHandler } from 'express';
 import multer from 'multer';
 import sharp from 'sharp';
+import { z } from 'zod';
 import { AiServiceError } from '../services/aiServiceError.js';
 import { runAiPlateAnalysis } from '../services/aiPlateAnalysis.service.js';
 import { buildAiPlateContextFromP0User } from '../adapters/index.js';
+import * as mealModel from '../../../models/mealModel.js';
+import * as profileModel from '../../../models/profileModel.js';
 
 // ── Upload config (mirrors aiPlateAnalysis.controller limits) ─────────────────
 
@@ -103,8 +106,10 @@ const postAnalyzePreview: RequestHandler = async (req, res, next) => {
     const result = await runAiPlateAnalysis({ ...aiContext, imageBuffer, imageMetadata });
 
     const n = result.structuredData.estimatedNutrition;
+    // Meal.name in PostgreSQL is varchar(100); Zod also caps at 100. Truncate to keep both happy.
+    const rawName = result.structuredData.detectedFoods.map(f => f.name).join(', ') || 'Plato analizado';
     const analysis = {
-      name: result.structuredData.detectedFoods.map(f => f.name).join(', ') || 'Plato analizado',
+      name: rawName.length > 100 ? rawName.slice(0, 97) + '...' : rawName,
       calories: Math.round((n.caloriesRange.min + n.caloriesRange.max) / 2),
       protein:  Math.round((n.proteinRange.min  + n.proteinRange.max)  / 2),
       fat:      Math.round((n.fatRange.min      + n.fatRange.max)      / 2),
@@ -112,11 +117,68 @@ const postAnalyzePreview: RequestHandler = async (req, res, next) => {
       source: 'Análisis IA (NutriCoach)',
     };
 
-    res.status(200).json({ analysis });
+    res.status(200).json({
+      analysis,
+      analysisId: result.analysisId,
+      responseText: result.responseText,
+      detectedFoods: result.structuredData.detectedFoods,
+      proportions: result.structuredData.proportions,
+      recommendations: result.structuredData.recommendations,
+      warnings: result.structuredData.warnings,
+      confidence: result.structuredData.confidence,
+    });
   } catch (err) {
     next(err);
   }
 };
 
-export const handleAnalyze: RequestHandler[]        = [uploadMiddleware, postAnalyze];
-export const handleAnalyzePreview: RequestHandler[] = [uploadMiddleware, postAnalyzePreview];
+// ── POST /api/ai/save-analyzed-meal ──────────────────────────────────────────
+// Creates a meal in PostgreSQL and assigns it to the authenticated user.
+// Bypasses requireAdmin: the AI module handles meal creation for analyzed plates.
+
+const saveMealBodySchema = z.object({
+  name:       z.string().min(1).max(100),
+  calories:   z.number().positive(),
+  protein:    z.number().nonnegative(),
+  fat:        z.number().nonnegative(),
+  carbs:      z.number().nonnegative(),
+  source:     z.string().max(200).optional(),
+  mealType:   z.string().max(50).optional(),
+  analysisId: z.string().optional(),
+});
+
+const postSaveAnalyzedMeal: RequestHandler = async (req, res, next) => {
+  try {
+    const parsed = saveMealBodySchema.safeParse(req.body);
+    if (!parsed.success) {
+      throw new AiServiceError(
+        `Invalid request body: ${parsed.error.issues.map(i => i.message).join(', ')}`,
+        'validation_error',
+      );
+    }
+    const { name, calories, protein, fat, carbs, source, mealType } = parsed.data;
+    const userId = Number(req.auth!.sub);
+    const meal_id = Date.now();
+
+    const meal = await mealModel.create({
+      meal_id,
+      name,
+      calories,
+      protein,
+      fat,
+      carbs,
+      img: null,
+      source: source ?? `Análisis IA (NutriCoach)${mealType ? ' - ' + mealType.toLowerCase() : ''}`,
+    });
+
+    await profileModel.assignMeal(userId, meal_id);
+
+    res.status(201).json({ success: true, data: { meal } });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const handleAnalyze: RequestHandler[]            = [uploadMiddleware, postAnalyze];
+export const handleAnalyzePreview: RequestHandler[]     = [uploadMiddleware, postAnalyzePreview];
+export const handleSaveAnalyzedMeal: RequestHandler     = postSaveAnalyzedMeal;

@@ -43,7 +43,13 @@ async function request<T = unknown>(
   const data = await res.json()
 
   if (!res.ok) {
-    throw new ApiError(data.error || `Error ${res.status}`, res.status)
+    // P0 endpoints return { error: 'string' }; AI module returns { success: false, error: { code, message } }.
+    // Normalize both shapes so ApiError.message is always a readable string.
+    const rawErr = data?.error
+    const errMsg = typeof rawErr === 'string'
+      ? rawErr
+      : (rawErr?.message ?? `Error ${res.status}`)
+    throw new ApiError(errMsg, res.status)
   }
 
   return data as T
