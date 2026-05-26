@@ -1,34 +1,35 @@
-/**
- * @file Punto de entrada: arranca el servidor HTTP.
- */
-
+import 'dotenv/config';
 import { createApp } from './app.js';
 import { env, assertAuthConfig } from './config/env.js';
 import { closePool } from './config/db.js';
+import { connectMongo } from './config/mongo.js';
 
-// Falla pronto si la config de auth es insegura en produccion.
 assertAuthConfig();
 
-const app = createApp();
+async function bootstrap(): Promise<void> {
+  try {
+    await connectMongo();
+  } catch (err) {
+    console.error('[server] Failed to connect to Mongo:', err);
+    process.exit(1);
+  }
 
-const server = app.listen(env.port, () => {
-  console.log(`[server] NutriCoach backend escuchando en puerto ${env.port}`);
-  console.log(`[server] Entorno: ${env.nodeEnv}`);
-});
+  const app = createApp();
 
-/**
- * Cierre ordenado ante senales del sistema: cierra el pool y el servidor.
- *
- * @param {string} signal - Senal recibida.
- * @returns {Promise<void>}
- */
-async function shutdown(signal: string): Promise<void> {
-  console.log(`[server] Recibida senal ${signal}, cerrando...`);
-  server.close(async () => {
-    await closePool();
-    process.exit(0);
+  const server = app.listen(env.port, () => {
+    console.log(`[server] Running on port ${env.port} — ${env.nodeEnv}`);
   });
+
+  async function shutdown(signal: string): Promise<void> {
+    console.log(`[server] Signal ${signal} received, shutting down...`);
+    server.close(async () => {
+      await closePool();
+      process.exit(0);
+    });
+  }
+
+  process.on('SIGINT', () => void shutdown('SIGINT'));
+  process.on('SIGTERM', () => void shutdown('SIGTERM'));
 }
 
-process.on('SIGINT', () => void shutdown('SIGINT'));
-process.on('SIGTERM', () => void shutdown('SIGTERM'));
+bootstrap();
