@@ -200,15 +200,6 @@
 
 /* Error message */
 .auth-error {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 12px 16px;
-  background: #fef2f2;
-  border: 1px solid #fecaca;
-  border-radius: 12px;
-  font-size: 13px;
-  color: #991b1b;
   animation: authErrorIn 0.3s ease-out;
 }
 
@@ -237,7 +228,7 @@
   font-size: 15px;
   font-weight: 700;
   font-family: inherit;
-  color: var(--color-white);
+  color: #ffffff;
   background: var(--color-primary);
   cursor: pointer;
   transition: background 0.25s, transform 0.2s, box-shadow 0.25s;
@@ -349,5 +340,39 @@
   .auth-back {
     width: 40px;
     height: 40px;
+  }
+}
+
+@media (max-width: 767px) {
+  .auth-page {
+    padding: 12px;
+  }
+
+  .auth-card {
+    padding: 24px 16px;
+    border-radius: 16px;
+  }
+
+  .auth-title {
+    font-size: 22px;
+  }
+
+  .auth-subtitle {
+    font-size: 13px;
+  }
+
+  .auth-submit {
+    padding: 14px;
+    font-size: 14px;
+    min-height: 48px;
+  }
+
+  .auth-label {
+    font-size: 11px;
+  }
+
+  .auth-input {
+    padding: 12px 14px;
+    font-size: 15px;
   }
 }

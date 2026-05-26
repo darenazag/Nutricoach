@@ -5,7 +5,7 @@
 .rc-page {
   min-height: 100vh;
   min-height: 100dvh;
-  background: #fdf6ec;
+  background: var(--color-bg);
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   padding: 80px 16px 40px;
 }
@@ -23,32 +23,10 @@
   margin-bottom: 16px;
 }
 
-.rc-back {
-  width: 40px;
-  height: 40px;
-  border: none;
-  border-radius: 50%;
-  background: #f0e6d8;
-  color: #7a6b5a;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: background 0.2s, color 0.2s;
-  flex-shrink: 0;
-  min-width: 44px;
-  min-height: 44px;
-}
-
-.rc-back:hover {
-  background: #fea50a;
-  color: #fff;
-}
-
 .rc-title {
   font-size: clamp(18px, 5vw, 22px);
   font-weight: 800;
-  color: #3d2c1a;
+  color: var(--color-text);
   margin: 0;
 }
 
@@ -72,13 +50,13 @@
   align-items: center;
   gap: 6px;
   padding: 8px 16px;
-  border: 1.5px solid #f0e6d8;
+  border: 1.5px solid var(--color-border);
   border-radius: 100px;
-  background: #fff;
+  background: var(--color-white);
   font-size: 13px;
   font-weight: 600;
   font-family: inherit;
-  color: #7a6b5a;
+  color: var(--color-text-light);
   cursor: pointer;
   white-space: nowrap;
   transition: all 0.2s;
@@ -88,13 +66,13 @@
 }
 
 .rc-cat-pill:hover {
-  border-color: #fea50a;
-  color: #fea50a;
+  border-color: var(--color-primary);
+  color: var(--color-primary);
 }
 
 .rc-cat-pill--active {
-  background: #fea50a;
-  border-color: #fea50a;
+  background: var(--color-primary);
+  border-color: var(--color-primary);
   color: #fff;
 }
 
@@ -105,8 +83,8 @@
   margin-bottom: 20px;
   border-radius: 12px;
   overflow: hidden;
-  border: 1.5px solid #f0e6d8;
-  background: #fff;
+  border: 1.5px solid var(--color-border);
+  background: var(--color-white);
 }
 
 .rc-tab {
@@ -117,7 +95,7 @@
   font-size: clamp(13px, 3.5vw, 14px);
   font-weight: 600;
   font-family: inherit;
-  color: #7a6b5a;
+  color: var(--color-text-light);
   cursor: pointer;
   transition: all 0.2s;
   display: flex;
@@ -129,7 +107,7 @@
 }
 
 .rc-tab:first-child {
-  border-right: 1.5px solid #f0e6d8;
+  border-right: 1.5px solid var(--color-border);
 }
 
 .rc-tab:hover {
@@ -137,7 +115,7 @@
 }
 
 .rc-tab--active {
-  background: #fea50a;
+  background: var(--color-primary);
   color: #fff;
 }
 
@@ -156,10 +134,10 @@
   flex-direction: column;
   align-items: center;
   padding: 40px 20px;
-  border: 2px dashed #f0e6d8;
+  border: 2px dashed var(--color-border);
   border-radius: 20px;
   text-align: center;
-  background: #fff;
+  background: var(--color-white);
 }
 
 .rc-upload-icon {
@@ -171,13 +149,13 @@
 .rc-upload-text {
   font-size: clamp(15px, 4vw, 17px);
   font-weight: 700;
-  color: #3d2c1a;
+  color: var(--color-text);
   margin: 0 0 4px;
 }
 
 .rc-upload-hint {
   font-size: clamp(12px, 3.5vw, 13px);
-  color: #a09686;
+  color: var(--color-text-light);
   margin: 0 0 24px;
   max-width: 280px;
 }
@@ -194,13 +172,13 @@
   align-items: center;
   gap: 8px;
   padding: 14px 24px;
-  border: 2px solid #f0e6d8;
+  border: 2px solid var(--color-border);
   border-radius: 14px;
-  background: #fdf6ec;
+  background: var(--color-bg);
   font-size: clamp(13px, 3.5vw, 14px);
   font-weight: 700;
   font-family: inherit;
-  color: #3d2c1a;
+  color: var(--color-text);
   cursor: pointer;
   transition: all 0.2s;
   min-height: 48px;
@@ -208,13 +186,13 @@
 }
 
 .rc-upload-btn:hover {
-  border-color: #fea50a;
-  background: #fff6e6;
+  border-color: var(--color-primary);
+  background: var(--color-bg);
 }
 
 .rc-upload-btn--camera {
-  background: #fea50a;
-  border-color: #fea50a;
+  background: var(--color-primary);
+  border-color: var(--color-primary);
   color: #fff;
 }
 
@@ -235,8 +213,8 @@
 .rc-spinner {
   width: 48px;
   height: 48px;
-  border: 5px solid #f0e6d8;
-  border-top-color: #fea50a;
+  border: 5px solid var(--color-border);
+  border-top-color: var(--color-primary);
   border-radius: 50%;
   animation: rcSpin 0.8s linear infinite;
   margin-bottom: 16px;
@@ -246,13 +224,13 @@
   margin: 0;
   font-size: 16px;
   font-weight: 700;
-  color: #3d2c1a;
+  color: var(--color-text);
 }
 
 .rc-analyzing-hint {
   font-size: 13px !important;
   font-weight: 500 !important;
-  color: #a09686 !important;
+  color: var(--color-text-light) !important;
   margin-top: 6px !important;
   max-width: 260px;
 }
@@ -275,7 +253,7 @@
   object-fit: cover;
   display: block;
   border-radius: 16px;
-  border: 2px solid #f0e6d8;
+  border: 2px solid var(--color-border);
 }
 
 .rc-result-rephoto {
@@ -316,7 +294,7 @@
 .rc-label {
   font-size: clamp(11px, 3vw, 12px);
   font-weight: 700;
-  color: #7a6b5a;
+  color: var(--color-text-light);
   text-transform: uppercase;
   letter-spacing: 0.3px;
 }
@@ -328,20 +306,20 @@
 .rc-input {
   width: 100%;
   padding: 12px 14px;
-  border: 1.5px solid #f0e6d8;
+  border: 1.5px solid var(--color-border);
   border-radius: 12px;
-  background: #fff;
+  background: var(--color-white);
   font-size: 16px;
   font-weight: 600;
   font-family: inherit;
-  color: #3d2c1a;
+  color: var(--color-text);
   outline: none;
   transition: border-color 0.2s, box-shadow 0.2s;
   box-sizing: border-box;
 }
 
 .rc-input:focus {
-  border-color: #fea50a;
+  border-color: var(--color-primary);
   box-shadow: 0 0 0 3px rgba(254, 165, 10, 0.1);
 }
 
@@ -350,7 +328,7 @@
 .rc-input--carbs { border-color: rgba(156, 39, 176, 0.3); }
 .rc-input--fat { border-color: rgba(255, 87, 34, 0.3); }
 
-.rc-input--kcal:focus { border-color: #fea50a; box-shadow: 0 0 0 3px rgba(254, 165, 10, 0.1); }
+.rc-input--kcal:focus { border-color: var(--color-primary); box-shadow: 0 0 0 3px rgba(254, 165, 10, 0.1); }
 .rc-input--protein:focus { border-color: #2196f3; box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.1); }
 .rc-input--carbs:focus { border-color: #9c27b0; box-shadow: 0 0 0 3px rgba(156, 39, 176, 0.1); }
 .rc-input--fat:focus { border-color: #ff5722; box-shadow: 0 0 0 3px rgba(255, 87, 34, 0.1); }
@@ -376,7 +354,7 @@
 .rc-cat-selector-label {
   font-size: clamp(11px, 3vw, 12px);
   font-weight: 700;
-  color: #7a6b5a;
+  color: var(--color-text-light);
   text-transform: uppercase;
   letter-spacing: 0.3px;
 }
@@ -392,13 +370,13 @@
   align-items: center;
   gap: 5px;
   padding: 8px 14px;
-  border: 1.5px solid #f0e6d8;
+  border: 1.5px solid var(--color-border);
   border-radius: 100px;
-  background: #fff;
+  background: var(--color-white);
   font-size: 12px;
   font-weight: 600;
   font-family: inherit;
-  color: #7a6b5a;
+  color: var(--color-text-light);
   cursor: pointer;
   transition: all 0.2s;
   min-height: 44px;
@@ -406,13 +384,13 @@
 }
 
 .rc-cat-opt:hover {
-  border-color: #fea50a;
-  color: #fea50a;
+  border-color: var(--color-primary);
+  color: var(--color-primary);
 }
 
 .rc-cat-opt--active {
-  background: #fea50a;
-  border-color: #fea50a;
+  background: var(--color-primary);
+  border-color: var(--color-primary);
   color: #fff;
 }
 
@@ -422,7 +400,7 @@
   padding: 16px;
   border: none;
   border-radius: 14px;
-  background: #fea50a;
+  background: var(--color-primary);
   color: #fff;
   font-size: clamp(15px, 4vw, 16px);
   font-weight: 800;
@@ -451,13 +429,13 @@
 
 .rc-list-subtitle {
   font-size: 14px;
-  color: #7a6b5a;
+  color: var(--color-text-light);
   margin: 0 0 16px;
 }
 
 .rc-empty {
   text-align: center;
-  color: #a09686;
+  color: var(--color-text-light);
   padding: 60px 0;
   font-size: 15px;
 }
@@ -468,27 +446,12 @@
   gap: 12px;
 }
 
-.rc-card {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  background: #fff;
-  border-radius: 16px;
-  padding: 16px 18px;
-  box-shadow: 0 1px 3px rgba(87, 23, 0, 0.05), 0 4px 12px rgba(87, 23, 0, 0.06);
-  transition: box-shadow 0.2s;
-}
-
-.rc-card:hover {
-  box-shadow: 0 2px 8px rgba(87, 23, 0, 0.1), 0 6px 20px rgba(87, 23, 0, 0.08);
-}
-
 .rc-card-icon {
   flex-shrink: 0;
   width: 48px;
   height: 48px;
   border-radius: 12px;
-  background: #f5f0eb;
+  background: var(--color-border);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -503,13 +466,13 @@
 .rc-card-name {
   font-size: 15px;
   font-weight: 700;
-  color: #3d2c1a;
+  color: var(--color-text);
   margin: 0 0 2px;
 }
 
 .rc-card-source {
   font-size: 12px;
-  color: #a09686;
+  color: var(--color-text-light);
   margin: 0 0 6px;
 }
 
@@ -550,10 +513,10 @@
   flex-shrink: 0;
   width: 40px;
   height: 40px;
-  border: 2px solid #fea50a;
+  border: 2px solid var(--color-primary);
   border-radius: 50%;
-  background: #fff;
-  color: #fea50a;
+  background: var(--color-white);
+  color: var(--color-primary);
   font-size: 20px;
   font-weight: 700;
   cursor: pointer;
@@ -568,7 +531,7 @@
 }
 
 .rc-add-btn:hover:not(:disabled) {
-  background: #fea50a;
+  background: var(--color-primary);
   color: #fff;
 }
 
@@ -613,5 +576,103 @@
 @media (min-width: 768px) {
   .rc-upload-area {
     padding: 60px 40px;
+  }
+}
+
+@media (max-width: 767px) {
+  .rc-page {
+    padding: 60px 12px 32px;
+  }
+
+  .rc-title {
+    font-size: 18px;
+  }
+
+  .rc-cat-pill {
+    padding: 6px 14px;
+    font-size: 12px;
+    min-height: 40px;
+  }
+
+  .rc-tab {
+    padding: 10px 8px;
+    font-size: 12px;
+    min-height: 44px;
+  }
+
+  .rc-upload-area {
+    padding: 28px 16px;
+  }
+
+  .rc-upload-icon {
+    font-size: 44px;
+  }
+
+  .rc-upload-text {
+    font-size: 14px;
+  }
+
+  .rc-upload-hint {
+    font-size: 12px;
+    max-width: 100%;
+  }
+
+  .rc-upload-btn {
+    padding: 12px 18px;
+    font-size: 13px;
+    min-height: 44px;
+  }
+
+  .rc-upload-buttons {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .rc-field-row {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .rc-field-row--3 {
+    grid-template-columns: 1fr;
+  }
+
+  .rc-input {
+    padding: 10px 12px;
+    font-size: 15px;
+    min-height: 48px;
+  }
+
+  .rc-save-btn {
+    padding: 14px;
+    font-size: 14px;
+    min-height: 48px;
+  }
+
+  .rc-card-icon {
+    width: 42px;
+    height: 42px;
+    font-size: 20px;
+  }
+
+  .rc-card-name {
+    font-size: 14px;
+  }
+
+  .rc-card-source {
+    font-size: 11px;
+  }
+
+  .rc-macro {
+    font-size: 10px;
+    padding: 2px 6px;
+  }
+
+  .rc-add-btn {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
+    font-size: 22px;
   }
 }

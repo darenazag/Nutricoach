@@ -112,50 +112,50 @@ function SocialProof() {
     <section className="bg-[#FDFBF7] py-16 sm:py-20 px-4 sm:px-6" id="social-proof">
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-14">
-          <span className="inline-block uppercase tracking-[3px] text-xs font-bold text-[#FAA61A] bg-[#FFF5E6] px-5 py-2 rounded-full mb-5">
+          <span className="inline-block uppercase tracking-[3px] text-xs font-bold text-[#FAA61A] bg-[#FFF5E6] px-5 py-2 rounded-full mb-5 sp-badge">
             RESULTADOS REALES
           </span>
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-[#3D2C1A] mb-4 leading-tight">
-            Resultados que <span className="text-[#FAA61A] relative inline-block hover-underline">hablan solos.</span>
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-[#3D2C1A] mb-4 leading-tight sp-heading">
+            Resultados que <span className="text-[#FAA61A] relative inline-block hover-underline sp-accent">hablan solos.</span>
           </h2>
           <div className="relative inline-block">
-            <p className="text-base md:text-lg text-[#3D2C1A] max-w-xl mx-auto leading-relaxed">
-              Más de <strong className="text-[#FAA61A] counter-num">50,000</strong> personas ya transformaron su alimentación con NutriCoach.
+            <p className="text-base md:text-lg text-[#3D2C1A] max-w-xl mx-auto leading-relaxed sp-desc">
+              Más de <strong className="text-[#FAA61A] counter-num sp-accent">50,000</strong> personas ya transformaron su alimentación con NutriCoach.
             </p>
-            <p className="text-sm text-[#7A6B5A] mt-1 italic">
+            <p className="text-sm text-[#7A6B5A] mt-1 italic sp-subtitle">
               Estos son algunos de sus resultados.
             </p>
             <div className="flex justify-center gap-3 mt-4">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#FAA61A] animate-bounce" style={{ animationDelay: '0s' }}></span>
-              <span className="w-1.5 h-1.5 rounded-full bg-[#d48208] animate-bounce" style={{ animationDelay: '0.15s' }}></span>
-              <span className="w-1.5 h-1.5 rounded-full bg-[#FAA61A] animate-bounce" style={{ animationDelay: '0.3s' }}></span>
+              <span className="w-1.5 h-1.5 rounded-full bg-[#FAA61A] animate-bounce sp-dot" style={{ animationDelay: '0s' }}></span>
+              <span className="w-1.5 h-1.5 rounded-full bg-[#d48208] animate-bounce sp-dot" style={{ animationDelay: '0.15s' }}></span>
+              <span className="w-1.5 h-1.5 rounded-full bg-[#FAA61A] animate-bounce sp-dot" style={{ animationDelay: '0.3s' }}></span>
             </div>
           </div>
         </div>
 
-        <div className="sp-scroll" ref={scrollRef}>
-          <div className="sp-track">
+        <div className="sp-scroll scroll-snap-x" ref={scrollRef}>
+          <div className="sp-track scroll-snap-track">
             {duplicated.map((t, i) => (
               <article
                 key={`${t.name}-${i}`}
-                className="sp-card"
+                className="sp-card glass-card-dark"
                 ref={(el) => { cardsRef.current[i] = el as HTMLDivElement | null }}
               >
                 <div className="flex items-center gap-3 mb-4">
                   <img
                     src={t.photo}
                     alt={t.name}
-                    className="w-11 h-11 rounded-full object-cover border-2 border-[#F0E6D8] flex-shrink-0"
+                    className="w-11 h-11 rounded-full object-cover border-2 border-[#F0E6D8] flex-shrink-0 sp-card-img"
                   />
                   <div className="min-w-0">
-                    <div className="font-semibold text-[#3D2C1A] text-sm truncate">{t.name}</div>
-                    <div className="text-xs text-[#7A6B5A]">{t.age}</div>
+                    <div className="font-semibold text-[#3D2C1A] text-sm truncate sp-card-name">{t.name}</div>
+                    <div className="text-xs text-[#7A6B5A] sp-card-age">{t.age}</div>
                   </div>
-                  <span className="ml-auto text-[11px] font-semibold text-[#FAA61A] bg-[#FFF5E6] px-3 py-1 rounded-full whitespace-nowrap flex-shrink-0">
+                  <span className="ml-auto text-[11px] font-semibold text-[#FAA61A] bg-[#FFF5E6] px-3 py-1 rounded-full whitespace-nowrap flex-shrink-0 sp-card-result">
                     {t.result}
                   </span>
                 </div>
-                <p className="italic text-[#3D2C1A] text-sm leading-relaxed">
+                <p className="italic text-[#3D2C1A] text-sm leading-relaxed sp-card-text">
                   &ldquo;{t.text}&rdquo;
                 </p>
               </article>
@@ -164,7 +164,7 @@ function SocialProof() {
         </div>
 
         <div className="text-center mt-12">
-          <a href="/register" className="inline-block w-full sm:w-auto bg-[#FAA61A] text-white font-bold text-base px-10 py-4 rounded-full shadow-lg hover:shadow-xl hover:bg-[#d48208] transition-all duration-300">
+          <a href="/register" className="inline-block w-full sm:w-auto bg-[#FAA61A] text-white font-bold text-base px-10 py-4 rounded-full shadow-lg hover:shadow-xl hover:bg-[#d48208] transition-all duration-300 sp-cta">
             Empieza tu transformación
           </a>
         </div>

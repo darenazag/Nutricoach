@@ -1,20 +1,10 @@
-import { API_URL } from '../../config/api';
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Header from '../../components/Header/Header'
+import { mealService } from '../../services/mealService'
+import type { Meal } from '../../types'
 import './MealLog.css'
 
-
-interface Meal {
-  meal_id: number
-  name: string
-  calories: number
-  protein: number
-  fat: number
-  carbs: number
-  img: string | null
-  source: string
-}
 
 const MEAL_ICONS = ['🍗', '🍚', '🥗', '🥤', '🐟', '🥩', '🥑', '🍳']
 
@@ -25,13 +15,7 @@ function MealLog() {
   const [assigning, setAssigning] = useState<number | null>(null)
 
   useEffect(() => {
-    const token = localStorage.getItem('token')
-    if (!token) return
-
-    fetch(`${API_URL}/meals`, {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then(r => r.ok ? r.json() : Promise.reject())
+    mealService.getAll()
       .then(data => setMeals(data.meals || []))
       .catch(() => setMeals([]))
       .finally(() => setLoading(false))
@@ -39,19 +23,9 @@ function MealLog() {
 
   async function handleAssign(mealId: number) {
     setAssigning(mealId)
-    const token = localStorage.getItem('token')
     try {
-      const res = await fetch(`${API_URL}/meals/profile/assign`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ mealId }),
-      })
-      if (res.ok) {
-        navigate('/perfil')
-      }
+      await mealService.assign(mealId)
+      navigate('/perfil')
     } catch {
       // ignore
     } finally {
@@ -65,7 +39,7 @@ function MealLog() {
       <div className="ml-page">
         <div className="ml-container">
           <div className="ml-header">
-            <button className="ml-back" onClick={() => navigate(-1)} aria-label="Volver">
+            <button className="btn-back-circle" onClick={() => navigate(-1)} aria-label="Volver">
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M19 12H5" />
                 <path d="M12 19l-7-7 7-7" />
@@ -83,7 +57,7 @@ function MealLog() {
           ) : (
             <div className="ml-grid">
               {meals.map((meal, i) => (
-                <div key={meal.meal_id} className="ml-card">
+                <div key={meal.meal_id} className="ml-card card-row">
                   <div className="ml-card-icon">
                     {MEAL_ICONS[i % MEAL_ICONS.length]}
                   </div>

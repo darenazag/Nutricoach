@@ -1,7 +1,7 @@
-import { API_URL } from '../../config/api';
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/useAuth'
+import { authService } from '../../services/authService'
 import '../auth.css'
 
 
@@ -21,23 +21,11 @@ function Login() {
     setLoading(true)
 
     try {
-      const res = await fetch(`${API_URL}/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      })
-
-      const data = await res.json()
-
-      if (!res.ok) {
-        setError(data.error || 'Error al iniciar sesión')
-        return
-      }
-
+      const data = await authService.login(email, password)
       login(data.token, data.user)
       navigate('/perfil')
-    } catch {
-      setError('Error de conexión con el servidor')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error de conexión con el servidor')
     } finally {
       setLoading(false)
     }
@@ -58,7 +46,7 @@ function Login() {
 
         <form onSubmit={handleSubmit} className="auth-form">
           {error && (
-            <div className="auth-error">
+            <div className="auth-error error-banner">
               <span className="auth-error-icon">⚠️</span>
               <span>{error}</span>
             </div>

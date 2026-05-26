@@ -1,11 +1,13 @@
 import { useState, useRef, useEffect } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/useAuth'
+import { useTheme } from '../../context/ThemeContext'
 import GooeyNav from '../GooeyNav/GooeyNav'
 import './Header.css'
 
 function Header() {
   const { user, isAuthenticated, logout } = useAuth()
+  const { theme, toggle } = useTheme()
   const location = useLocation()
   const navigate = useNavigate()
   const isDashboard = location.pathname === '/perfil'
@@ -58,6 +60,15 @@ function Header() {
         )}
 
         <div className="header-actions">
+          <button
+            className="header-theme-btn"
+            onClick={toggle}
+            type="button"
+            aria-label={theme === 'dark' ? 'Modo claro' : 'Modo oscuro'}
+          >
+            {theme === 'dark' ? '☀️' : '🌙'}
+          </button>
+
           {isAuthenticated ? (
             <div className="header-user-wrap" ref={ref}>
               <button className="header-user-btn" onClick={() => setOpen(o => !o)}>

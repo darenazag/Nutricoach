@@ -13,7 +13,7 @@
 .pre-footer-title {
   font-size: 38px;
   font-weight: 800;
-  color: var(--color-white);
+  color: #ffffff;
   margin: 0 0 16px;
   letter-spacing: -1px;
 }
@@ -28,20 +28,29 @@
 .pre-footer-cta {
   display: inline-block;
   background: var(--color-primary);
-  color: var(--color-white);
+  color: #ffffff;
   padding: 16px 40px;
   border-radius: var(--radius-full);
   text-decoration: none;
   font-weight: 700;
   font-size: 17px;
-  transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+  transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
   box-shadow: 0 4px 14px rgba(254, 165, 10, 0.35);
 }
 
+body.dark .pre-footer-cta {
+  box-shadow: 0 4px 20px color-mix(in srgb, var(--color-primary) 30%, transparent), 0 0 40px color-mix(in srgb, var(--color-primary) 10%, transparent);
+}
+
+body.dark .pre-footer-cta:hover {
+  box-shadow: 0 6px 30px color-mix(in srgb, var(--color-primary) 40%, transparent), 0 0 60px color-mix(in srgb, var(--color-primary) 15%, transparent);
+  transform: translateY(-3px) scale(1.02);
+}
+
 .pre-footer-cta:hover {
-  background: #e89500;
+  background: var(--color-secondary);
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(254, 165, 10, 0.5);
+  box-shadow: 0 6px 20px color-mix(in srgb, var(--color-primary) 50%, transparent);
 }
 
 .pre-footer-badges {
@@ -53,21 +62,7 @@
 }
 
 /* Store Badges (App Store / Google Play) */
-.pre-footer-badges .store-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  background: #0a0a0a;
-  border-radius: 9px;
-  padding: 7px 18px 7px 14px;
-  text-decoration: none;
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
-  border: 1px solid #2a2a2a;
-  min-width: 150px;
-}
-
 .pre-footer-badges .store-badge:hover {
-  transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
 }
 
@@ -77,34 +72,6 @@
 
 .pre-footer-badges .store-badge--android:hover {
   border-color: #34A853;
-}
-
-.pre-footer-badges .store-badge-icon {
-  width: 26px;
-  height: 26px;
-  flex-shrink: 0;
-  display: block;
-}
-
-.pre-footer-badges .store-badge-text {
-  display: flex;
-  flex-direction: column;
-  line-height: 1.15;
-}
-
-.pre-footer-badges .store-badge-small {
-  font-size: 7.5px;
-  font-weight: 400;
-  color: #aaa;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.pre-footer-badges .store-badge-name {
-  font-size: 14.5px;
-  font-weight: 600;
-  color: #fff;
-  letter-spacing: -0.2px;
 }
 
 /* Footer main */
@@ -129,9 +96,25 @@
 }
 
 .footer-logo {
-  font-size: 22px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  text-decoration: none;
+}
+
+.footer-logo-icon {
+  font-size: 24px;
+}
+
+.footer-logo-text {
+  font-size: 20px;
   font-weight: 700;
-  color: var(--color-white);
+  color: #ffffff;
+  font-family: var(--ff-heading);
+}
+
+.footer-logo .highlight {
+  color: var(--color-primary);
 }
 
 .footer-brand p {
@@ -231,5 +214,51 @@
 
   .footer-bottom {
     padding: 16px 20px;
+  }
+}
+
+@media (max-width: 767px) {
+  .pre-footer {
+    padding: 56px 16px;
+  }
+
+  .pre-footer-title {
+    font-size: 26px;
+  }
+
+  .pre-footer-text {
+    font-size: 15px;
+    margin-bottom: 24px;
+  }
+
+  .pre-footer-cta {
+    padding: 14px 32px;
+    font-size: 15px;
+    width: 100%;
+    min-height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .pre-footer-badges {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .footer-main {
+    padding: 48px 20px 0;
+  }
+
+  .footer-bottom {
+    padding: 16px 20px;
+  }
+
+  .footer-links h4 {
+    margin-bottom: 12px;
+  }
+
+  .footer-links a {
+    font-size: 13px;
   }
 }

@@ -85,18 +85,18 @@ function MiniFeatures() {
     <section id="mini-features" className="mini-features">
       <div className="mf-container">
         <div className="mf-header">
-          <span className="mf-section-tag">Todo en uno</span>
+          <span className="section-tag">Todo en uno</span>
           <h2 className="mf-title">
             Todo lo que necesitas en <span className="text-primary">un solo lugar</span>.
           </h2>
         </div>
 
-        <div className="mf-scroll" ref={scrollRef}>
-          <div className="mf-track">
+        <div className="mf-scroll scroll-snap-x" ref={scrollRef}>
+          <div className="mf-track scroll-snap-track">
             {duplicated.map((f, i) => (
               <article
                 key={`${f.title}-${i}`}
-                className="mf-card"
+                className="mf-card glass-card-dark"
                 ref={(el) => { cardsRef.current[i] = el as HTMLDivElement | null }}
               >
                 <div className="mf-card-img">

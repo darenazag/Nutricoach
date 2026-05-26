@@ -2,6 +2,36 @@
   padding: 140px 24px 100px;
   background-color: var(--color-bg);
   position: relative;
+  overflow: hidden;
+}
+
+body.dark .hero::before {
+  content: '';
+  position: absolute;
+  top: -20%;
+  left: -10%;
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(254, 165, 10, 0.08) 0%, transparent 70%);
+  pointer-events: none;
+  animation: heroGlow 8s ease-in-out infinite alternate;
+}
+
+body.dark .hero::after {
+  content: '';
+  position: absolute;
+  bottom: -30%;
+  right: -5%;
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, rgba(254, 165, 10, 0.05) 0%, transparent 70%);
+  pointer-events: none;
+  animation: heroGlow 10s ease-in-out infinite alternate-reverse;
+}
+
+@keyframes heroGlow {
+  0% { opacity: 0.6; transform: translate(0, 0); }
+  100% { opacity: 1; transform: translate(30px, -20px); }
 }
 
 .hero-container {
@@ -28,6 +58,13 @@
   letter-spacing: -1.8px;
 }
 
+body.dark .hero-title .text-primary {
+  background: linear-gradient(135deg, var(--color-primary), #f59e0b);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
 .text-primary {
   color: var(--color-primary);
 }
@@ -38,6 +75,10 @@
   color: var(--color-text-light);
   margin: 0 0 20px;
   max-width: 500px;
+}
+
+body.dark .hero-subtitle {
+  color: #cbd5e1;
 }
 
 .hero-stats {
@@ -53,6 +94,10 @@
   color: var(--color-deep);
 }
 
+body.dark .hero-stats strong {
+  color: var(--color-primary);
+}
+
 .hero-stats-dot {
   color: var(--color-primary);
   font-weight: 700;
@@ -66,20 +111,29 @@
 
 .hero-btn-primary {
   background: var(--color-primary);
-  color: var(--color-white);
+  color: #ffffff;
   padding: 16px 36px;
   border-radius: var(--radius-full);
   text-decoration: none;
   font-weight: 700;
   font-size: 16px;
-  transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
-  box-shadow: 0 4px 14px rgba(254, 165, 10, 0.35);
+  transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  box-shadow: 0 4px 14px color-mix(in srgb, var(--color-primary) 35%, transparent);
 }
 
 .hero-btn-primary:hover {
   background: var(--color-secondary);
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(254, 165, 10, 0.45);
+  box-shadow: 0 6px 20px color-mix(in srgb, var(--color-primary) 45%, transparent);
+}
+
+body.dark .hero-btn-primary {
+  box-shadow: 0 4px 20px color-mix(in srgb, var(--color-primary) 30%, transparent), 0 0 40px color-mix(in srgb, var(--color-primary) 10%, transparent);
+}
+
+body.dark .hero-btn-primary:hover {
+  box-shadow: 0 6px 30px color-mix(in srgb, var(--color-primary) 40%, transparent), 0 0 60px color-mix(in srgb, var(--color-primary) 15%, transparent);
+  transform: translateY(-3px) scale(1.02);
 }
 
 .hero-btn-secondary {
@@ -91,12 +145,26 @@
   font-weight: 600;
   font-size: 16px;
   border: 2px solid var(--color-border);
-  transition: border-color 0.2s, transform 0.2s;
+  transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .hero-btn-secondary:hover {
   border-color: var(--color-primary);
   transform: translateY(-2px);
+}
+
+body.dark .hero-btn-secondary {
+  background: rgba(15, 23, 42, 0.4);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-color: rgba(51, 65, 85, 0.6);
+  color: var(--color-text);
+}
+
+body.dark .hero-btn-secondary:hover {
+  background: rgba(254, 165, 10, 0.08);
+  border-color: var(--color-primary);
+  box-shadow: 0 0 20px color-mix(in srgb, var(--color-primary) 10%, transparent);
 }
 
 .hero-badges {
@@ -107,21 +175,7 @@
 }
 
 /* Store Badges (App Store / Google Play) */
-.store-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  background: #0a0a0a;
-  border-radius: 9px;
-  padding: 7px 18px 7px 14px;
-  text-decoration: none;
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
-  border: 1px solid #2a2a2a;
-  min-width: 150px;
-}
-
 .store-badge:hover {
-  transform: translateY(-2px);
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
 }
 
@@ -131,34 +185,6 @@
 
 .store-badge--android:hover {
   border-color: #34A853;
-}
-
-.store-badge-icon {
-  width: 26px;
-  height: 26px;
-  flex-shrink: 0;
-  display: block;
-}
-
-.store-badge-text {
-  display: flex;
-  flex-direction: column;
-  line-height: 1.15;
-}
-
-.store-badge-small {
-  font-size: 7.5px;
-  font-weight: 400;
-  color: #aaa;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.store-badge-name {
-  font-size: 14.5px;
-  font-weight: 600;
-  color: #fff;
-  letter-spacing: -0.2px;
 }
 
 /* Phone Mockup */
@@ -198,7 +224,7 @@
 .phone-screen {
   width: 100%;
   height: 100%;
-  background: #ffffff;
+  background: var(--color-white, #ffffff);
   border-radius: 28px;
   overflow: hidden;
   display: flex;
@@ -211,7 +237,7 @@
   justify-content: space-between;
   font-size: 11px;
   font-weight: 600;
-  color: #333;
+  color: var(--color-text);
   padding: 0 4px 8px;
 }
 
@@ -231,7 +257,7 @@
 .phone-meal-card {
   display: flex;
   gap: 10px;
-  background: #f8f6f3;
+  background: color-mix(in srgb, var(--color-bg) 80%, var(--color-white));
   border-radius: 12px;
   padding: 10px;
   margin-bottom: 8px;
@@ -257,7 +283,7 @@
 .phone-meal-name {
   font-size: 12px;
   font-weight: 600;
-  color: #333;
+  color: var(--color-text);
   display: block;
   margin-bottom: 4px;
   white-space: nowrap;
@@ -274,15 +300,15 @@
 .macro {
   font-size: 10px;
   font-weight: 600;
-  color: #666;
+  color: var(--color-text-light);
   padding: 2px 6px;
-  background: #eee;
+  background: color-mix(in srgb, var(--color-border) 50%, transparent);
   border-radius: 4px;
 }
 
-.macro.prot { color: #e74c3c; background: #fde8e8; }
-.macro.carb { color: #e67e22; background: #fef0e0; }
-.macro.fat { color: #3498db; background: #e8f4fd; }
+.macro.prot { color: var(--color-error, #e74c3c); background: color-mix(in srgb, var(--color-error) 12%, transparent); }
+.macro.carb { color: var(--color-primary, #e67e22); background: color-mix(in srgb, var(--color-primary) 12%, transparent); }
+.macro.fat { color: var(--color-protein, #3498db); background: color-mix(in srgb, var(--color-protein) 12%, transparent); }
 
 .phone-total {
   display: flex;
@@ -290,8 +316,8 @@
   align-items: center;
   padding: 10px 4px;
   font-size: 12px;
-  color: #666;
-  border-top: 1px solid #eee;
+  color: var(--color-text-light);
+  border-top: 1px solid var(--color-border);
   margin-top: auto;
 }
 
@@ -302,7 +328,7 @@
 
 .phone-add-btn {
   background: var(--color-primary);
-  color: var(--color-white);
+  color: #ffffff;
   text-align: center;
   padding: 10px;
   border-radius: 10px;
@@ -314,7 +340,7 @@
 .phone-bar {
   width: 120px;
   height: 4px;
-  background: #ddd;
+  background: var(--color-border);
   border-radius: 4px;
   margin: 4px auto 0;
 }
@@ -345,6 +371,21 @@
 
 .float-icon.voice { animation-delay: 0.3s; }
 .float-icon.scan { animation-delay: 0.6s; }
+
+body.dark .float-icon {
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(51, 65, 85, 0.5);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3), 0 0 30px color-mix(in srgb, var(--color-primary) 8%, transparent);
+}
+
+body.dark .phone-mockup {
+  box-shadow:
+    0 0 0 1px rgba(51, 65, 85, 0.5),
+    0 20px 60px rgba(0, 0, 0, 0.5),
+    0 0 40px color-mix(in srgb, var(--color-primary) 8%, transparent);
+}
 
 @keyframes float {
   0%, 100% { transform: translateY(0); }
@@ -467,6 +508,83 @@
   .hero-visual {
     display: none;
   }
+}
 
+@media (max-width: 767px) {
+  .hero {
+    padding: 100px 12px 50px;
+  }
 
+  .hero-container {
+    gap: 24px;
+  }
+
+  .hero-title {
+    font-size: 28px;
+    letter-spacing: -0.8px;
+    margin-bottom: 10px;
+  }
+
+  .hero-subtitle {
+    font-size: 15px;
+    margin-bottom: 16px;
+  }
+
+  .hero-stats {
+    font-size: 13px;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 6px;
+    margin-bottom: 24px;
+  }
+
+  .hero-actions {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .hero-btn-primary,
+  .hero-btn-secondary {
+    padding: 14px 24px;
+    font-size: 15px;
+    text-align: center;
+    width: 100%;
+    min-height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .hero-badges {
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    margin-top: 20px;
+  }
+
+  .store-badge {
+    min-width: 200px;
+    padding: 6px 16px 6px 12px;
+  }
+
+  .store-badge-icon {
+    width: 22px;
+    height: 22px;
+  }
+
+  .store-badge-name {
+    font-size: 13px;
+  }
+
+  .store-badge-small {
+    font-size: 7px;
+  }
+
+  .hero-visual {
+    display: none;
+  }
+
+  .hero-float-icons {
+    display: none;
+  }
 }

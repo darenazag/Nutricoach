@@ -5,7 +5,7 @@ function Features() {
   return (
     <section className="features" id="features">
       <div className="features__container">
-        <h2 className="features__title">
+        <h2 className="features__title text-gradient-dark">
           Planes de comida personalizados para ti
         </h2>
         <p className="features__subtitle">

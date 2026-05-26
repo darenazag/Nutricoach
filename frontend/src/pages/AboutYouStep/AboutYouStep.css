@@ -13,7 +13,7 @@
   padding: 16px 18px;
   border: none;
   border-radius: 14px;
-  background: #F5F0EB;
+  background: var(--color-border);
   cursor: pointer;
   transition: background 0.2s, box-shadow 0.2s;
   text-align: left;
@@ -21,7 +21,7 @@
 }
 
 .ay-field:hover {
-  background: #F0E8DE;
+  background: var(--color-border);
 }
 
 .ay-field-icon {
@@ -29,7 +29,7 @@
   width: 44px;
   height: 44px;
   border-radius: 12px;
-  background: #EDE6DC;
+  background: var(--color-border);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -47,19 +47,19 @@
 .ay-field-label {
   font-size: 11px;
   font-weight: 600;
-  color: #A09686;
+  color: var(--color-text-light);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
 .ay-field-value {
   font-size: 15px;
-  color: #A09686;
+  color: var(--color-text-light);
   transition: color 0.2s;
 }
 
 .ay-field-value--set {
-  color: #3D2C1A;
+  color: var(--color-text);
   font-weight: 600;
 }
 
@@ -72,23 +72,23 @@
   padding: 18px 20px;
   border: 2px solid transparent;
   border-radius: 16px;
-  background: #F5F0EB;
+  background: var(--color-border);
   cursor: pointer;
   transition: all 0.25s ease;
   text-align: left;
   font-family: inherit;
   font-size: 16px;
   font-weight: 600;
-  color: #3D2C1A;
+  color: var(--color-text);
 }
 
 .ay-option:hover {
-  border-color: #FAA61A;
-  background: #FDF6EC;
+  border-color: var(--color-primary);
+  background: var(--color-bg);
 }
 
 .ay-option--selected {
-  border-color: #FAA61A;
+  border-color: var(--color-primary);
   background: rgba(250, 166, 26, 0.10);
   box-shadow: 0 0 0 3px rgba(250, 166, 26, 0.15);
 }
@@ -98,7 +98,7 @@
   width: 48px;
   height: 48px;
   border-radius: 14px;
-  background: #EDE6DC;
+  background: var(--color-border);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -121,18 +121,18 @@
 .ay-input {
   flex: 1;
   padding: 16px 18px;
-  border: 2px solid #F0E8DE;
+  border: 2px solid var(--color-border);
   border-radius: 14px;
   font-size: 18px;
   font-family: inherit;
-  color: #3D2C1A;
-  background: #FFFFFF;
+  color: var(--color-text);
+  background: var(--color-white);
   outline: none;
   transition: border-color 0.25s, box-shadow 0.25s;
 }
 
 .ay-input:focus {
-  border-color: #FAA61A;
+  border-color: var(--color-primary);
   box-shadow: 0 0 0 4px rgba(250, 166, 26, 0.12);
 }
 
@@ -143,7 +143,7 @@
 .ay-input-suffix {
   font-size: 16px;
   font-weight: 700;
-  color: #7A6B5A;
+  color: var(--color-text-light);
   flex-shrink: 0;
 }
 
@@ -160,10 +160,10 @@
 .ay-stepper-btn {
   width: 52px;
   height: 52px;
-  border: 2px solid #F0E8DE;
+  border: 2px solid var(--color-border);
   border-radius: 50%;
-  background: #FFFFFF;
-  color: #7A6B5A;
+  background: var(--color-white);
+  color: var(--color-text-light);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -173,9 +173,9 @@
 }
 
 .ay-stepper-btn:hover:not(:disabled) {
-  border-color: #FAA61A;
-  color: #FAA61A;
-  background: #FDF6EC;
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  background: var(--color-bg);
 }
 
 .ay-stepper-btn:disabled {
@@ -196,7 +196,7 @@
   text-align: center;
   font-size: 36px;
   font-weight: 800;
-  color: #3D2C1A;
+  color: var(--color-text);
   line-height: 1.1;
   letter-spacing: -1px;
   border: none;
@@ -221,7 +221,7 @@
 .ay-stepper-suffix {
   font-size: 14px;
   font-weight: 500;
-  color: #A09686;
+  color: var(--color-text-light);
 }
 
 @media (max-width: 480px) {
@@ -259,6 +259,53 @@
 
   .ay-option {
     padding: 14px 16px;
+  }
+
+  .ay-option-icon {
+    width: 42px;
+    height: 42px;
+    font-size: 20px;
+  }
+}
+
+@media (max-width: 767px) {
+  .ay-stepper {
+    gap: 14px;
+  }
+
+  .ay-stepper-input {
+    font-size: 28px;
+  }
+
+  .ay-stepper-btn {
+    width: 44px;
+    height: 44px;
+  }
+
+  .ay-field {
+    padding: 14px 14px;
+    min-height: 52px;
+  }
+
+  .ay-field-icon {
+    width: 40px;
+    height: 40px;
+    font-size: 18px;
+  }
+
+  .ay-field-value {
+    font-size: 14px;
+  }
+
+  .ay-input {
+    font-size: 16px;
+    padding: 14px 14px;
+    min-height: 48px;
+  }
+
+  .ay-option {
+    padding: 14px 16px;
+    min-height: 52px;
   }
 
   .ay-option-icon {

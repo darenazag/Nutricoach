@@ -83,35 +83,34 @@ function comboTotal(c: Combo): number {
   return KCAL[c.desayuno] + KCAL[c.almuerzo] + KCAL[c.cena];
 }
 
-/** Elige el mejor combo según el objetivo nutricional. */
-function pickCombo(tmb: number, getd: number, objective: Objective): Combo {
-  if (objective === 'P') {
-    // Máximo que sea >= TMB y < GETD
-    const valid = COMBOS.filter(c => comboTotal(c) >= tmb && comboTotal(c) < getd);
-    if (valid.length > 0) return valid[valid.length - 1];
-    // Fallback: más cercano al punto medio TMB–GETD
+function comboKey(c: Combo): string {
+  return `${c.desayuno}-${c.almuerzo}-${c.cena}`;
+}
+
+function isValidCombo(c: Combo, tmb: number, getd: number, objective: Objective): boolean {
+  const total = comboTotal(c);
+  if (objective === 'P') return total >= tmb && total < getd;
+  if (objective === 'G') return total >= getd * 1.10 && total <= getd * 1.15;
+  return Math.abs(total - getd) <= 100;
+}
+
+/** Elige un combo aleatorio valido para el objetivo, evitando repetir los usados. */
+function pickRandomCombo(tmb: number, getd: number, objective: Objective, usedKeys: Set<string>): Combo {
+  const valid = COMBOS.filter(c => isValidCombo(c, tmb, getd, objective));
+
+  if (valid.length === 0) {
     const mid = (tmb + getd) / 2;
     return COMBOS.reduce((best, c) =>
       Math.abs(comboTotal(c) - mid) < Math.abs(comboTotal(best) - mid) ? c : best
     );
   }
 
-  if (objective === 'G') {
-    const lo = getd * 1.10;
-    const hi = getd * 1.15;
-    const valid = COMBOS.filter(c => comboTotal(c) >= lo && comboTotal(c) <= hi);
-    if (valid.length > 0) return valid[0];
-    // Fallback: más cercano al centro de la banda
-    const mid = (lo + hi) / 2;
-    return COMBOS.reduce((best, c) =>
-      Math.abs(comboTotal(c) - mid) < Math.abs(comboTotal(best) - mid) ? c : best
-    );
+  const unused = valid.filter(c => !usedKeys.has(comboKey(c)));
+  if (unused.length > 0) {
+    return unused[Math.floor(Math.random() * unused.length)];
   }
 
-  // 'M': más cercano a GETD con |balance| <= 100 preferente
-  return COMBOS.reduce((best, c) =>
-    Math.abs(comboTotal(c) - getd) < Math.abs(comboTotal(best) - getd) ? c : best
-  );
+  return valid[Math.floor(Math.random() * valid.length)];
 }
 
 const OBJECTIVE_LABEL: Record<Objective, string> = {
@@ -152,14 +151,16 @@ export async function recommend(req: Request, res: Response): Promise<void> {
   const weight = toFiniteProfileNumber(profile.weight, 'weight');
   const { objective } = profile;
 
-  const combo = pickCombo(tmb, getd, objective);
-  const dailyKcal = comboTotal(combo);
-  const dailyBalance = dailyKcal - getd;
-
+  const usedCombos = new Set<string>();
   const proyeccion_diaria = [];
   let pesoActual = weight;
 
   for (let dia = 1; dia <= 100; dia++) {
+    const combo = pickRandomCombo(tmb, getd, objective, usedCombos);
+    usedCombos.add(comboKey(combo));
+    const dailyKcal = comboTotal(combo);
+    const dailyBalance = dailyKcal - getd;
+
     pesoActual = pesoActual + dailyBalance / 7700;
     proyeccion_diaria.push({
       dia,

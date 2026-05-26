@@ -16,6 +16,11 @@ export function createApp(): Application {
     res.json({ status: 'ok', service: 'nutricoach-backend', timestamp: new Date().toISOString() });
   });
 
+  // Legacy alias kept so older smoke scripts and Docker healthchecks keep working.
+  app.get('/health', (_req, res) => {
+    res.json({ status: 'ok', service: 'nutricoach-backend', timestamp: new Date().toISOString() });
+  });
+
   // P0 routes: auth, profile, meals, food items
   app.use('/api', routes);
 

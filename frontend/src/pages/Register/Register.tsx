@@ -1,7 +1,7 @@
-import { API_URL } from '../../config/api';
 import { useState, useMemo } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/useAuth'
+import { authService } from '../../services/authService'
 import '../auth.css'
 
 
@@ -47,24 +47,11 @@ function Register() {
     setLoading(true)
 
     try {
-      const res = await fetch(`${API_URL}/auth/register`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, password }),
-      })
-
-      const data = await res.json()
-
-      if (!res.ok) {
-        setError(data.error || 'Error al registrarse')
-        return
-      }
-
-
+      const data = await authService.register(name, email, password)
       login(data.token, data.user)
       navigate('/objetivo')
-    } catch {
-      setError('Error de conexión con el servidor')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error de conexión con el servidor')
     } finally {
       setLoading(false)
     }
@@ -85,7 +72,7 @@ function Register() {
 
         <form onSubmit={handleSubmit} className="auth-form">
           {error && (
-            <div className="auth-error">
+            <div className="auth-error error-banner">
               <span className="auth-error-icon">⚠️</span>
               <span>{error}</span>
             </div>
