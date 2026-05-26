@@ -555,3 +555,124 @@ body.dark .prec-card {
     padding: 28px;
   }
 }
+
+@media (max-width: 767px) {
+  .prec-card {
+    padding: 16px 14px;
+  }
+
+  .prec-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  .prec-title {
+    font-size: 16px;
+  }
+
+  .prec-next-btn {
+    padding: 8px 14px;
+    font-size: 12px;
+    min-height: 40px;
+    width: 100%;
+    text-align: center;
+  }
+
+  .prec-context {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
+    padding: 10px 12px;
+  }
+
+  .prec-meal-header {
+    padding: 10px 12px;
+    gap: 8px;
+    min-height: 48px;
+  }
+
+  .prec-meal-label {
+    font-size: 13px;
+    min-width: 50px;
+  }
+
+  .prec-meal-kcal {
+    font-size: 12px;
+  }
+
+  .prec-rotate-btn {
+    width: 36px;
+    height: 36px;
+  }
+
+  .prec-accordion-inner {
+    padding: 0 12px 12px;
+  }
+
+  .prec-food-item {
+    font-size: 12px;
+    gap: 8px;
+  }
+
+  .prec-total-bar {
+    padding: 10px 12px;
+    flex-direction: column;
+    gap: 6px;
+    align-items: flex-start;
+  }
+
+  .prec-total-label {
+    font-size: 12px;
+  }
+
+  .prec-total-kcal {
+    font-size: 13px;
+  }
+
+  .prec-summary-grid {
+    gap: 8px;
+  }
+
+  .prec-summary-item {
+    padding: 10px;
+  }
+
+  .prec-summary-label {
+    font-size: 10px;
+  }
+
+  .prec-summary-value {
+    font-size: 17px;
+  }
+
+  .prec-summary-context {
+    font-size: 11px;
+  }
+
+  /* Carousel: scroll horizontal con dedo */
+  .prec-carousel-grid {
+    gap: 6px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .prec-carousel-grid::-webkit-scrollbar {
+    display: none;
+  }
+
+  .prec-carousel-day {
+    padding: 8px 10px;
+    min-height: 54px;
+    flex-shrink: 0;
+  }
+
+  .prec-carousel-label {
+    font-size: 10px;
+  }
+
+  .prec-carousel-kcal {
+    font-size: 9px;
+  }
+}

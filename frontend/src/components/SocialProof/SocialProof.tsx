@@ -133,12 +133,12 @@ function SocialProof() {
           </div>
         </div>
 
-        <div className="sp-scroll" ref={scrollRef}>
-          <div className="sp-track">
+        <div className="sp-scroll scroll-snap-x" ref={scrollRef}>
+          <div className="sp-track scroll-snap-track">
             {duplicated.map((t, i) => (
               <article
                 key={`${t.name}-${i}`}
-                className="sp-card"
+                className="sp-card glass-card-dark"
                 ref={(el) => { cardsRef.current[i] = el as HTMLDivElement | null }}
               >
                 <div className="flex items-center gap-3 mb-4">

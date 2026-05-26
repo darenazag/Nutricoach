@@ -105,7 +105,7 @@ function ObjectiveStep() {
   return (
     <div className="os-page">
       <div className="os-card">
-        <button className="os-back" onClick={() => navigate(-1)} aria-label="Volver">
+        <button className="os-back btn-back-circle" onClick={() => navigate(-1)} aria-label="Volver">
           <ArrowBackIcon />
         </button>
 

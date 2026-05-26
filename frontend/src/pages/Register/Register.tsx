@@ -72,7 +72,7 @@ function Register() {
 
         <form onSubmit={handleSubmit} className="auth-form">
           {error && (
-            <div className="auth-error">
+            <div className="auth-error error-banner">
               <span className="auth-error-icon">⚠️</span>
               <span>{error}</span>
             </div>

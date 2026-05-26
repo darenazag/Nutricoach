@@ -60,22 +60,6 @@ body.dark .features::after {
   line-height: 1.1;
 }
 
-body.dark .features__title {
-  background: linear-gradient(135deg, #f1f5f9 0%, #94a3b8 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.features__subtitle {
-  font-size: 17px;
-  text-align: center;
-  color: var(--color-text-light);
-  margin: 0 auto 56px;
-  max-width: 540px;
-  line-height: 1.6;
-}
-
 body.dark .features__subtitle {
   color: #cbd5e1;
 }
@@ -110,7 +94,9 @@ body.dark .feature-card:hover {
   background: linear-gradient(180deg, #fef8ef 0%, #fff5e6 100%);
 }
 
-body.dark .feature-card--weekly {
+body.dark .feature-card--weekly,
+body.dark .feature-card--recipes,
+body.dark .feature-card--shopping {
   background: rgba(15, 23, 42, 0.4);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
@@ -122,24 +108,8 @@ body.dark .feature-card--weekly {
   background: linear-gradient(180deg, #fef8ef 0%, #fff5e6 100%);
 }
 
-body.dark .feature-card--recipes {
-  background: rgba(15, 23, 42, 0.4);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(51, 65, 85, 0.5);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-}
-
 .feature-card--shopping {
   background: linear-gradient(180deg, #fef8ef 0%, #fff5e6 100%);
-}
-
-body.dark .feature-card--shopping {
-  background: rgba(15, 23, 42, 0.4);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(51, 65, 85, 0.5);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
 }
 
 .feature-card__body {
@@ -557,5 +527,42 @@ body.dark .shop-category__title {
 
   .phone__content {
     padding: 4px 10px 14px;
+  }
+}
+
+@media (max-width: 767px) {
+  .features {
+    padding: 60px 16px 80px;
+  }
+
+  .features__title {
+    font-size: 28px;
+    margin-bottom: 12px;
+  }
+
+  .features__grid {
+    grid-template-columns: 1fr;
+    max-width: 100%;
+    margin: 0 auto;
+  }
+
+  .feature-card__body {
+    padding: 24px 20px 0;
+  }
+
+  .feature-card__title {
+    font-size: 19px;
+  }
+
+  .feature-card__desc {
+    font-size: 14px;
+  }
+
+  .feature-card__phone {
+    padding: 20px 16px 0;
+  }
+
+  .phone {
+    max-width: 260px;
   }
 }

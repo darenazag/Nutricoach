@@ -1366,3 +1366,270 @@ body.dark .profile-page {
     max-width: 1200px;
   }
 }
+
+/* ================================================================
+   MOBILE (≤767px)
+   ================================================================ */
+@media (max-width: 767px) {
+  .profile-page {
+    padding: 60px 12px 20px;
+  }
+
+  .profile-dashboard {
+    gap: 14px;
+  }
+
+  .pcard {
+    padding: 18px 14px;
+    border-radius: 16px;
+  }
+
+  .p-tab {
+    padding: 10px 6px;
+    font-size: 12px;
+    min-height: 44px;
+  }
+
+  .pcard-avatar-row {
+    gap: 12px;
+  }
+
+  .pcard-avatar {
+    width: 48px;
+    height: 48px;
+    font-size: 18px;
+  }
+
+  .pcard-name {
+    font-size: 18px;
+  }
+
+  .pcard-email {
+    font-size: 12px;
+  }
+
+  .pcard-stats-grid {
+    gap: 8px;
+  }
+
+  .pcard-stat {
+    padding: 10px;
+  }
+
+  .pcard-stat-label {
+    font-size: 10px;
+  }
+
+  .pcard-stat-value {
+    font-size: 17px;
+  }
+
+  .pcard-title {
+    font-size: 16px;
+    margin-bottom: 14px;
+  }
+
+  .pcard-add-btn {
+    padding: 6px 12px;
+    font-size: 12px;
+    min-height: 40px;
+  }
+
+  .pcard-edit-btn {
+    padding: 12px 18px;
+    font-size: 13px;
+    min-height: 44px;
+  }
+
+  .pcard-empty-cta {
+    padding: 12px 22px;
+    font-size: 13px;
+    min-height: 44px;
+  }
+
+  .pcard-streak {
+    padding: 12px 14px;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .pcard-streak-fire {
+    font-size: 22px;
+  }
+
+  .pcard-streak-count {
+    font-size: 20px;
+  }
+
+  .pcard-streak-label {
+    font-size: 10px;
+  }
+
+  .pcard-streak-day {
+    width: 26px;
+    height: 26px;
+    font-size: 10px;
+  }
+
+  .pcard-calories {
+    padding: 0;
+  }
+
+  .pcard-ring-wrap {
+    gap: 12px;
+  }
+
+  .pcard-ring {
+    width: 130px;
+    height: 130px;
+  }
+
+  .pcard-ring-number {
+    font-size: 28px;
+  }
+
+  .pcard-ring-label {
+    font-size: 11px;
+  }
+
+  .pcard-ring-meta {
+    gap: 16px;
+    font-size: 12px;
+  }
+
+  .pcm-wrap {
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .pcm-chart {
+    width: 160px;
+    height: 160px;
+  }
+
+  .pcm-item {
+    padding: 6px 8px;
+    min-height: 40px;
+  }
+
+  .pcm-item-name {
+    font-size: 13px;
+  }
+
+  .pcm-item-grams {
+    font-size: 12px;
+  }
+
+  .pcm-item-sub {
+    gap: 8px;
+  }
+
+  .pcard-meal-block-header {
+    padding: 10px 12px;
+  }
+
+  .pcard-meal {
+    padding: 10px 12px;
+    gap: 10px;
+  }
+
+  .pcard-meal-name {
+    font-size: 13px;
+  }
+
+  .pcard-meal-source {
+    font-size: 11px;
+  }
+
+  .pcard-meal-macro {
+    font-size: 10px;
+    padding: 2px 7px;
+  }
+
+  .pcard-meal-block-empty {
+    padding: 16px 18px;
+    font-size: 13px;
+    min-height: 48px;
+  }
+
+  .pcard-meal-empty-icon {
+    width: 30px;
+    height: 30px;
+    font-size: 16px;
+  }
+
+  .prec-item {
+    padding: 10px 12px;
+    gap: 10px;
+  }
+
+  .prec-item-label {
+    font-size: 13px;
+    min-width: 60px;
+  }
+
+  .prec-item-cat {
+    font-size: 10px;
+    padding: 2px 8px;
+  }
+
+  .prec-item-kcal {
+    font-size: 13px;
+  }
+
+  .prec-summary {
+    gap: 8px;
+  }
+
+  .prec-summary-item {
+    padding: 10px;
+  }
+
+  .prec-summary-item strong {
+    font-size: 16px;
+  }
+
+  .prec-preview {
+    padding: 12px;
+  }
+
+  .prec-preview-grid {
+    gap: 6px;
+  }
+
+  .prec-preview-day {
+    padding: 8px 10px;
+    min-height: 52px;
+  }
+
+  .pproj-summary {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+
+  .pproj-stat {
+    padding: 10px;
+  }
+
+  .pproj-stat-label {
+    font-size: 10px;
+  }
+
+  .pproj-stat-value {
+    font-size: 17px;
+  }
+
+  .pproj-table-wrap {
+    margin: 0 -4px;
+    border-radius: 8px;
+  }
+
+  .pproj-table {
+    font-size: 11px;
+  }
+
+  .pproj-table th,
+  .pproj-table td {
+    padding: 6px 8px;
+  }
+}

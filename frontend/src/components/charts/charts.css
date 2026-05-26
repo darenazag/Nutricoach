@@ -35,16 +35,28 @@
 
 @media (min-width: 600px) {
   .chart-card {
-    padding: 22px;
+    padding: 20px;
   }
-
-  .chart-wrapper {
-    height: 240px;
+  .chart-tooltip {
+    min-width: 170px;
   }
 }
 
 @media (min-width: 1024px) {
   .chart-card {
     padding: 24px;
+  }
+}
+
+@media (max-width: 767px) {
+  .chart-card {
+    padding: 14px;
+  }
+
+  .chart-card canvas,
+  .chart-card svg,
+  .chart-card .recharts-wrapper {
+    width: 100% !important;
+    max-width: 100%;
   }
 }

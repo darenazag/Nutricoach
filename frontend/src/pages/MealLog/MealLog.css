@@ -17,26 +17,6 @@
   margin-bottom: 8px;
 }
 
-.ml-back {
-  width: 40px;
-  height: 40px;
-  border: none;
-  border-radius: 50%;
-  background: var(--color-border);
-  color: var(--color-text-light);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: background 0.2s, color 0.2s;
-  flex-shrink: 0;
-}
-
-.ml-back:hover {
-  background: var(--color-primary);
-  color: #FFFFFF;
-}
-
 .ml-title {
   font-size: 22px;
   font-weight: 800;
@@ -61,21 +41,6 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
-}
-
-.ml-card {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  background: var(--color-white);
-  border-radius: 16px;
-  padding: 16px 18px;
-  box-shadow: 0 1px 3px rgba(87, 23, 0, 0.05), 0 4px 12px rgba(87, 23, 0, 0.06);
-  transition: box-shadow 0.2s;
-}
-
-.ml-card:hover {
-  box-shadow: 0 2px 8px rgba(87, 23, 0, 0.1), 0 6px 20px rgba(87, 23, 0, 0.08);
 }
 
 .ml-card-icon {
@@ -183,5 +148,52 @@
     width: 42px;
     height: 42px;
     font-size: 20px;
+  }
+}
+
+@media (max-width: 767px) {
+  .ml-page {
+    padding: 60px 12px 32px;
+  }
+
+  .ml-title {
+    font-size: 19px;
+  }
+
+  .ml-subtitle {
+    font-size: 13px;
+    margin-left: 48px;
+    margin-bottom: 18px;
+  }
+
+  .ml-card {
+    padding: 12px 12px;
+  }
+
+  .ml-card-icon {
+    width: 42px;
+    height: 42px;
+    font-size: 20px;
+  }
+
+  .ml-card-name {
+    font-size: 14px;
+  }
+
+  .ml-card-source {
+    font-size: 11px;
+  }
+
+  .ml-macro {
+    font-size: 10px;
+    padding: 2px 6px;
+  }
+
+  .ml-add-btn {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
+    font-size: 22px;
   }
 }

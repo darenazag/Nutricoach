@@ -295,3 +295,70 @@ body.dark .header .highlight {
     font-size: 14px;
   }
 }
+
+/* ================================================================
+   MOBILE (≤767px)
+   ================================================================ */
+@media (max-width: 767px) {
+  .header-container {
+    padding: 0 12px;
+    height: 56px;
+  }
+
+  .header-logo-icon {
+    font-size: 22px;
+  }
+
+  .header-logo-text {
+    font-size: 16px;
+  }
+
+  .header-actions {
+    gap: 6px;
+  }
+
+  .header-user-btn {
+    padding: 3px 6px 3px 3px;
+    gap: 4px;
+  }
+
+  .header-user-avatar {
+    width: 28px;
+    height: 28px;
+    font-size: 11px;
+  }
+
+  .header-user-name {
+    max-width: 60px;
+    font-size: 13px;
+  }
+
+  .header-user-chevron {
+    font-size: 10px;
+  }
+
+  .header-theme-btn {
+    width: 34px;
+    height: 34px;
+    font-size: 16px;
+  }
+
+  .header-dropdown {
+    right: -8px;
+    min-width: 160px;
+  }
+
+  .header-dropdown-item {
+    padding: 10px 14px;
+    font-size: 13px;
+  }
+
+  .header-login {
+    font-size: 13px;
+  }
+
+  .header-cta {
+    padding: 8px 18px;
+    font-size: 13px;
+  }
+}

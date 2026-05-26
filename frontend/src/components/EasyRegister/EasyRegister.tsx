@@ -28,8 +28,8 @@ function EasyRegister() {
     <section id="easy-register" className="easy-register">
       <div className="er-container">
         <div className="er-header">
-          <span className="er-section-tag">Registro inteligente</span>
-          <h2 className="er-title">
+          <span className="section-tag">Registro inteligente</span>
+          <h2 className="er-title text-gradient-dark">
             Registrar tu comida en segundos <span className="text-primary">(no en minutos)</span>.
           </h2>
           <p className="er-subtitle">
@@ -40,7 +40,7 @@ function EasyRegister() {
 
         <div className="er-grid">
           {methods.map((m) => (
-            <article key={m.title} className="er-card">
+            <article key={m.title} className="er-card glass-card-dark">
               <div className="er-card-icon">{m.icon}</div>
               <h3 className="er-card-title">{m.title}</h3>
               <p className="er-card-desc">{m.desc}</p>

@@ -23,28 +23,6 @@
   margin-bottom: 16px;
 }
 
-.rc-back {
-  width: 40px;
-  height: 40px;
-  border: none;
-  border-radius: 50%;
-  background: var(--color-border);
-  color: var(--color-text-light);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: background 0.2s, color 0.2s;
-  flex-shrink: 0;
-  min-width: 44px;
-  min-height: 44px;
-}
-
-.rc-back:hover {
-  background: var(--color-primary);
-  color: #fff;
-}
-
 .rc-title {
   font-size: clamp(18px, 5vw, 22px);
   font-weight: 800;
@@ -468,21 +446,6 @@
   gap: 12px;
 }
 
-.rc-card {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  background: var(--color-white);
-  border-radius: 16px;
-  padding: 16px 18px;
-  box-shadow: 0 1px 3px rgba(87, 23, 0, 0.05), 0 4px 12px rgba(87, 23, 0, 0.06);
-  transition: box-shadow 0.2s;
-}
-
-.rc-card:hover {
-  box-shadow: 0 2px 8px rgba(87, 23, 0, 0.1), 0 6px 20px rgba(87, 23, 0, 0.08);
-}
-
 .rc-card-icon {
   flex-shrink: 0;
   width: 48px;
@@ -613,5 +576,103 @@
 @media (min-width: 768px) {
   .rc-upload-area {
     padding: 60px 40px;
+  }
+}
+
+@media (max-width: 767px) {
+  .rc-page {
+    padding: 60px 12px 32px;
+  }
+
+  .rc-title {
+    font-size: 18px;
+  }
+
+  .rc-cat-pill {
+    padding: 6px 14px;
+    font-size: 12px;
+    min-height: 40px;
+  }
+
+  .rc-tab {
+    padding: 10px 8px;
+    font-size: 12px;
+    min-height: 44px;
+  }
+
+  .rc-upload-area {
+    padding: 28px 16px;
+  }
+
+  .rc-upload-icon {
+    font-size: 44px;
+  }
+
+  .rc-upload-text {
+    font-size: 14px;
+  }
+
+  .rc-upload-hint {
+    font-size: 12px;
+    max-width: 100%;
+  }
+
+  .rc-upload-btn {
+    padding: 12px 18px;
+    font-size: 13px;
+    min-height: 44px;
+  }
+
+  .rc-upload-buttons {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .rc-field-row {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .rc-field-row--3 {
+    grid-template-columns: 1fr;
+  }
+
+  .rc-input {
+    padding: 10px 12px;
+    font-size: 15px;
+    min-height: 48px;
+  }
+
+  .rc-save-btn {
+    padding: 14px;
+    font-size: 14px;
+    min-height: 48px;
+  }
+
+  .rc-card-icon {
+    width: 42px;
+    height: 42px;
+    font-size: 20px;
+  }
+
+  .rc-card-name {
+    font-size: 14px;
+  }
+
+  .rc-card-source {
+    font-size: 11px;
+  }
+
+  .rc-macro {
+    font-size: 10px;
+    padding: 2px 6px;
+  }
+
+  .rc-add-btn {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
+    font-size: 22px;
   }
 }

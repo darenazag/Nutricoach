@@ -1,27 +1,3 @@
-.sp-scroll {
-  overflow-x: auto;
-  scroll-snap-type: x mandatory;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-  padding-bottom: 16px;
-  cursor: grab;
-}
-
-.sp-scroll:active {
-  cursor: grabbing;
-}
-
-.sp-scroll::-webkit-scrollbar {
-  display: none;
-}
-
-.sp-track {
-  display: flex;
-  gap: 20px;
-  padding: 8px 4px 16px;
-  width: max-content;
-}
-
 .sp-card {
   width: 360px;
   flex-shrink: 0;
@@ -36,19 +12,6 @@
               box-shadow 0.35s ease,
               opacity 0.5s ease;
   user-select: none;
-}
-
-body.dark .sp-card {
-  background: rgba(15, 23, 42, 0.35);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(51, 65, 85, 0.5);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
-}
-
-body.dark .sp-card:hover {
-  border-color: rgba(254, 165, 10, 0.3);
-  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.25), 0 0 40px color-mix(in srgb, var(--color-primary) 6%, transparent);
 }
 
 .sp-card.visible {
@@ -171,5 +134,11 @@ body.dark .sp-cta:hover {
 
   .sp-scroll {
     padding-bottom: 12px;
+  }
+}
+
+@media (max-width: 767px) {
+  .sp-card {
+    width: 280px;
   }
 }

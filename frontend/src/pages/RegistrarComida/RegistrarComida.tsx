@@ -129,7 +129,7 @@ function RegistrarComida() {
       <div className="rc-page">
         <div className="rc-container">
           <div className="rc-header">
-            <button className="rc-back" onClick={() => navigate(-1)} aria-label="Volver">
+            <button className="btn-back-circle" onClick={() => navigate(-1)} aria-label="Volver">
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M19 12H5" />
                 <path d="M12 19l-7-7 7-7" />
@@ -274,7 +274,7 @@ function RegistrarComida() {
               ) : (
                 <div className="rc-list">
                   {meals.map((meal, i) => (
-                    <div key={meal.meal_id} className="rc-card">
+                    <div key={meal.meal_id} className="rc-card card-row">
                       <div className="rc-card-icon">
                         {MEAL_ICONS[i % MEAL_ICONS.length]}
                       </div>

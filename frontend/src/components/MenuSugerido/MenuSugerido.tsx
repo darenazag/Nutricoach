@@ -294,14 +294,22 @@ export default function MenuSugerido({
                     </span>
 
                     {canRotate && (
-                      <button
+                      <span
                         className="prec-rotate-btn"
                         onClick={e => {
                           e.stopPropagation()
                           rotateMeal(key)
                         }}
+                        onKeyDown={e => {
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault()
+                            e.stopPropagation()
+                            rotateMeal(key)
+                          }
+                        }}
+                        role="button"
+                        tabIndex={0}
                         title="Cambiar alimentos"
-                        type="button"
                       >
                         <svg
                           width="16"
@@ -317,7 +325,7 @@ export default function MenuSugerido({
                           <polyline points="1 20 1 14 7 14" />
                           <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
                         </svg>
-                      </button>
+                      </span>
                     )}
 
                     <span

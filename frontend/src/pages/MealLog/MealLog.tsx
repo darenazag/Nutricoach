@@ -39,7 +39,7 @@ function MealLog() {
       <div className="ml-page">
         <div className="ml-container">
           <div className="ml-header">
-            <button className="ml-back" onClick={() => navigate(-1)} aria-label="Volver">
+            <button className="btn-back-circle" onClick={() => navigate(-1)} aria-label="Volver">
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M19 12H5" />
                 <path d="M12 19l-7-7 7-7" />
@@ -57,7 +57,7 @@ function MealLog() {
           ) : (
             <div className="ml-grid">
               {meals.map((meal, i) => (
-                <div key={meal.meal_id} className="ml-card">
+                <div key={meal.meal_id} className="ml-card card-row">
                   <div className="ml-card-icon">
                     {MEAL_ICONS[i % MEAL_ICONS.length]}
                   </div>

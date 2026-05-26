@@ -267,3 +267,50 @@
     font-size: 20px;
   }
 }
+
+@media (max-width: 767px) {
+  .ay-stepper {
+    gap: 14px;
+  }
+
+  .ay-stepper-input {
+    font-size: 28px;
+  }
+
+  .ay-stepper-btn {
+    width: 44px;
+    height: 44px;
+  }
+
+  .ay-field {
+    padding: 14px 14px;
+    min-height: 52px;
+  }
+
+  .ay-field-icon {
+    width: 40px;
+    height: 40px;
+    font-size: 18px;
+  }
+
+  .ay-field-value {
+    font-size: 14px;
+  }
+
+  .ay-input {
+    font-size: 16px;
+    padding: 14px 14px;
+    min-height: 48px;
+  }
+
+  .ay-option {
+    padding: 14px 16px;
+    min-height: 52px;
+  }
+
+  .ay-option-icon {
+    width: 42px;
+    height: 42px;
+    font-size: 20px;
+  }
+}

@@ -108,7 +108,7 @@ function ProfileForm() {
 
         <form onSubmit={handleSubmit} className="pf-form">
           {error && (
-            <div className="pf-error">
+            <div className="pf-error error-banner">
               <span>⚠️</span> {error}
             </div>
           )}

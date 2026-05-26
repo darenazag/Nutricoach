@@ -5,7 +5,7 @@ function Hero() {
     <section id="hero" className="hero">
       <div className="hero-container">
         <div className="hero-content">
-          <h1 className="hero-title">
+          <h1 className="hero-title text-gradient-dark">
             Cuenta calorías sin <span className="text-primary">contar calorías</span>.
           </h1>
           <p className="hero-subtitle">

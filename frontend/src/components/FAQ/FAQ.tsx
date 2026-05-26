@@ -32,7 +32,7 @@ function FAQ() {
       <div className="faq-container">
         <div className="faq-header">
           <span className="faq-section-tag">FAQ</span>
-          <h2 className="faq-title">
+          <h2 className="faq-title text-gradient-dark">
             Respuestas rápidas <span className="text-primary">(para que no tengas que buscar)</span>.
           </h2>
         </div>
@@ -41,7 +41,7 @@ function FAQ() {
           {faqs.map((item, i) => (
             <div
               key={i}
-              className={`faq-item ${openIndex === i ? 'open' : ''}`}
+              className={`faq-item glass-card-dark ${openIndex === i ? 'open' : ''}`}
             >
               <button
                 className="faq-question"
