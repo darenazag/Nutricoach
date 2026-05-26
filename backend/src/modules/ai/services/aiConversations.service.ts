@@ -1,5 +1,5 @@
 import {
-  findConversationById,
+  findConversationByIdAndUser,
   findMessagesByConversation,
 } from '../repositories/aiConversation.repository.js';
 import { AiServiceError } from './aiServiceError.js';
@@ -40,12 +40,19 @@ export interface GetAiConversationResult {
 
 export async function getAiConversationById(
   conversationId: string,
+  userId: string,
 ): Promise<GetAiConversationResult> {
   if (!conversationId.trim()) {
     throw new AiServiceError('conversationId must not be empty.', 'validation_error');
   }
+  if (!userId.trim()) {
+    throw new AiServiceError('userId must not be empty.', 'validation_error');
+  }
 
-  const conv = await findConversationById(conversationId);
+  // Ownership is enforced at the repository level. A conversation that exists
+  // but belongs to another user yields the SAME 'not_found' as a missing one
+  // — this is intentional and avoids leaking which conversation IDs exist.
+  const conv = await findConversationByIdAndUser(conversationId, userId);
   if (!conv) {
     throw new AiServiceError('AI conversation not found.', 'not_found');
   }

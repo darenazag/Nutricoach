@@ -18,6 +18,30 @@ import type {
 // In development the Vite proxy handles /api → http://localhost:3000.
 const BASE_URL: string = (import.meta.env['VITE_API_URL'] as string | undefined) ?? '';
 
+// AI Lab reuses the P0 auth token stored in localStorage by the login flow
+// (see frontend/src/services/api.tsx for the canonical reader). The backend
+// now protects every /api/ai/* endpoint with `authenticate`, so requests
+// without this header come back as 401.
+function getAuthToken(): string | null {
+  try {
+    return localStorage.getItem('token');
+  } catch {
+    // SSR / privacy mode: no localStorage → fall through to unauthenticated.
+    return null;
+  }
+}
+
+/**
+ * Returns the given headers augmented with `Authorization: Bearer <token>`
+ * when a token is available. Used both for JSON and FormData requests; in the
+ * FormData case the caller must NOT add Content-Type manually (the browser
+ * adds the boundary).
+ */
+function withAuth(base: Record<string, string> = {}): Record<string, string> {
+  const token = getAuthToken();
+  return token ? { ...base, Authorization: `Bearer ${token}` } : base;
+}
+
 export async function sendAiChatMessage(
   payload: AiChatRequest,
 ): Promise<AiApiResponse<AiChatResponseData>> {
@@ -26,7 +50,7 @@ export async function sendAiChatMessage(
   try {
     response = await fetch(`${BASE_URL}/api/ai/chat`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: withAuth({ 'Content-Type': 'application/json' }),
       body: JSON.stringify(payload),
     });
   } catch (err) {
@@ -86,6 +110,7 @@ export async function sendAiPlateAnalysis(
   try {
     response = await fetch(`${BASE_URL}/api/ai/plate-analysis`, {
       method: 'POST',
+      headers: withAuth(),
       body: formData,
     });
   } catch (err) {
@@ -132,7 +157,7 @@ export async function sendAiMenuRequest(
   try {
     response = await fetch(`${BASE_URL}/api/ai/menu`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: withAuth({ 'Content-Type': 'application/json' }),
       body: JSON.stringify(payload),
     });
   } catch (err) {
@@ -167,7 +192,7 @@ export async function sendAiProfileExplanation(
   try {
     response = await fetch(`${BASE_URL}/api/ai/profile-explanation`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: withAuth({ 'Content-Type': 'application/json' }),
       body: JSON.stringify(payload),
     });
   } catch (err) {
@@ -202,7 +227,7 @@ export async function sendAiWeeklyMenuRequest(
   try {
     response = await fetch(`${BASE_URL}/api/ai/menu/weekly`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: withAuth({ 'Content-Type': 'application/json' }),
       body: JSON.stringify(payload),
     });
   } catch (err) {
@@ -235,7 +260,9 @@ export async function getAiWeeklyMenuPlan(
 ): Promise<AiApiResponse<AiWeeklyMenuPlanDto>> {
   let response: Response;
   try {
-    response = await fetch(`${BASE_URL}/api/ai/menu/weekly/${encodeURIComponent(planId)}`);
+    response = await fetch(`${BASE_URL}/api/ai/menu/weekly/${encodeURIComponent(planId)}`, {
+      headers: withAuth(),
+    });
   } catch (err) {
     return {
       success: false,
@@ -266,7 +293,9 @@ export async function getAiConversation(
 ): Promise<AiApiResponse<AiConversationData>> {
   let response: Response;
   try {
-    response = await fetch(`${BASE_URL}/api/ai/conversations/${encodeURIComponent(conversationId)}`);
+    response = await fetch(`${BASE_URL}/api/ai/conversations/${encodeURIComponent(conversationId)}`, {
+      headers: withAuth(),
+    });
   } catch (err) {
     return {
       success: false,
