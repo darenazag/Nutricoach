@@ -8,6 +8,10 @@ import {
   postAiWeeklyMenu,
   getAiWeeklyMenuPlan,
 } from '../controllers/aiWeeklyMenu.controller.js';
+import {
+  handleAnalyze,
+  handleAnalyzePreview,
+} from '../controllers/aiLegacyAnalyze.controller.js';
 
 export const aiRouter: Router = Router();
 
@@ -31,3 +35,9 @@ aiRouter.post('/plate-analysis', ...handlePlateAnalysis);
 
 // GET /api/ai/conversations/:conversationId
 aiRouter.get('/conversations/:conversationId', getAiConversation);
+
+// Legacy adapters — frontend calls these endpoints directly
+// POST /api/ai/analyze        — AIBubble.tsx (only checks res.ok)
+// POST /api/ai/analyze-preview — RegistrarComida.tsx (reads { analysis: {...} })
+aiRouter.post('/analyze', ...handleAnalyze);
+aiRouter.post('/analyze-preview', ...handleAnalyzePreview);
