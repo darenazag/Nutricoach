@@ -1,22 +1,30 @@
-# Módulo IA — Estado actual
+# Módulo IA — Estado actual (MVP final)
 
 > Rama de integración: `integration/full-integration-sanitized`
-> Fecha: 2026-05-26
-> Stack: Node.js + Express + TypeScript + Mongoose 9 + Zod + `@google/genai`
+> Fecha: 2026-05-27
+> Stack: Node.js + Express + TypeScript + Mongoose 9 + Zod + `@google/genai` + DeepSeek
 
 ---
 
 ## Resumen ejecutivo
 
-El módulo IA está **integrado con la base P0** y operativo dentro de NutriCoach. Estado actual:
+El módulo IA está **operativo como MVP de producto** dentro de NutriCoach. Estado actual:
 
+- **MVP IA funcional end-to-end**: chat de texto, análisis de plato con imagen, menú semanal y explicación de perfil.
+- **Router de proveedor**:
+  - **DeepSeek** para texto (chat, profile-explanation, menu, weekly menu) por coste — activo cuando `AI_TEXT_PROVIDER=deepseek` y `AI_ENABLE_DEEPSEEK=true`.
+  - **Gemini** para imagen/multimodal siempre (`/api/ai/analyze`, `/api/ai/analyze-preview`, `/api/ai/plate-analysis`).
+  - **Gemini como fallback de texto** si DeepSeek falla o no valida contra Zod (especialmente útil en weekly menu que necesita JSON estricto).
+- **`/asistente-ia`** es la **pantalla de producto** para el usuario final (chat + menú semanal + CTA análisis de plato), integrada en el Header.
+- **`/ai-lab`** queda como **herramienta técnica/dev** para QA y debugging interno.
+- **`RegistrarComida`** ahora muestra **análisis completo del plato** (responseText, detectedFoods, proportions, recommendations, warnings) y permite **guardar la comida** vía `POST /api/ai/save-analyzed-meal`.
+- **Persistencia dual**:
+  - El análisis se persiste **siempre** en Mongo como `AiPlateAnalysis` (auditoría/cache).
+  - La comida visible en dashboard/perfil se guarda en **PostgreSQL** (`Meal` + `Profile_Meal`) mediante el flujo P0 estándar.
 - **JWT obligatorio en todos los endpoints `/api/ai/*`** (`aiRouter.use(authenticate)`).
 - **`userId` se deriva siempre de `req.auth.sub`**; el backend no confía en `userId` que llegue desde body o query del frontend.
-- **Ownership real en conversaciones**: una conversación que pertenece a otro usuario devuelve `not_found`, no `forbidden`, para no filtrar qué IDs existen.
-- **10 endpoints HTTP** activos (5 escritura, 2 lectura de conversaciones, 2 weekly menu, 2 adaptadores legacy para P0).
-- **Legacy adapters** `/api/ai/analyze` y `/api/ai/analyze-preview` siguen sirviendo a `AIBubble.tsx` y `RegistrarComida.tsx` sin tocar el frontend P0.
-- **AI Lab del frontend** envía `Authorization: Bearer <token>` desde `aiApi.ts` usando el mismo `localStorage.token` que el cliente P0.
 - **Tests backend: 101/101 en 11 ficheros**, lint en verde.
+- **Frontend lint: 0 errores** (2 warnings preexistentes en `MenuSugerido`, fuera de scope). **Build OK**.
 
 La premisa arquitectónica sigue siendo: el módulo IA se adapta a la base P0, no al revés.
 
@@ -26,16 +34,17 @@ La premisa arquitectónica sigue siendo: el módulo IA se adapta a la base P0, n
 
 | Método | Ruta | Función | Auth | Notas |
 |---|---|---|---|---|
-| POST | `/api/ai/chat` | Chat conversacional multi-turno | JWT | userId desde JWT; cache: no |
+| POST | `/api/ai/chat` | Chat conversacional multi-turno | JWT | userId desde JWT; provider router (DeepSeek/Gemini) |
 | POST | `/api/ai/menu` | Generación de menú orientativo (one-shot) | JWT | cache 24 h |
-| POST | `/api/ai/menu/weekly` | Generación asíncrona de menú semanal | JWT | 202 + polling |
+| POST | `/api/ai/menu/weekly` | Generación asíncrona de menú semanal | JWT | 202 + polling; DeepSeek con fallback Gemini |
 | GET | `/api/ai/menu/weekly/:planId` | Polling del estado del plan semanal | JWT | — |
 | POST | `/api/ai/profile-explanation` | Explicación del perfil nutricional calculado por P0 | JWT | cache 24 h; no recalcula valores |
 | POST | `/api/ai/plate-analysis` | Análisis multimodal de plato (imagen → Gemini Vision) | JWT | multipart `image`; cache 24 h con hash de imagen |
 | GET | `/api/ai/conversations` | Listado paginado de conversaciones del usuario | JWT | `?page=&limit=` (default 1/10, max 50) |
 | GET | `/api/ai/conversations/:conversationId` | Lectura de una conversación + mensajes | JWT + ownership | `not_found` para conversaciones de otro user |
 | POST | `/api/ai/analyze` | Adaptador legacy para `AIBubble.tsx` | JWT | mismo contrato `{success,data}`; ahora con auth |
-| POST | `/api/ai/analyze-preview` | Adaptador legacy para `RegistrarComida.tsx` | JWT | devuelve `{analysis:{...}}`; reusa `runAiPlateAnalysis` |
+| POST | `/api/ai/analyze-preview` | Adaptador legacy para `RegistrarComida.tsx` | JWT | devuelve `{analysis:{...}, ...campos enriquecidos}`; backward compatible |
+| POST | `/api/ai/save-analyzed-meal` | **(nuevo)** Guarda comida analizada en P0 (PostgreSQL) y la asigna al user | JWT | bypass de `requireAdmin` que bloquea `/api/meals` |
 
 Forma de respuesta común:
 
@@ -44,62 +53,34 @@ Forma de respuesta común:
 { "success": false, "error": { "code": "...", "message": "..." } }
 ```
 
-Excepción: `/api/ai/analyze-preview` mantiene el contrato P0 `{ "analysis": { name, calories, protein, fat, carbs, source } }` para no romper a `RegistrarComida.tsx`.
+Excepción: `/api/ai/analyze-preview` mantiene el contrato P0 `{ "analysis": { name, calories, protein, fat, carbs, source } }` para no romper a `RegistrarComida.tsx`, y añade campos opcionales (`analysisId`, `responseText`, `detectedFoods`, `proportions`, `recommendations`, `warnings`, `confidence`) al mismo nivel.
 
 ---
 
 ## Seguridad actual
 
 - **`aiRouter.use(authenticate)`** se aplica una vez al inicio de `ai.routes.ts` y cubre todos los endpoints del router. Petición sin Bearer válido → `401` antes de tocar el controller.
-- **`req.auth.sub` es la única fuente de `userId`** en cada controller de escritura: `{ ...body, userId: String(req.auth!.sub) }` justo antes de invocar al service.
-- **`body.userId` y `query.userId` se ignoran** aunque el cliente los envíe (incluyendo intentos de impersonación tipo `"hacker"`).
-- **Ownership en `getAiConversationById`** vía `findConversationByIdAndUser`. La paginación `listAiConversationsForUser` filtra siempre por `{ userId }` en el repository.
-- **Adaptadores legacy `/analyze` y `/analyze-preview`** también pasan por `authenticate`. El `userId` se inyecta en el contexto de plate-analysis mediante `buildAiPlateContextFromP0User(req.auth!.sub)`, que enriquece el input con `objective` y `caloriesTarget` leídos del perfil P0 en PostgreSQL.
-
-Detalle de cobertura por endpoint:
-
-| Endpoint | `userId` fuente | Ownership extra |
-|---|---|---|
-| POST `/chat`, `/menu`, `/menu/weekly`, `/profile-explanation`, `/plate-analysis` | `req.auth.sub` (sobrescribe body) | — |
-| GET `/menu/weekly/:planId` | no aplica (lookup por planId) | pendiente refuerzo si surge necesidad |
-| GET `/conversations` | `req.auth.sub` (ignora `query.userId`) | filtro `{userId}` en repo |
-| GET `/conversations/:conversationId` | `req.auth.sub` | `findConversationByIdAndUser` → cross-user = `not_found` |
-| POST `/analyze`, `/analyze-preview` | `req.auth.sub` vía adapter | — |
+- **`req.auth.sub` es la única fuente de `userId`** en cada controller de escritura.
+- **`body.userId` y `query.userId` se ignoran** aunque el cliente los envíe (incluyendo intentos de impersonación).
+- **Ownership en conversaciones**: cross-user → `not_found` para no filtrar existencia.
+- **`/api/ai/save-analyzed-meal`** solo requiere JWT, no `requireAdmin`. La razón: `POST /api/meals` (P0) está restringido a admin por contrato P0, y bloquea al usuario final. Este endpoint del módulo IA es el camino oficial para que un user normal cree comidas tras el análisis IA — ver deuda técnica abajo.
 
 ---
 
 ## Integración con P0
 
-- **`AIBubble.tsx`** (cápsula flotante de análisis rápido) consume `POST /api/ai/analyze`. Frontend intacto; solo el backend cambió para autenticar y resolver el contexto.
-- **`RegistrarComida.tsx`** consume `POST /api/ai/analyze-preview`. Misma situación: respuesta `{ analysis: {...} }` intacta.
-- **`Profile.tsx`** no llama al módulo IA directamente; usa los servicios P0. No se ha tocado.
-- **AI Lab (`frontend/src/pages/AiLabPage.tsx`)** consume el resto de endpoints IA a través de `frontend/src/services/aiApi.ts`, que ahora añade `Authorization: Bearer <token>` (vía `withAuth()` helper, leyendo `localStorage.getItem('token')` con el mismo criterio que `services/api.tsx`).
-- **`buildAiPlateContextFromP0User(userId)`** lee `Profile` desde PostgreSQL/Sequelize (P0) y devuelve `{ objective, caloriesTarget, plan }` para enriquecer el input de plate-analysis. Tolerante a fallos: si Mongo o Postgres caen, devuelve un contexto mínimo en lugar de tirar la petición.
+- **`AIBubble.tsx`** (cápsula flotante de análisis rápido) consume `POST /api/ai/analyze`. Frontend intacto.
+- **`RegistrarComida.tsx`** consume:
+  - `POST /api/ai/analyze-preview` para análisis enriquecido tras subir imagen.
+  - `POST /api/ai/save-analyzed-meal` para persistir la comida en P0 y asignarla al user. Detalle en [docs/ai/features/plate-analysis-product-flow.md](ai/features/plate-analysis-product-flow.md).
+- **`Profile.tsx` / Dashboard** lee las comidas asignadas vía servicios P0 estándar (`/api/meals/profile/mine`). Las comidas guardadas vía `/api/ai/save-analyzed-meal` aparecen ahí sin tocar el frontend P0.
+- **`/asistente-ia` (`AiAssistantPage.tsx`)** es la pantalla producto del usuario final. Detalle en [docs/ai/features/user-assistant-dashboard.md](ai/features/user-assistant-dashboard.md).
+- **`/ai-lab` (`AiLabPage.tsx`)** queda como pantalla técnica/dev para probar endpoints individualmente.
+- **`buildAiPlateContextFromP0User(userId)`** lee `Profile` desde PostgreSQL/Sequelize (P0) y devuelve `{ objective, caloriesTarget, plan }` para enriquecer el input de plate-analysis. Tolerante a fallos.
 
----
+### Normalización de errores frontend
 
-## Conversaciones
-
-### GET `/api/ai/conversations`
-
-Listado paginado de conversaciones del usuario autenticado.
-
-- Query: `?page=1&limit=10`
-- Defaults: `page=1`, `limit=10`
-- **`limit` máximo: 50.** Pedir más devuelve `validation_error` (no clamping silencioso) para evitar que el cliente crea que recibió la ventana completa.
-- Respuesta: `{ items: ConversationDto[], pagination: { page, limit, total, totalPages } }`
-- Orden: `updatedAt desc` con `createdAt desc` como tiebreaker.
-- Ownership: filtro `{ userId: req.auth.sub }` en el repository. Total cuenta solo del owner.
-
-### GET `/api/ai/conversations/:conversationId`
-
-Lectura de una conversación concreta + sus mensajes.
-
-- Ownership en el repository: `findConversationByIdAndUser`.
-- Si la conversación no existe **o** pertenece a otro user → `AiServiceError('not_found')` → HTTP 404. Mismo código para ambos casos para no filtrar existencia.
-- Devuelve `{ conversation: ConversationDto, messages: MessageDto[] }` con DTOs limpios (sin `_id`, `__v`, `tokenUsage`, `costEstimate`).
-
-Detalle completo en `docs/ai/features/conversations-pagination.md`.
+- **`frontend/src/services/api.ts`** extrae `.message` de cualquier shape de error (`{ error: "string" }` de P0 o `{ error: { code, message } }` del módulo IA). Esto **elimina globalmente** el `[object Object]` que aparecía antes en alerts y `console.error` cuando el módulo IA devolvía un 4xx.
 
 ---
 
@@ -107,43 +88,27 @@ Detalle completo en `docs/ai/features/conversations-pagination.md`.
 
 - **`npm run lint`** (backend, `tsc --noEmit`): OK, 0 errores.
 - **`npm test`** (backend, Vitest): **101/101 tests en 11 ficheros**, ~12 s.
-- **Frontend build** validado en la feature anterior de auth: `tsc -b && vite build` OK. Warning de "chunk > 500 kB" no bloqueante (deuda conocida de bundle splitting).
+- **Frontend `npm run lint`**: 0 errores (2 warnings preexistentes en `MenuSugerido`).
+- **Frontend `npm run build`**: OK (`tsc -b && vite build`). Warning de "chunk > 500 kB" no bloqueante.
 - **`mongodb-memory-server`** se usa para los tests de service que tocan modelos Mongoose.
-- **Mock de Gemini** en los tests de provider router y plate-analysis para no consumir cuota real.
-
-Composición de tests (resumen):
-
-| Fichero | Tests |
-|---|---|
-| `aiAuthOverride.controller.test.ts` | 11 |
-| `aiConversations.service.test.ts` | 17 |
-| `aiLegacyAnalyze.test.ts` | 9 |
-| `aiMenu.service.test.ts` | ~6 |
-| `aiPlateAnalysis.service.test.ts` | ~7 |
-| `aiProfileExplanation.service.test.ts` | ~5 |
-| `aiProviderRouter.service.test.ts` | ~9 |
-| `aiWeeklyMenu.service.test.ts` | ~7 |
-| `deepseekClient.test.ts` | ~6 |
-| `errorHandler.test.ts` | ~5 |
-| `nutricoachContext.adapter.test.ts` | 10 |
-| **Total** | **101** |
-
-(Conteos aproximados para los ficheros no tocados directamente en las últimas features; el dato firme es el total de 101.)
+- **Mock de Gemini y DeepSeek** en los tests para no consumir cuota real.
 
 ---
 
-## Pendientes actuales
+## Deuda técnica pendiente
 
 En orden de impacto operativo:
 
-1. **Rate limiting / control de coste** por usuario y por plan (`free` vs `pro`), idealmente delante de `authenticate` para que un token válido siga rate-limited.
-2. **Prompts activos cargados desde Mongo en runtime** en lugar de las plantillas en memoria (`getDefaultPromptTemplate`).
-3. **Smoke real con Gemini** sobre un entorno con `GEMINI_API_KEY` válida para confirmar el camino feliz end-to-end tras los cambios de auth.
-4. **Docker demo / producción unificado** con servicio Mongo + servicio API + servicio frontend bajo un solo `docker-compose.yml`.
-5. **CI mínimo** que ejecute `npm run lint` y `npm test` en cada PR contra `integration/full-integration-sanitized` o `main`.
-6. **Documentación raíz**: actualizar `README.md` del repo y `frontend/README.md` para reflejar el módulo IA y el AI Lab.
-7. **Posible inconsistencia de `VITE_API_URL`** antes de producción: hoy el frontend lo lee de env, pero el AI Lab y P0 deben apuntar al mismo backend; conviene unificarlo en un solo lugar.
-8. **Métricas reales de tokens y coste** por usuario / conversación, expuestas en el dashboard.
+1. **Permisos P0**: `POST /api/meals` exige `requireAdmin`, lo que obliga a tener `/api/ai/save-analyzed-meal` como workaround. La fix correcta es revisar el contrato P0 para permitir que un user autenticado cree sus propias comidas, y entonces deprecar el endpoint IA específico.
+2. **Rate limiting / control de coste** por usuario y por plan (`free` vs `pro`), idealmente delante de `authenticate` para que un token válido siga rate-limited.
+3. **Prompts activos cargados desde Mongo en runtime** en lugar de las plantillas en memoria (`getDefaultPromptTemplate`).
+4. **Weekly menu — robustez DeepSeek/JSON**: hoy DeepSeek puede no respetar siempre el JSON Schema estricto, lo que dispara el fallback a Gemini. Mejorar prompt + parser para que DeepSeek sirva sin caer a Gemini en el caso típico.
+5. **CI mínimo** que ejecute `npm run lint` y `npm test` (backend) + `npm run lint` y `npm run build` (frontend) en cada PR contra `integration/full-integration-sanitized` o `main`.
+6. **Docker demo / producción unificado** con servicio Mongo + servicio API + servicio frontend bajo un solo `docker-compose.yml`.
+7. **`VITE_API_URL` unificado** entre P0 (`services/api.ts`) y AI Lab (`services/aiApi.ts`) para evitar drift en producción.
+8. **Métricas reales de tokens y coste** por usuario / conversación, expuestas en un panel admin.
+9. **Bundle splitting con `React.lazy`** para AI Lab / Asistente IA (hoy el bundle JS pasa de 500 kB y vite-reporter lo marca).
+10. **Panel admin** para revisar conversaciones, plate analyses, y plans semanales generados.
 
 ### Mantenidos (futuro)
 
@@ -155,56 +120,35 @@ En orden de impacto operativo:
 
 ## Cómo probar localmente
 
-### 1. Levantar Mongo
+Ver checklist reproducible en [docs/ai/features/final-mvp-smoke-test.md](ai/features/final-mvp-smoke-test.md).
+
+Resumen rápido:
 
 ```bash
+# 1. Mongo
 docker compose up -d mongo
-```
 
-### 2. Backend
+# 2. Backend
+cd backend && cp .env.example .env  # añadir GEMINI_API_KEY y opcional DEEPSEEK_API_KEY
+npm ci && npm run seed:ai-prompts && npm run dev
 
-```bash
-cd backend
-cp .env.example .env
-# editar .env: añadir GEMINI_API_KEY real, ajustar MONGO_URI si difiere
-npm ci
-npm run seed:ai-prompts
-npm run dev
-```
+# 3. Frontend
+cd frontend && npm ci && npm run dev
 
-### 3. Frontend (incluye AI Lab)
-
-```bash
-cd frontend
-npm ci
-npm run dev
-# Abrir http://localhost:5173/login → tras hacer login, ir a /ai-lab
-```
-
-### 4. Token para curl
-
-Tras hacer login en el frontend, el token queda en `localStorage.token`. Copiarlo y usarlo:
-
-```bash
-TOKEN="<bearer token>"
-
-# Listar conversaciones del usuario autenticado
-curl -s -H "Authorization: Bearer $TOKEN" \
-  "http://localhost:3000/api/ai/conversations?page=1&limit=10" | jq .
-
-# Leer una conversación (ownership: solo si es del user del token)
-curl -s -H "Authorization: Bearer $TOKEN" \
-  "http://localhost:3000/api/ai/conversations/<conversationId>" | jq .
-
-# Sin token → 401
-curl -i "http://localhost:3000/api/ai/conversations" | head -5
+# 4. Validación
+cd backend  && npm run lint && npm test
+cd frontend && npm run lint && npm run build
 ```
 
 ---
 
 ## Ver también
 
-- `docs/ai/features/auth-real-context.md` — detalle de la feature de auth real y override de `userId`.
-- `docs/ai/features/conversations-pagination.md` — detalle del listado paginado.
-- `docs/ai-module-architecture.md` — arquitectura interna del módulo (servicios, providers, prompts, cache).
-- `docs/ai-module-demo-guide.md` — guion de demo del módulo IA.
+- [docs/ai/features/provider-router-gemini-deepseek.md](ai/features/provider-router-gemini-deepseek.md) — router de proveedor texto/imagen y fallback.
+- [docs/ai/features/user-assistant-dashboard.md](ai/features/user-assistant-dashboard.md) — `/asistente-ia` (pantalla producto).
+- [docs/ai/features/plate-analysis-product-flow.md](ai/features/plate-analysis-product-flow.md) — flujo de RegistrarComida + guardado.
+- [docs/ai/features/final-mvp-smoke-test.md](ai/features/final-mvp-smoke-test.md) — checklist de smoke MVP.
+- [docs/ai/features/auth-real-context.md](ai/features/auth-real-context.md) — detalle de la feature de auth real y override de `userId`.
+- [docs/ai/features/conversations-pagination.md](ai/features/conversations-pagination.md) — detalle del listado paginado.
+- [docs/ai-module-architecture.md](ai-module-architecture.md) — arquitectura interna del módulo (servicios, providers, prompts, cache).
+- [docs/ai-module-demo-guide.md](ai-module-demo-guide.md) — guion de demo del módulo IA.
