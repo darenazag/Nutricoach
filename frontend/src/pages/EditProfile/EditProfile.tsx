@@ -35,7 +35,7 @@ function EditProfile() {
   const [activityFactor, setActivityFactor] = useState<'' | 'S' | 'A' | 'M'>('')
   const [objective, setObjective] = useState<'' | 'P' | 'M' | 'G'>('')
   const [error, setError] = useState('')
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(() => Boolean(localStorage.getItem('token')))
   const [saving, setSaving] = useState(false)
 
   // Redirección si el usuario no está autenticado globalmente
@@ -52,7 +52,6 @@ function EditProfile() {
 
     const token = localStorage.getItem('token')
     if (!token) {
-      setLoading(false)
       return
     }
 
