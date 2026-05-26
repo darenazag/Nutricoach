@@ -78,7 +78,9 @@ const postAiPlateAnalysis: RequestHandler = async (req, res, next) => {
     const body = req.body as Record<string, string | undefined>;
 
     const result = await runAiPlateAnalysis({
-      userId: body['userId']?.trim() ?? 'anonymous',
+      // userId always comes from the authenticated JWT (req.auth.sub).
+      // Any body.userId sent by AI Lab or another client is ignored.
+      userId: String(req.auth!.sub),
       mealId: body['mealId']?.trim() || undefined,
       imageBuffer: processedBuffer,
       imageMetadata: {

@@ -13,7 +13,13 @@ import { runAiProfileExplanation } from '../services/index.js';
  */
 export const postAiProfileExplanation: RequestHandler = async (req, res, next) => {
   try {
-    const result = await runAiProfileExplanation(req.body);
+    // userId always comes from the authenticated JWT (req.auth.sub).
+    // Any body.userId sent by AI Lab or another client is ignored.
+    const body = (req.body ?? {}) as Record<string, unknown>;
+    const result = await runAiProfileExplanation({
+      ...body,
+      userId: String(req.auth!.sub),
+    });
     res.status(200).json({ success: true, data: result });
   } catch (err) {
     next(err);
