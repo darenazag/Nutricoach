@@ -27,51 +27,54 @@ export const getRecommendedMeals = async (req, res) => {
       { tipo: 'alto', kcal: 750 }
     ];
 
-    // 4. MONTE CARLO: Generar pool de combinaciones válidas (muestreo aleatorio)
-    const poolCombinaciones = [];
-    const TAMAÑO_POOL = 500; // Intentos aleatorios para llenar el pool
+    // ========================================================
+    // Función auxiliar para generar un pool de combinaciones válidas
+    // ========================================================
+    function generarPoolValido(tmb, getd, objetivo, tamaño = 500) {
+      const pool = [];
+      for (let intento = 0; intento < tamaño; intento++) {
+        const d = categorias[Math.floor(Math.random() * categorias.length)];
+        const a = categorias[Math.floor(Math.random() * categorias.length)];
+        const c = categorias[Math.floor(Math.random() * categorias.length)];
+        const totalCaloriasDia = d.kcal + a.kcal + c.kcal;
+        const balanceDiario = totalCaloriasDia - getd;
+        let esValido = false;
 
-    for (let intento = 0; intento < TAMAÑO_POOL; intento++) {
-      // Seleccionar categorías aleatoriamente
-      const d = categorias[Math.floor(Math.random() * categorias.length)];
-      const a = categorias[Math.floor(Math.random() * categorias.length)];
-      const c = categorias[Math.floor(Math.random() * categorias.length)];
+        if (objetivo === 'P') { // Perder
+          if (totalCaloriasDia < getd && totalCaloriasDia >= tmb) esValido = true;
+        } else if (objetivo === 'G') { // Ganar
+          const minSuperavit = getd * 1.10;
+          const maxSuperavit = getd * 1.15;
+          if (totalCaloriasDia >= minSuperavit && totalCaloriasDia <= maxSuperavit) esValido = true;
+        } else if (objetivo === 'M') { // Mantener
+          if (Math.abs(balanceDiario) <= 100) esValido = true;
+        }
 
-      const totalCaloriasDia = d.kcal + a.kcal + c.kcal;
-      const balanceDiario = totalCaloriasDia - GETD;
-
-      let esValido = false;
-
-      if (objetivoChar === 'P') { // Perder
-        if (totalCaloriasDia < GETD && totalCaloriasDia >= TMB) esValido = true;
-      } else if (objetivoChar === 'G') { // Ganar
-        if (totalCaloriasDia >= GETD * 1.10 && totalCaloriasDia <= GETD * 1.15) esValido = true;
-      } else if (objetivoChar === 'M') { // Mantener
-        if (Math.abs(balanceDiario) <= 100) esValido = true;
+        if (esValido) {
+          pool.push({
+            estructura: {
+              desayuno: { categoria: d.tipo, kcal: d.kcal },
+              almuerzo: { categoria: a.tipo, kcal: a.kcal },
+              cena: { categoria: c.tipo, kcal: c.kcal }
+            },
+            totalCaloriasDia,
+            balanceDiario
+          });
+        }
       }
-
-      if (esValido) {
-        poolCombinaciones.push({
-          estructura: {
-            desayuno: { categoria: d.tipo, kcal: d.kcal },
-            almuerzo: { categoria: a.tipo, kcal: a.kcal },
-            cena: { categoria: c.tipo, kcal: c.kcal }
-          },
-          totalCaloriasDia,
-          balanceDiario
-        });
-      }
+      return pool;
     }
 
-    // 5. Validar que exista al menos una opción válida
+    // 4. Generar pool inicial de combinaciones válidas
+    let poolCombinaciones = generarPoolValido(TMB, GETD, objetivoChar, 500);
     if (poolCombinaciones.length === 0) {
-      return res.status(422).json({ 
+      return res.status(422).json({
         error: `No hay combinaciones válidas para el objetivo '${objetivoChar}' con los parámetros actuales.`,
         diagnostico: {
           tmb: TMB,
           getd: GETD,
           objetivo: objetivoChar,
-          rango_buscado: objetivoChar === 'P' 
+          rango_buscado: objetivoChar === 'P'
             ? `${TMB} - ${GETD} kcal`
             : objetivoChar === 'G'
             ? `${(GETD * 1.10).toFixed(0)} - ${(GETD * 1.15).toFixed(0)} kcal`
@@ -80,57 +83,44 @@ export const getRecommendedMeals = async (req, res) => {
       });
     }
 
-    // 6. MONTE CARLO: Simular 100 días muestreando SIN REEMPLAZO del pool
-    const trayectoria100Dias = [];
+    // 5. Simular 100 días muestreando sin reemplazo
     const KCAL_POR_KG = 7700;
     let pesoActualizado = pesoInicial;
-    let poolActual = [...poolCombinaciones]; // Copia del pool para muestreo sin reemplazo
+    let poolActual = [...poolCombinaciones];
+    const trayectoria100Dias = [];
 
     for (let dia = 1; dia <= 100; dia++) {
-      // Si se agota el pool, regenerar (hacer más muestreos aleatorios)
+      // Regenerar pool si se agota
       if (poolActual.length === 0) {
-        for (let intento = 0; intento < TAMAÑO_POOL; intento++) {
-          const d = categorias[Math.floor(Math.random() * categorias.length)];
-          const a = categorias[Math.floor(Math.random() * categorias.length)];
-          const c = categorias[Math.floor(Math.random() * categorias.length)];
-
-          const totalCaloriasDia = d.kcal + a.kcal + c.kcal;
-          const balanceDiario = totalCaloriasDia - GETD;
-
-          let esValido = false;
-
-          if (objetivoChar === 'P') {
-            if (totalCaloriasDia < GETD && totalCaloriasDia >= TMB) esValido = true;
-          } else if (objetivoChar === 'G') {
-            if (totalCaloriasDia >= GETD * 1.10 && totalCaloriasDia <= GETD * 1.15) esValido = true;
-          } else if (objetivoChar === 'M') {
-            if (Math.abs(balanceDiario) <= 100) esValido = true;
-          }
-
-          if (esValido) {
-            poolActual.push({
-              estructura: {
-                desayuno: { categoria: d.tipo, kcal: d.kcal },
-                almuerzo: { categoria: a.tipo, kcal: a.kcal },
-                cena: { categoria: c.tipo, kcal: c.kcal }
-              },
-              totalCaloriasDia,
-              balanceDiario
-            });
-          }
+        poolActual = generarPoolValido(TMB, GETD, objetivoChar, 500);
+        if (poolActual.length === 0) {
+          // Si sigue sin haber combinaciones, devolvemos error (no debería ocurrir)
+          return res.status(422).json({
+            error: 'No se pudo generar ningún combo válido para continuar la simulación.'
+          });
         }
       }
 
-      // Seleccionar una combinación aleatoria del pool (sin reemplazo)
-      const indiceAleatorio = Math.floor(Math.random() * poolActual.length);
-      const combinacionElegida = poolActual[indiceAleatorio];
-      poolActual.splice(indiceAleatorio, 1); // Remover del pool
+      // Seleccionar una combinación aleatoria y eliminarla del pool
+      const indice = Math.floor(Math.random() * poolActual.length);
+      const combinacionElegida = poolActual[indice];
+      poolActual.splice(indice, 1);
 
-      // Agregar variación aleatoria ±50 kcal
-      const variacion = (Math.random() - 0.5) * 100; // ±50 kcal
-      const totalCaloriasConVariacion = combinacionElegida.totalCaloriasDia + variacion;
+      // Aplicar variación aleatoria de ±50 kcal, limitada al rango seguro según objetivo
+      let variacion = (Math.random() - 0.5) * 100;
+      let totalCaloriasConVariacion = combinacionElegida.totalCaloriasDia + variacion;
+
+      if (objetivoChar === 'P') {
+        totalCaloriasConVariacion = Math.min(Math.max(totalCaloriasConVariacion, TMB), GETD);
+      } else if (objetivoChar === 'G') {
+        const minSuperavit = GETD * 1.10;
+        const maxSuperavit = GETD * 1.15;
+        totalCaloriasConVariacion = Math.min(Math.max(totalCaloriasConVariacion, minSuperavit), maxSuperavit);
+      } else if (objetivoChar === 'M') {
+        totalCaloriasConVariacion = Math.min(Math.max(totalCaloriasConVariacion, GETD - 100), GETD + 100);
+      }
+
       const balanceDiarioConVariacion = totalCaloriasConVariacion - GETD;
-
       pesoActualizado += (balanceDiarioConVariacion / KCAL_POR_KG);
 
       trayectoria100Dias.push({
@@ -138,14 +128,14 @@ export const getRecommendedMeals = async (req, res) => {
         calorias_consumidas: Math.round(totalCaloriasConVariacion),
         balance_energetico: Math.round(balanceDiarioConVariacion),
         peso_proyectado: parseFloat(pesoActualizado.toFixed(2)),
-        recomendacion_menu: combinacionElegida.estructura
+        recomendacion_menu: combinacionElegida.estructura   // menú base (sin variación)
       });
     }
 
     res.json({
       datos_biometricos: { tmb: TMB, getd: GETD, objetivo: objetivoChar },
       pool_size: poolCombinaciones.length,
-      metodo: 'Monte Carlo - Muestreo sin reemplazo',
+      metodo: 'Monte Carlo - Muestreo sin reemplazo con variación ±50 kcal acotada',
       proyeccion_diaria: trayectoria100Dias
     });
 
