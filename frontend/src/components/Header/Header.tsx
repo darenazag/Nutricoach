@@ -79,6 +79,13 @@ function Header() {
 
               {open && (
                 <div className="header-dropdown">
+                  <Link
+                    to="/asistente-ia"
+                    className="header-dropdown-item"
+                    onClick={() => setOpen(false)}
+                  >
+                    <span>🤖</span> Asistente IA
+                  </Link>
                   <button className="header-dropdown-item header-dropdown-item--danger" onClick={() => { setOpen(false); logout() }}>
                     <span>🚪</span> Cerrar sesión
                   </button>
