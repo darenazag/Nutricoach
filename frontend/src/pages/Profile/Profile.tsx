@@ -139,21 +139,17 @@ function Profile() {
       }).then(r => r.ok ? r.json() : Promise.reject()),
       fetch(`${API_URL}/meals/profile/mine`, {
         headers: { Authorization: `Bearer ${token}` },
-      }).then(r => r.ok ? r.json() : Promise.reject()),
+      }).then(r => r.ok ? r.json() : { meals: [] }).catch(() => ({ meals: [] })),
       fetch(`${API_URL}/profile/streak`, {
         headers: { Authorization: `Bearer ${token}` },
-      }).then(r => r.ok ? r.json() : Promise.reject()),
+      }).then(r => r.ok ? r.json() : null).catch(() => null),
     ])
       .then(([profileData, mealsData, streakData]) => {
         setProfile(profileData.profile)
         setMeals(mealsData.meals || [])
         setStreak(streakData)
       })
-      .catch(() => {
-        setProfile(null)
-        setMeals([])
-        setStreak(null)
-      })
+      .catch(() => setProfile(null))
       .finally(() => setLoading(false))
   }, [])
 

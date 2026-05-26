@@ -1,5 +1,5 @@
 import { API_URL } from '../../config/api';
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/useAuth'
 import './ProfileForm.css'
@@ -29,8 +29,10 @@ function ProfileForm() {
   const [activityFactor, setActivityFactor] = useState<'' | 'S' | 'A' | 'M'>('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const submittedRef = useRef(false)
 
   useEffect(() => {
+    if (submittedRef.current) return
     if (!objective || !gender || !age || !height || !weight) {
       navigate('/objetivo', { replace: true })
     }
@@ -87,6 +89,7 @@ function ProfileForm() {
         return
       }
 
+      submittedRef.current = true
       sessionStorage.removeItem('objective')
       sessionStorage.removeItem('gender')
       sessionStorage.removeItem('age')
