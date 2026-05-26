@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { authenticate } from '../../../middlewares/authenticate.js';
 import { postAiChat } from '../controllers/aiChat.controller.js';
 import { postAiMenu } from '../controllers/aiMenu.controller.js';
 import { postAiProfileExplanation } from '../controllers/aiProfileExplanation.controller.js';
@@ -14,6 +15,12 @@ import {
 } from '../controllers/aiLegacyAnalyze.controller.js';
 
 export const aiRouter: Router = Router();
+
+// Every AI endpoint requires a valid JWT. `userId` is taken from req.auth.sub
+// by each controller and any value in req.body.userId is ignored. This is
+// the architectural rule for this module: the AI layer adapts to the P0
+// auth contract, not the other way around.
+aiRouter.use(authenticate);
 
 // POST /api/ai/chat
 aiRouter.post('/chat', postAiChat);

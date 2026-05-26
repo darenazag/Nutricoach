@@ -10,7 +10,13 @@ import { createWeeklyMenuPlan, getWeeklyMenuPlanById } from '../services/index.j
  */
 export const postAiWeeklyMenu: RequestHandler = async (req, res, next) => {
   try {
-    const result = await createWeeklyMenuPlan(req.body);
+    // userId always comes from the authenticated JWT (req.auth.sub).
+    // Any body.userId sent by AI Lab or another client is ignored.
+    const body = (req.body ?? {}) as Record<string, unknown>;
+    const result = await createWeeklyMenuPlan({
+      ...body,
+      userId: String(req.auth!.sub),
+    });
     res.status(202).json({ success: true, data: result });
   } catch (err) {
     next(err);
