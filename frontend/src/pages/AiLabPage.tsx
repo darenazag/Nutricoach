@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import {
   getAiConversation,
   getAiWeeklyMenuPlan,
@@ -646,6 +646,7 @@ export function AiLabPage() {
   const [showWeeklyRaw, setShowWeeklyRaw] = useState(false);
   const weeklyPlanIdRef = useRef('');
   const weeklyPollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const weeklyPollLoadingRef = useRef(false);
 
   // ── Helpers ─────────────────────────────────────────────────────────────
 
@@ -898,8 +899,9 @@ export function AiLabPage() {
     }
   }
 
-  async function pollWeeklyPlan(pid: string) {
-    if (!pid || weeklyPollLoading) return;
+  const pollWeeklyPlan = useCallback(async (pid: string) => {
+    if (!pid || weeklyPollLoadingRef.current) return;
+    weeklyPollLoadingRef.current = true;
     setWeeklyPollLoading(true);
     try {
       const result = await getAiWeeklyMenuPlan(pid);
@@ -912,9 +914,10 @@ export function AiLabPage() {
     } catch (err) {
       setWeeklyError(err instanceof Error ? err.message : 'Error inesperado');
     } finally {
+      weeklyPollLoadingRef.current = false;
       setWeeklyPollLoading(false);
     }
-  }
+  }, []);
 
   useEffect(() => {
     weeklyPlanIdRef.current = weeklyPlanId;
@@ -928,7 +931,7 @@ export function AiLabPage() {
     return () => {
       if (weeklyPollRef.current) { clearInterval(weeklyPollRef.current); weeklyPollRef.current = null; }
     };
-  }, [weeklyPlanId, weeklyPlanData?.status]);
+  }, [weeklyPlanId, weeklyPlanData?.status, pollWeeklyPlan]);
 
   // ── Render ───────────────────────────────────────────────────────────────
 
