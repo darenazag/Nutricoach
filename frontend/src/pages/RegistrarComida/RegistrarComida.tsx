@@ -1,7 +1,8 @@
-import { API_URL } from '../../config/api';
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import Header from '../../components/Header/Header'
+import { mealService } from '../../services/mealService'
+import type { Meal, Analysis } from '../../types'
 import './RegistrarComida.css'
 
 
@@ -13,26 +14,6 @@ const CATEGORIES = [
 ] as const
 
 const MEAL_ICONS = ['🍗', '🍚', '🥗', '🥤', '🐟', '🥩', '🥑', '🍳']
-
-interface Meal {
-  meal_id: number
-  name: string
-  calories: number
-  protein: number
-  fat: number
-  carbs: number
-  img: string | null
-  source: string
-}
-
-interface Analysis {
-  name: string
-  calories: number
-  protein: number
-  fat: number
-  carbs: number
-  source: string
-}
 
 type Tab = 'foto' | 'lista'
 
@@ -61,18 +42,12 @@ function RegistrarComida() {
   const fileRef = useRef<HTMLInputElement>(null)
   const cameraRef = useRef<HTMLInputElement>(null)
 
-  const token = localStorage.getItem('token')
-
   useEffect(() => {
-    if (!token) return
-    fetch(`${API_URL}/meals`, {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then(r => r.ok ? r.json() : Promise.reject())
+    mealService.getAll()
       .then(data => setMeals(data.meals || []))
       .catch(() => setMeals([]))
       .finally(() => setLoading(false))
-  }, [token])
+  }, [])
 
   function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
@@ -84,21 +59,9 @@ function RegistrarComida() {
   async function uploadForAnalysis(file: File) {
     setAnalyzing(true)
     setAnalysis(null)
-    if (!token) return
-
-    const form = new FormData()
-    form.append('image', file)
 
     try {
-      const res = await fetch(`${API_URL}/ai/analyze-preview`, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${token}` },
-        body: form,
-      })
-
-      if (!res.ok) throw new Error('Error al analizar')
-
-      const data = await res.json()
+      const data = await mealService.analyzeImage(file)
       const a = data.analysis
       setAnalysis(a)
       setEditName(a.name)
@@ -133,32 +96,13 @@ function RegistrarComida() {
     }
 
     setSaving(true)
-    if (!token) return
 
     try {
-      const res = await fetch(`${API_URL}/meals`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ name, calories, protein, fat, carbs, source: `Registrado manualmente - ${selectedCategory.toLowerCase()}` }),
+      const data = await mealService.create({
+        name, calories, protein, fat, carbs,
+        source: `Registrado manualmente - ${selectedCategory.toLowerCase()}`,
       })
-
-      if (!res.ok) throw new Error('Error al guardar')
-
-      const data = await res.json()
-      const mealId = data.meal.meal_id
-
-      await fetch(`${API_URL}/meals/profile/assign`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ mealId }),
-      })
-
+      await mealService.assign(data.meal.meal_id)
       navigate('/perfil')
     } catch {
       alert('Error al guardar la comida. Intenta de nuevo.')
@@ -169,17 +113,9 @@ function RegistrarComida() {
 
   async function handleAssign(mealId: number) {
     setAssigning(mealId)
-    if (!token) return
     try {
-      const res = await fetch(`${API_URL}/meals/profile/assign`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ mealId, mealType: selectedCategory.toLowerCase() }),
-      })
-      if (res.ok) navigate('/perfil')
+      await mealService.assign(mealId, selectedCategory.toLowerCase())
+      navigate('/perfil')
     } catch {
       // ignore
     } finally {

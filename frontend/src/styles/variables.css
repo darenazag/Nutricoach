@@ -11,6 +11,13 @@
   --color-white: #ffffff;
   --color-border: #f0e6d8;
 
+  --color-success: #4caf50;
+  --color-error: #dc2626;
+  --color-warning: #f59e0b;
+  --color-protein: #2196f3;
+  --color-carbs: #9c27b0;
+  --color-fat: #ff5722;
+
   --ff-sans: 'Inter', system-ui, -apple-system, sans-serif;
   --ff-heading: 'Inter', system-ui, -apple-system, sans-serif;
 
@@ -22,4 +29,29 @@
   --radius-md: 12px;
   --radius-lg: 20px;
   --radius-full: 9999px;
+}
+
+body.dark {
+  --color-primary: #798dff;
+  --color-secondary: #5a6ee0;
+  --color-tertiary: #3d52c0;
+  --color-dark: #121f45;
+  --color-deep: #0e1a3c;
+
+  --color-bg: #000000;
+  --color-text: #bacaff;
+  --color-text-light: #8da4d8;
+  --color-white: #18254c;
+  --color-border: #4356a0;
+
+  --color-success: #4caf50;
+  --color-error: #ef5350;
+  --color-warning: #ffa726;
+  --color-protein: #42a5f5;
+  --color-carbs: #ab47bc;
+  --color-fat: #ff7043;
+
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.5);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.6);
+  --shadow-lg: 0 8px 30px rgba(0, 0, 0, 0.7);
 }

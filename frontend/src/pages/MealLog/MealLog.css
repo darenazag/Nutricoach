@@ -1,6 +1,6 @@
 .ml-page {
   min-height: 100vh;
-  background: #FDF8F3;
+  background: var(--color-bg);
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   padding: 24px 20px 40px;
 }
@@ -22,8 +22,8 @@
   height: 40px;
   border: none;
   border-radius: 50%;
-  background: #F5F0EB;
-  color: #7A6B5A;
+  background: var(--color-border);
+  color: var(--color-text-light);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -33,26 +33,26 @@
 }
 
 .ml-back:hover {
-  background: #FAA61A;
+  background: var(--color-primary);
   color: #FFFFFF;
 }
 
 .ml-title {
   font-size: 22px;
   font-weight: 800;
-  color: #3D2C1A;
+  color: var(--color-text);
   margin: 0;
 }
 
 .ml-subtitle {
   font-size: 14px;
-  color: #7A6B5A;
+  color: var(--color-text-light);
   margin: 0 0 24px 52px;
 }
 
 .ml-empty {
   text-align: center;
-  color: #A09686;
+  color: var(--color-text-light);
   padding: 60px 0;
   font-size: 15px;
 }
@@ -67,7 +67,7 @@
   display: flex;
   align-items: center;
   gap: 14px;
-  background: #FFFFFF;
+  background: var(--color-white);
   border-radius: 16px;
   padding: 16px 18px;
   box-shadow: 0 1px 3px rgba(87, 23, 0, 0.05), 0 4px 12px rgba(87, 23, 0, 0.06);
@@ -83,7 +83,7 @@
   width: 48px;
   height: 48px;
   border-radius: 12px;
-  background: #F5F0EB;
+  background: var(--color-border);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -98,13 +98,13 @@
 .ml-card-name {
   font-size: 15px;
   font-weight: 700;
-  color: #3D2C1A;
+  color: var(--color-text);
   margin: 0 0 2px;
 }
 
 .ml-card-source {
   font-size: 12px;
-  color: #A09686;
+  color: var(--color-text-light);
   margin: 0 0 6px;
 }
 
@@ -145,10 +145,10 @@
   flex-shrink: 0;
   width: 40px;
   height: 40px;
-  border: 2px solid #FAA61A;
+  border: 2px solid var(--color-primary);
   border-radius: 50%;
-  background: #FFFFFF;
-  color: #FAA61A;
+  background: var(--color-white);
+  color: var(--color-primary);
   font-size: 20px;
   font-weight: 700;
   cursor: pointer;
@@ -161,7 +161,7 @@
 }
 
 .ml-add-btn:hover:not(:disabled) {
-  background: #FAA61A;
+  background: var(--color-primary);
   color: #FFFFFF;
 }
 

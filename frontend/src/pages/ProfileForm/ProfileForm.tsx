@@ -1,7 +1,7 @@
-import { API_URL } from '../../config/api';
 import { useState, useMemo, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/useAuth'
+import { profileService } from '../../services/profileService'
 import './ProfileForm.css'
 
 const ACTIVITY_LABELS: Record<string, string> = {
@@ -62,30 +62,16 @@ function ProfileForm() {
 
     setLoading(true)
     try {
-      const token = localStorage.getItem('token')
-      const res = await fetch(`${API_URL}/profile`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          weight: w,
-          height: h,
-          age: a,
-          gender,
-          activityFactor,
-          objective,
-          basalMetabolicRate: bmr,
-          totalDailyEnergyExpenditure: tdee,
-        }),
+      await profileService.create({
+        weight: w,
+        height: h,
+        age: a,
+        gender,
+        activityFactor,
+        objective,
+        basalMetabolicRate: bmr,
+        totalDailyEnergyExpenditure: tdee,
       })
-
-      if (!res.ok) {
-        const data = await res.json()
-        setError(data.error || 'Error al guardar')
-        return
-      }
 
       sessionStorage.removeItem('objective')
       sessionStorage.removeItem('gender')
@@ -94,8 +80,8 @@ function ProfileForm() {
       sessionStorage.removeItem('weight')
 
       navigate('/perfil')
-    } catch {
-      setError('Error de conexión con el servidor')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error de conexión con el servidor')
     } finally {
       setLoading(false)
     }

@@ -13,7 +13,7 @@
 .pre-footer-title {
   font-size: 38px;
   font-weight: 800;
-  color: var(--color-white);
+  color: #ffffff;
   margin: 0 0 16px;
   letter-spacing: -1px;
 }
@@ -28,20 +28,29 @@
 .pre-footer-cta {
   display: inline-block;
   background: var(--color-primary);
-  color: var(--color-white);
+  color: #ffffff;
   padding: 16px 40px;
   border-radius: var(--radius-full);
   text-decoration: none;
   font-weight: 700;
   font-size: 17px;
-  transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+  transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
   box-shadow: 0 4px 14px rgba(254, 165, 10, 0.35);
 }
 
+body.dark .pre-footer-cta {
+  box-shadow: 0 4px 20px color-mix(in srgb, var(--color-primary) 30%, transparent), 0 0 40px color-mix(in srgb, var(--color-primary) 10%, transparent);
+}
+
+body.dark .pre-footer-cta:hover {
+  box-shadow: 0 6px 30px color-mix(in srgb, var(--color-primary) 40%, transparent), 0 0 60px color-mix(in srgb, var(--color-primary) 15%, transparent);
+  transform: translateY(-3px) scale(1.02);
+}
+
 .pre-footer-cta:hover {
-  background: #e89500;
+  background: var(--color-secondary);
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(254, 165, 10, 0.5);
+  box-shadow: 0 6px 20px color-mix(in srgb, var(--color-primary) 50%, transparent);
 }
 
 .pre-footer-badges {
@@ -129,9 +138,25 @@
 }
 
 .footer-logo {
-  font-size: 22px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  text-decoration: none;
+}
+
+.footer-logo-icon {
+  font-size: 24px;
+}
+
+.footer-logo-text {
+  font-size: 20px;
   font-weight: 700;
-  color: var(--color-white);
+  color: #ffffff;
+  font-family: var(--ff-heading);
+}
+
+.footer-logo .highlight {
+  color: var(--color-primary);
 }
 
 .footer-brand p {

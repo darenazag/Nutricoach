@@ -43,7 +43,10 @@ function Footer() {
       <div className="footer-main">
         <div className="footer-container">
           <div className="footer-brand">
-            <span className="footer-logo">&#x1F34A; Nutri<span className="highlight">Coach</span></span>
+            <span className="footer-logo">
+              <span className="footer-logo-icon">&#x1F34A;</span>
+              <span className="footer-logo-text">Nutri<span className="highlight">Coach</span></span>
+            </span>
             <p>Tu coach nutricional con inteligencia artificial.</p>
           </div>
 

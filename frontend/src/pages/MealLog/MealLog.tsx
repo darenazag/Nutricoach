@@ -1,20 +1,10 @@
-import { API_URL } from '../../config/api';
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Header from '../../components/Header/Header'
+import { mealService } from '../../services/mealService'
+import type { Meal } from '../../types'
 import './MealLog.css'
 
-
-interface Meal {
-  meal_id: number
-  name: string
-  calories: number
-  protein: number
-  fat: number
-  carbs: number
-  img: string | null
-  source: string
-}
 
 const MEAL_ICONS = ['🍗', '🍚', '🥗', '🥤', '🐟', '🥩', '🥑', '🍳']
 
@@ -25,13 +15,7 @@ function MealLog() {
   const [assigning, setAssigning] = useState<number | null>(null)
 
   useEffect(() => {
-    const token = localStorage.getItem('token')
-    if (!token) return
-
-    fetch(`${API_URL}/meals`, {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then(r => r.ok ? r.json() : Promise.reject())
+    mealService.getAll()
       .then(data => setMeals(data.meals || []))
       .catch(() => setMeals([]))
       .finally(() => setLoading(false))
@@ -39,19 +23,9 @@ function MealLog() {
 
   async function handleAssign(mealId: number) {
     setAssigning(mealId)
-    const token = localStorage.getItem('token')
     try {
-      const res = await fetch(`${API_URL}/meals/profile/assign`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ mealId }),
-      })
-      if (res.ok) {
-        navigate('/perfil')
-      }
+      await mealService.assign(mealId)
+      navigate('/perfil')
     } catch {
       // ignore
     } finally {

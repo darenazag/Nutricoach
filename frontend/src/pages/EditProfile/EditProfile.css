@@ -4,14 +4,14 @@
   align-items: center;
   justify-content: center;
   padding: 24px 20px;
-  background: linear-gradient(135deg, #fffaf2 0%, #fff5e6 50%, #ffedd5 100%);
+  background: linear-gradient(135deg, var(--color-bg) 0%, var(--color-bg) 50%, var(--color-bg) 100%);
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
 }
 
 .ep-card {
   width: 100%;
   max-width: 580px;
-  background: #fff;
+  background: var(--color-white);
   border-radius: 24px;
   padding: 40px 36px;
   box-shadow: 0 1px 3px rgba(87, 23, 0, 0.06), 0 8px 30px rgba(87, 23, 0, 0.1);
@@ -35,8 +35,8 @@
   height: 40px;
   border: none;
   border-radius: 50%;
-  background: #F5F0EB;
-  color: #7A6B5A;
+  background: var(--color-border);
+  color: var(--color-text-light);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -46,20 +46,20 @@
 }
 
 .ep-back:hover {
-  background: #FAA61A;
+  background: var(--color-primary);
   color: #fff;
 }
 
 .ep-title {
   font-size: 22px;
   font-weight: 800;
-  color: #3D2C1A;
+  color: var(--color-text);
   margin: 0;
 }
 
 .ep-loading {
   text-align: center;
-  color: #7A6B5A;
+  color: var(--color-text-light);
   padding: 40px 0;
 }
 
@@ -96,25 +96,25 @@
 .ep-label {
   font-size: 13px;
   font-weight: 600;
-  color: #3D2C1A;
+  color: var(--color-text);
 }
 
 .ep-input {
   width: 100%;
   padding: 14px 16px;
-  border: 2px solid #F0E8DE;
+  border: 2px solid var(--color-border);
   border-radius: 12px;
   font-size: 15px;
   font-family: inherit;
-  color: #3D2C1A;
-  background: #FFFAF2;
+  color: var(--color-text);
+  background: var(--color-bg);
   outline: none;
   transition: border-color 0.25s, box-shadow 0.25s;
   box-sizing: border-box;
 }
 
 .ep-input:focus {
-  border-color: #FAA61A;
+  border-color: var(--color-primary);
   box-shadow: 0 0 0 4px rgba(250, 166, 26, 0.12);
 }
 
@@ -134,26 +134,26 @@
   justify-content: center;
   gap: 8px;
   padding: 14px 18px;
-  border: 2px solid #F0E8DE;
+  border: 2px solid var(--color-border);
   border-radius: 12px;
-  background: #FFFAF2;
+  background: var(--color-bg);
   font-size: 14px;
   font-weight: 600;
   font-family: inherit;
-  color: #7A6B5A;
+  color: var(--color-text-light);
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .ep-radio-btn:hover {
-  border-color: #FAA61A;
-  color: #3D2C1A;
+  border-color: var(--color-primary);
+  color: var(--color-text);
 }
 
 .ep-radio-btn--active {
-  border-color: #FAA61A;
+  border-color: var(--color-primary);
   background: rgba(250, 166, 26, 0.08);
-  color: #571700;
+  color: var(--color-deep);
   box-shadow: 0 0 0 3px rgba(250, 166, 26, 0.15);
 }
 
@@ -171,9 +171,9 @@
   flex-direction: column;
   gap: 10px;
   padding: 20px;
-  background: #FFFAF2;
+  background: var(--color-bg);
   border-radius: 16px;
-  border: 1px solid #F0E8DE;
+  border: 1px solid var(--color-border);
 }
 
 .ep-result {
@@ -181,7 +181,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 12px 16px;
-  background: #fff;
+  background: var(--color-white);
   border-radius: 10px;
 }
 
@@ -193,17 +193,17 @@
 .ep-result-label {
   font-size: 13px;
   font-weight: 500;
-  color: #7A6B5A;
+  color: var(--color-text-light);
 }
 
 .ep-result-value {
   font-size: 18px;
   font-weight: 800;
-  color: #3D2C1A;
+  color: var(--color-text);
 }
 
 .ep-result--primary .ep-result-value {
-  color: #FAA61A;
+  color: var(--color-primary);
 }
 
 .ep-submit {
@@ -215,7 +215,7 @@
   font-weight: 700;
   font-family: inherit;
   color: #fff;
-  background: #FAA61A;
+  background: var(--color-primary);
   cursor: pointer;
   transition: background 0.25s, transform 0.2s;
   box-shadow: 0 4px 14px rgba(250, 166, 26, 0.35);

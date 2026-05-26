@@ -1,5 +1,5 @@
-import { API_URL } from '../../config/api';
 import { useState, useRef } from 'react'
+import { mealService } from '../../services/mealService'
 import './AIBubble.css'
 
 
@@ -23,21 +23,9 @@ function AIBubble({ onMealAdded }: Props) {
 
   async function uploadImage(file: File) {
     setLoading(true)
-    const token = localStorage.getItem('token')
-    if (!token) return
-
-    const form = new FormData()
-    form.append('image', file)
 
     try {
-      const res = await fetch(`${API_URL}/ai/analyze`, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${token}` },
-        body: form,
-      })
-
-      if (!res.ok) throw new Error('Error al analizar')
-
+      await mealService.analyzeImageQuick(file)
       onMealAdded()
       setTimeout(() => {
         setOpen(false)

@@ -237,7 +237,7 @@
   font-size: 15px;
   font-weight: 700;
   font-family: inherit;
-  color: var(--color-white);
+  color: #ffffff;
   background: var(--color-primary);
   cursor: pointer;
   transition: background 0.25s, transform 0.2s, box-shadow 0.25s;

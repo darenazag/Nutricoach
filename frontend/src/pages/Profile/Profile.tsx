@@ -1,102 +1,24 @@
-import { API_URL } from '../../config/api';
 import { useState, useEffect, useCallback } from 'react'
 import { useAuth } from '../../context/useAuth'
 import { Navigate, useNavigate } from 'react-router-dom'
 import Header from '../../components/Header/Header'
 import AIBubble from '../../components/AIBubble/AIBubble'
+import MenuSugerido from '../../components/MenuSugerido/MenuSugerido'
+import MealsSection from '../../components/MealsSection/MealsSection'
 import { CaloriesBarChart } from '../../components/charts/CaloriesBarChart'
 import { MacroPieChart } from '../../components/charts/MacroPieChart'
 import { WeightLineChart } from '../../components/charts/WeightLineChart'
+import { profileService } from '../../services/profileService'
+import { mealService } from '../../services/mealService'
+import type { ProfileData, Meal, StreakData, RecommendationData } from '../../types'
+import { objectiveForApi, objectiveLabel, activityLabel, genderLabel } from '../../types'
 import './Profile.css'
 
 
-interface ProfileData {
-  weight: number
-  age: number
-  height: number
-  gender: 'M' | 'F'
-  activityFactor: 'S' | 'A' | 'M'
-  objective: 'P' | 'M' | 'G'
-  basalMetabolicRate: number
-  totalDailyEnergyExpenditure: number
-}
-
-interface Meal {
-  meal_id: number
-  name: string
-  calories: number
-  protein: number
-  fat: number
-  carbs: number
-  img: string | null
-  source: string
-}
-
-interface StreakData {
-  streak: number
-  history: { label: string; done: boolean }[]
-  mealCount: number
-}
-
-interface RecomendacionMenuComida {
-  categoria: string
-  kcal: number
-}
-
-interface RecomendacionMenu {
-  desayuno: RecomendacionMenuComida
-  almuerzo: RecomendacionMenuComida
-  cena: RecomendacionMenuComida
-}
-
-interface DiaProyeccion {
-  dia: number
-  calorias_consumidas: number
-  balance_energetico: number
-  peso_proyectado: number
-  recomendacion_menu: RecomendacionMenu
-}
-
-interface RecommendationData {
-  datos_usuario: { tmb: string; getd: string }
-  objetivo_usuario: string
-  proyeccion_diaria: DiaProyeccion[]
-}
-
-const objectiveForApi: Record<string, string> = {
-  P: 'bajar',
-  M: 'mantener',
-  G: 'subir',
-}
-
-const objectiveLabel: Record<string, string> = {
-  P: 'Perder peso',
-  M: 'Mantener peso',
-  G: 'Ganar masa muscular',
-}
-
-const activityLabel: Record<string, string> = {
-  S: 'Sedentario',
-  A: 'Activo',
-  M: 'Muy activo',
-}
-
-const genderLabel: Record<string, string> = {
-  M: 'Masculino',
-  F: 'Femenino',
-}
-
-const MEAL_ICONS = ['🍗', '🍚', '🥗', '🥤', '🐟', '🥩', '🥑', '🍳']
-
-const MEAL_CATEGORIES = [
-  { id: 'Desayuno', icon: '🌅', hour: '07:00 - 09:00' },
-  { id: 'Almuerzo', icon: '☀️', hour: '12:00 - 14:00' },
-  { id: 'Merienda', icon: '🌤️', hour: '16:00 - 17:00' },
-  { id: 'Cena', icon: '🌙', hour: '20:00 - 21:00' },
-] as const
-
-function cleanSource(source: string | null) {
-  return source?.replace(/\s*-\s*(desayuno|almuerzo|merienda|cena)$/i, '') || ''
+const CAT_COLORS: Record<string, string> = {
+  bajo: '#4caf50',
+  medio: '#ff9800',
+  alto: '#f44336',
 }
 
 type Tab = 'perfil' | 'dashboard'
@@ -110,39 +32,29 @@ function Profile() {
   const [recommendation, setRecommendation] = useState<RecommendationData | null>(null)
   const [loading, setLoading] = useState(true)
   const [tab, setTab] = useState<Tab>('dashboard')
+  const [todayIndex, setTodayIndex] = useState(0)
+  const [suggestedKcal, setSuggestedKcal] = useState(0)
 
   const reloadMeals = useCallback(() => {
-    const token = localStorage.getItem('token')
-    if (!token) return
     Promise.all([
-      fetch(`${API_URL}/meals/profile/mine`, {
-        headers: { Authorization: `Bearer ${token}` },
-      }).then(r => r.ok ? r.json() : Promise.reject()),
-      fetch(`${API_URL}/profile/streak`, {
-        headers: { Authorization: `Bearer ${token}` },
-      }).then(r => r.ok ? r.json() : Promise.reject()),
+      mealService.getMyMeals(),
+      profileService.getStreak(),
     ])
       .then(([mealsData, streakData]) => {
-        setMeals(mealsData.meals || [])
+        setMeals(prev => {
+          const mockMeals = prev.filter(m => m.meal_id < 0)
+          return [...(mealsData.meals || []), ...mockMeals]
+        })
         setStreak(streakData)
       })
       .catch(() => {})
   }, [])
 
   useEffect(() => {
-    const token = localStorage.getItem('token')
-    if (!token) return
-
     Promise.all([
-      fetch(`${API_URL}/profile`, {
-        headers: { Authorization: `Bearer ${token}` },
-      }).then(r => r.ok ? r.json() : Promise.reject()),
-      fetch(`${API_URL}/meals/profile/mine`, {
-        headers: { Authorization: `Bearer ${token}` },
-      }).then(r => r.ok ? r.json() : Promise.reject()),
-      fetch(`${API_URL}/profile/streak`, {
-        headers: { Authorization: `Bearer ${token}` },
-      }).then(r => r.ok ? r.json() : Promise.reject()),
+      profileService.get(),
+      mealService.getMyMeals(),
+      profileService.getStreak(),
     ])
       .then(([profileData, mealsData, streakData]) => {
         setProfile(profileData.profile)
@@ -159,29 +71,23 @@ function Profile() {
 
   useEffect(() => {
     if (!profile || !user?.id) return
-    const token = localStorage.getItem('token')
-    if (!token) return
-
     const objective = objectiveForApi[profile.objective]
     if (!objective) return
 
-    fetch(`${API_URL}/meals/recommend?userId=${user.id}&objective=${objective}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then(r => r.ok ? r.json() : Promise.reject())
+    profileService.getRecommendation(user.id, objective)
       .then(data => setRecommendation(data))
       .catch(() => {})
   }, [profile, user?.id])
 
   if (!isAuthenticated) return <Navigate to="/login" replace />
 
-  const totalCalories = meals.reduce((s, m) => s + Number(m.calories), 0)
+  const totalCalories = meals.reduce((s, m) => s + Number(m.calories), 0) + suggestedKcal
   const totalProtein  = meals.reduce((s, m) => s + Number(m.protein), 0)
   const totalCarbs    = meals.reduce((s, m) => s + Number(m.carbs), 0)
   const totalFat      = meals.reduce((s, m) => s + Number(m.fat), 0)
 
   const calorieGoal = profile?.totalDailyEnergyExpenditure || 2000
-  const caloriePct = Math.min(Math.round((totalCalories / calorieGoal) * 100), 100)
+  const caloriePct = Math.round((totalCalories / calorieGoal) * 100)
   const circumference = 251.2
   const offset = circumference - (caloriePct / 100) * circumference
 
@@ -190,24 +96,6 @@ function Profile() {
     carbs: Math.round(calorieGoal * 0.4 / 4),
     fat: Math.round(calorieGoal * 0.3 / 9),
   }
-
-  const mealsByCategory: Record<string, Meal[]> = {
-    Desayuno: [],
-    Almuerzo: [],
-    Merienda: [],
-    Cena: [],
-  }
-  meals.forEach((meal, i) => {
-    const catMatch = meal.source?.match(/-\s*(desayuno|almuerzo|merienda|cena)$/i)
-    let key: string
-    if (catMatch) {
-      const map: Record<string, string> = { desayuno: 'Desayuno', almuerzo: 'Almuerzo', merienda: 'Merienda', cena: 'Cena' }
-      key = map[catMatch[1].toLowerCase()] || MEAL_CATEGORIES[i % MEAL_CATEGORIES.length].id
-    } else {
-      key = MEAL_CATEGORIES[i % MEAL_CATEGORIES.length].id
-    }
-    mealsByCategory[key].push(meal)
-  })
 
   const streakDays = streak?.history ?? [
     { label: 'L', done: false },
@@ -234,18 +122,6 @@ function Profile() {
       }))
     : []
 
-  const todayProjection = projectionDays[0]
-  const todayRecommendation = todayProjection?.recomendacion_menu ?? null
-  const suggestedMeals = todayRecommendation
-    ? [
-        { key: 'desayuno', label: 'Desayuno', info: todayRecommendation.desayuno },
-        { key: 'almuerzo', label: 'Almuerzo', info: todayRecommendation.almuerzo },
-        { key: 'cena', label: 'Cena', info: todayRecommendation.cena },
-      ]
-    : []
-  const todayCalories = Number(todayProjection?.calorias_consumidas ?? 0)
-  const todayBalance = Number(todayProjection?.balance_energetico ?? 0)
-  const todayProjectedWeight = Number(todayProjection?.peso_proyectado ?? 0)
   const weightStart = Number(projectionDays[0]?.peso_proyectado ?? 0)
   const weightEnd = Number(projectionDays[projectionDays.length - 1]?.peso_proyectado ?? 0)
 
@@ -381,7 +257,6 @@ function Profile() {
               {/* META CALÓRICA */}
               <section className="pcard pcard-calories">
                 <h2 className="pcard-title">
-                  <span className="pcard-title-icon">🔥</span>
                   Meta calórica
                 </h2>
 
@@ -406,49 +281,20 @@ function Profile() {
                 </div>
               </section>
 
-              {/* RECOMENDACIÓN DEL DÍA */}
-              <section className="pcard pcard-recommend">
-                <h2 className="pcard-title">
-                  <span className="pcard-title-icon">📋</span>
-                  Menú sugerido de hoy
-                </h2>
-                {todayRecommendation ? (
-                  <>
-                  <div className="prec-grid">
-                    {suggestedMeals.map(({ key, label, info }) => (
-                      <div key={key} className={`prec-item prec-item--${info.categoria}`}>
-                        <span className="prec-item-label">{label}</span>
-                        <span className="prec-item-cat">{info.categoria}</span>
-                        <span className="prec-item-kcal">{Number(info.kcal ?? 0)} kcal</span>
-                      </div>
-                    ))}
-                    <div className="prec-total">
-                      Total: {todayCalories} kcal
-                    </div>
-                  </div>
-                  <div className="prec-summary">
-                    <div className="prec-summary-item">
-                      <span>Balance</span>
-                      <strong>{todayBalance} kcal</strong>
-                    </div>
-                    <div className="prec-summary-item">
-                      <span>Peso proyectado</span>
-                      <strong>{todayProjectedWeight.toFixed(1)} kg</strong>
-                    </div>
-                  </div>
-                  </>
-                ) : (
-                  <p className="prec-empty">
-                    {profile ? 'Generando recomendación…' : 'Completa tu perfil para generar una recomendación'}
-                  </p>
-                )}
-              </section>
+              <MenuSugerido
+                projectionDays={projectionDays}
+                todayIndex={todayIndex}
+                onDayChange={setTodayIndex}
+                objetivoUsuario={recommendation?.objetivo_usuario}
+                tmb={recommendation?.datos_usuario?.tmb}
+                getd={recommendation?.datos_usuario?.getd}
+                onCompletedKcalChange={setSuggestedKcal}
+              />
 
               {/* PROYECCIÓN 100 DÍAS */}
               {projectionDays.length > 0 && (
                 <section className="pcard pcard-projection">
                   <h2 className="pcard-title">
-                    <span className="pcard-title-icon">📈</span>
                     Proyección a 100 días
                   </h2>
                   <div className="pproj-summary">
@@ -487,14 +333,14 @@ function Profile() {
                         </thead>
                         <tbody>
                           {projectionDays.map(d => (
-                            <tr key={d.dia}>
+                            <tr key={d.dia} className={todayIndex === d.dia - 1 ? 'pproj-row--active' : ''}>
                               <td>{d.dia}</td>
                               <td>{d.calorias_consumidas}</td>
                               <td>{d.balance_energetico}</td>
                               <td>{Number(d.peso_proyectado ?? 0).toFixed(1)}</td>
-                              <td className="pproj-cat">{d.recomendacion_menu.desayuno.categoria}</td>
-                              <td className="pproj-cat">{d.recomendacion_menu.almuerzo.categoria}</td>
-                              <td className="pproj-cat">{d.recomendacion_menu.cena.categoria}</td>
+                              <td><span className="pproj-cat-dot" style={{ background: CAT_COLORS[d.recomendacion_menu.desayuno.categoria] }} />{d.recomendacion_menu.desayuno.categoria}</td>
+                              <td><span className="pproj-cat-dot" style={{ background: CAT_COLORS[d.recomendacion_menu.almuerzo.categoria] }} />{d.recomendacion_menu.almuerzo.categoria}</td>
+                              <td><span className="pproj-cat-dot" style={{ background: CAT_COLORS[d.recomendacion_menu.cena.categoria] }} />{d.recomendacion_menu.cena.categoria}</td>
                             </tr>
                           ))}
                         </tbody>
@@ -513,83 +359,18 @@ function Profile() {
               </section>
 
               {/* GRÁFICO: CALORÍAS vs OBJETIVO */}
-              <CaloriesBarChart consumed={totalCalories} goal={calorieGoal} />
+              <CaloriesBarChart
+                consumed={totalCalories}
+                goal={calorieGoal}
+                protein={totalProtein}
+                carbs={totalCarbs}
+                fat={totalFat}
+              />
 
-              {/* COMIDAS REGISTRADAS */}
-              <section className="pcard pcard-meals">
-                <div className="pcard-title-row">
-                  <h2 className="pcard-title">
-                    <span className="pcard-title-icon">🍽️</span>
-                    Comidas registradas
-                  </h2>
-                  <button
-                    className="pcard-add-btn"
-                    onClick={() => navigate('/registrar-comida')}
-                    type="button"
-                  >
-                    + Añadir
-                  </button>
-                </div>
-
-                {meals.length === 0 ? (
-                  <p style={{ color: 'var(--pcolor-text-light, #7a6b5a)', fontSize: '14px', textAlign: 'center', padding: '20px 0' }}>
-                    Aún no tienes comidas registradas hoy
-                  </p>
-                ) : (
-                  <div className="pcard-meal-blocks">
-                    {MEAL_CATEGORIES.map(cat => {
-                      const catMeals = mealsByCategory[cat.id]
-                      return (
-                        <div key={cat.id} className="pcard-meal-block">
-                          <div className="pcard-meal-block-header">
-                            <span className="pcard-meal-block-icon">{cat.icon}</span>
-                            <div>
-                              <span className="pcard-meal-block-title">{cat.id}</span>
-                              <span className="pcard-meal-block-hour">{cat.hour}</span>
-                            </div>
-                            {catMeals.length > 0 && (
-                              <span className="pcard-meal-block-count">{catMeals.length} plato{catMeals.length > 1 ? 's' : ''}</span>
-                            )}
-                          </div>
-
-                          {catMeals.length === 0 ? (
-                            <button
-                              className="pcard-meal-block-empty"
-                              onClick={() => navigate(`/registrar-comida?categoria=${cat.id.toLowerCase()}`)}
-                              type="button"
-                            >
-                              <span className="pcard-meal-empty-icon">+</span>
-                              <span className="pcard-meal-empty-text">
-                                + Añadir <strong>{cat.id.toLowerCase()}</strong>
-                              </span>
-                            </button>
-                          ) : (
-                            <div className="pcard-meal-block-items">
-                              {catMeals.map((meal, i) => (
-                                <article key={meal.meal_id} className="pcard-meal">
-                                  <div className="pcard-meal-img">
-                                    {MEAL_ICONS[i % MEAL_ICONS.length]}
-                                  </div>
-                                  <div className="pcard-meal-body">
-                                    <h3 className="pcard-meal-name">{meal.name}</h3>
-                                    <p className="pcard-meal-source">{cleanSource(meal.source)}</p>
-                                    <div className="pcard-meal-macros">
-                                      <span className="pcard-meal-macro pcard-meal-macro--kcal">{Number(meal.calories)} kcal</span>
-                                      <span className="pcard-meal-macro pcard-meal-macro--protein">{Number(meal.protein)}g</span>
-                                      <span className="pcard-meal-macro pcard-meal-macro--carbs">{Number(meal.carbs)}g</span>
-                                      <span className="pcard-meal-macro pcard-meal-macro--fat">{Number(meal.fat)}g</span>
-                                    </div>
-                                  </div>
-                                </article>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                      )
-                    })}
-                  </div>
-                )}
-              </section>
+              <MealsSection
+                meals={meals}
+                onMealsChange={setMeals}
+              />
             </>
 
           )}

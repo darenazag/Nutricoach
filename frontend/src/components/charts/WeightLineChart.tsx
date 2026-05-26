@@ -28,20 +28,29 @@ export function WeightLineChart({ data }: WeightLineChartProps) {
       <div className="chart-wrapper">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={data}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#f0e6d8" />
-            <XAxis dataKey="day" tick={{ fontSize: 13, fill: '#7a6b5a' }} />
+            <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" strokeOpacity={0.5} />
+            <XAxis dataKey="day" tick={{ fontSize: 13, fill: 'var(--color-text-light)' }} />
             <YAxis
               domain={[min - padding, max + padding]}
-              tick={{ fontSize: 12, fill: '#7a6b5a' }}
+              tick={{ fontSize: 12, fill: 'var(--color-text-light)' }}
               tickFormatter={v => `${v}kg`}
             />
-            <Tooltip formatter={(value) => [`${value} kg`, 'Peso']} />
+            <Tooltip
+              contentStyle={{
+                background: 'var(--color-white)',
+                border: '1px solid var(--color-border)',
+                borderRadius: '12px',
+                boxShadow: 'var(--shadow-md)',
+              }}
+              labelStyle={{ color: 'var(--color-text)', fontWeight: 700, fontSize: 13 }}
+              formatter={(value) => [`${value} kg`, 'Peso']}
+            />
             <Line
               type="monotone"
               dataKey="weight"
-              stroke="#fea50a"
+              stroke="var(--color-primary)"
               strokeWidth={3}
-              dot={{ r: 5, fill: '#fea50a', strokeWidth: 2, stroke: '#fff' }}
+              dot={{ r: 5, fill: 'var(--color-primary)', strokeWidth: 2, stroke: 'var(--color-white)' }}
               activeDot={{ r: 7 }}
             />
           </LineChart>

@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from 'react'
 import { AuthContext } from './AuthContext'
-import type { User, RawUser } from './AuthContext'
+import type { User, RawUser } from '../types'
 
 function normalizeUser(raw: RawUser): User {
   const id = raw.id ?? raw.user_id

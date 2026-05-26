@@ -1,8 +1,8 @@
 
-import { API_URL } from '../../config/api';
 import { useState, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/useAuth'
+import { profileService } from '../../services/profileService'
 import './EditProfile.css'
 
 
@@ -47,36 +47,9 @@ function EditProfile() {
 
   // Carga de datos segura desde el servidor
   useEffect(() => {
-    // 1. ESPERAR: Si el sistema no está autenticado todavía, no hacemos fetch
     if (!isAuthenticated) return
 
-    const token = localStorage.getItem('token')
-    if (!token) {
-      setLoading(false)
-      return
-    }
-
-    fetch(`${API_URL}/profile`, {
-      method: 'GET',
-      headers: { 
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}` 
-      },
-    })
-      .then(async (res) => {
-        if (res.status === 401) {
-          throw new Error('Sesión expirada. Por favor, vuelve a iniciar sesión.')
-        }
-        if (res.status === 404) {
-          // Si no hay perfil guardado aún, no es un error trágico, dejamos que lo rellene
-          return null
-        }
-        if (!res.ok) {
-          const data = await res.json().catch(() => ({}))
-          throw new Error(data.error || 'Error al obtener el perfil')
-        }
-        return res.json()
-      })
+    profileService.get()
       .then(data => {
         if (data && data.profile) {
           const p = data.profile
@@ -88,14 +61,11 @@ function EditProfile() {
           setObjective(p.objective || '')
         }
       })
-      .catch((err) => {
-        setError(err.message)
-        if (err.message.includes('Sesión expirada')) {
-          navigate('/login')
-        }
+      .catch(() => {
+        // 404 = no profile yet, not an error
       })
       .finally(() => setLoading(false))
-  }, [isAuthenticated, navigate]) // <-- Dependencia clave: isAuthenticated
+  }, [isAuthenticated, navigate])
 
   const w = parseFloat(weight)
   const h = parseFloat(height)
@@ -124,34 +94,20 @@ function EditProfile() {
 
     setSaving(true)
     try {
-      const token = localStorage.getItem('token')
-      const res = await fetch(`${API_URL}/profile`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          weight: w,
-          height: h,
-          age: a,
-          gender,
-          activityFactor,
-          objective,
-          basalMetabolicRate: bmr,
-          totalDailyEnergyExpenditure: tdee,
-        }),
+      await profileService.create({
+        weight: w,
+        height: h,
+        age: a,
+        gender,
+        activityFactor,
+        objective,
+        basalMetabolicRate: bmr,
+        totalDailyEnergyExpenditure: tdee,
       })
 
-      if (!res.ok) {
-        const data = await res.json()
-        setError(data.error || 'Error al guardar')
-        return
-      }
-
       navigate('/perfil')
-    } catch {
-      setError('Error de conexión con el servidor')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error de conexión con el servidor')
     } finally {
       setSaving(false)
     }
