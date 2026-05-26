@@ -6,6 +6,10 @@ vi.mock('../../modules/ai/services/aiPlateAnalysis.service.js', () => ({
   runAiPlateAnalysis: vi.fn(),
 }));
 
+vi.mock('../../modules/ai/adapters/index.js', () => ({
+  buildAiPlateContextFromP0User: vi.fn(),
+}));
+
 vi.mock('sharp', () => ({
   default: vi.fn(() => ({
     metadata: vi.fn().mockResolvedValue({ width: 100, height: 100 }),
@@ -18,6 +22,7 @@ vi.mock('sharp', () => ({
 }));
 
 import { runAiPlateAnalysis } from '../../modules/ai/services/aiPlateAnalysis.service.js';
+import { buildAiPlateContextFromP0User } from '../../modules/ai/adapters/index.js';
 import { handleAnalyze, handleAnalyzePreview } from '../../modules/ai/controllers/aiLegacyAnalyze.controller.js';
 
 // ── Mock plate-analysis result ────────────────────────────────────────────────
@@ -60,8 +65,18 @@ function makeReqWithFile(): Request {
       size: 1024,
     },
     body: {},
+    // populated by `authenticate` middleware in production; mocked here so the
+    // controller can pass req.auth!.sub to buildAiPlateContextFromP0User().
+    auth: { sub: 123, email: 'demo@nutricoach.com', role: 'user' },
   } as unknown as Request;
 }
+
+const MOCK_CONTEXT = {
+  userId: '123',
+  objective: 'lose_weight' as const,
+  caloriesTarget: 2000,
+  plan: 'free' as const,
+};
 
 function makeRes(): Response {
   return {
@@ -79,6 +94,7 @@ describe('POST /api/ai/analyze — legacy adapter (AIBubble)', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.mocked(runAiPlateAnalysis).mockResolvedValue(MOCK_RESULT as never);
+    vi.mocked(buildAiPlateContextFromP0User).mockResolvedValue(MOCK_CONTEXT);
   });
 
   it('returns HTTP 200 — endpoint exists, does not 404', async () => {
@@ -96,11 +112,17 @@ describe('POST /api/ai/analyze — legacy adapter (AIBubble)', () => {
     );
   });
 
-  it('delegates to runAiPlateAnalysis with userId "legacy_adapter"', async () => {
+  it('delegates to runAiPlateAnalysis with the P0 nutrition context from the adapter', async () => {
     const res = makeRes();
     await handler(makeReqWithFile(), res, next);
+    expect(buildAiPlateContextFromP0User).toHaveBeenCalledWith(123);
     expect(runAiPlateAnalysis).toHaveBeenCalledWith(
-      expect.objectContaining({ userId: 'legacy_adapter' }),
+      expect.objectContaining({
+        userId: '123',
+        objective: 'lose_weight',
+        caloriesTarget: 2000,
+        plan: 'free',
+      }),
     );
   });
 
@@ -122,6 +144,7 @@ describe('POST /api/ai/analyze-preview — legacy adapter (RegistrarComida)', ()
   beforeEach(() => {
     vi.clearAllMocks();
     vi.mocked(runAiPlateAnalysis).mockResolvedValue(MOCK_RESULT as never);
+    vi.mocked(buildAiPlateContextFromP0User).mockResolvedValue(MOCK_CONTEXT);
   });
 
   it('returns HTTP 200 — endpoint exists, does not 404', async () => {

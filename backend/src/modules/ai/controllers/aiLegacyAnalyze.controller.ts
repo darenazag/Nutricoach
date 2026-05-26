@@ -3,6 +3,7 @@ import multer from 'multer';
 import sharp from 'sharp';
 import { AiServiceError } from '../services/aiServiceError.js';
 import { runAiPlateAnalysis } from '../services/aiPlateAnalysis.service.js';
+import { buildAiPlateContextFromP0User } from '../adapters/index.js';
 
 // ── Upload config (mirrors aiPlateAnalysis.controller limits) ─────────────────
 
@@ -82,7 +83,8 @@ async function processUploadedImage(req: Request): Promise<ProcessedImage> {
 const postAnalyze: RequestHandler = async (req, res, next) => {
   try {
     const { imageBuffer, imageMetadata } = await processUploadedImage(req);
-    const result = await runAiPlateAnalysis({ userId: 'legacy_adapter', imageBuffer, imageMetadata });
+    const aiContext = await buildAiPlateContextFromP0User(req.auth!.sub);
+    const result = await runAiPlateAnalysis({ ...aiContext, imageBuffer, imageMetadata });
     res.status(200).json({ success: true, data: result });
   } catch (err) {
     next(err);
@@ -97,7 +99,8 @@ const postAnalyze: RequestHandler = async (req, res, next) => {
 const postAnalyzePreview: RequestHandler = async (req, res, next) => {
   try {
     const { imageBuffer, imageMetadata } = await processUploadedImage(req);
-    const result = await runAiPlateAnalysis({ userId: 'legacy_adapter', imageBuffer, imageMetadata });
+    const aiContext = await buildAiPlateContextFromP0User(req.auth!.sub);
+    const result = await runAiPlateAnalysis({ ...aiContext, imageBuffer, imageMetadata });
 
     const n = result.structuredData.estimatedNutrition;
     const analysis = {
