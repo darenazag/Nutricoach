@@ -131,3 +131,24 @@ export interface ProfileMeal {
 export interface MealWithItems extends Meal {
   items: FoodItem[];
 }
+
+
+/**
+ * Proyección de un día en la simulación Monte Carlo.
+ */
+export interface DiaProyeccion {
+  /** Número de día (1 a 100) */
+  dia: number;
+  /** Calorías consumidas ese día (con variación ±50 kcal) */
+  calorias_consumidas: number;
+  /** Balance energético (calorías_consumidas - GETD) */
+  balance_energetico: number;
+  /** Peso proyectado al final del día (kg) */
+  peso_proyectado: number;
+  /** Menú recomendado para ese día (categorías calóricas) */
+  recomendacion_menu: {
+    desayuno: { categoria: string; kcal: number };
+    almuerzo: { categoria: string; kcal: number };
+    cena: { categoria: string; kcal: number };
+  };
+}
