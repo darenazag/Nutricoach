@@ -117,6 +117,8 @@
   font-size: 14px;
   color: var(--color-error);
   margin: 0 0 16px;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 /* ── Primary button ────────────────────────────────────────────── */
@@ -190,10 +192,11 @@
   min-height: 280px;
   max-height: 480px;
   overflow-y: auto;
+  overflow-x: hidden;
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  padding: 4px 0 8px;
+  gap: 18px;
+  padding: 4px 2px 8px;
   margin-bottom: 20px;
   scroll-behavior: smooth;
 }
@@ -223,51 +226,64 @@
   margin: 0;
 }
 
-/* Bubbles */
+/* Message bubbles
+   NOTE: class is `.ai-msg` (NOT `.ai-bubble`) to avoid collision with the
+   floating-button `.ai-bubble` defined in components/AIBubble/AIBubble.css. */
 
-.ai-bubble {
+.ai-msg {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  max-width: 85%;
+  gap: 8px;
+  max-width: 100%;
+  min-width: 0;
 }
 
-.ai-bubble--user {
+.ai-msg--user {
   align-self: flex-end;
   align-items: flex-end;
+  max-width: min(88%, 56ch);
 }
 
-.ai-bubble--ai {
+.ai-msg--ai {
   align-self: flex-start;
   align-items: flex-start;
+  max-width: min(92%, 68ch);
 }
 
-.ai-bubble__text {
+.ai-msg__text {
   padding: 12px 16px;
   border-radius: 18px;
   font-size: 15px;
   line-height: 1.55;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
   word-break: break-word;
+  hyphens: auto;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
-.ai-bubble--user .ai-bubble__text {
+.ai-msg--user .ai-msg__text {
   background: var(--color-primary);
   color: #fff;
   border-bottom-right-radius: 4px;
 }
 
-.ai-bubble--ai .ai-bubble__text {
+.ai-msg--ai .ai-msg__text {
   background: var(--color-bg);
   color: var(--color-text);
   border: 1px solid var(--color-border);
   border-bottom-left-radius: 4px;
 }
 
-.ai-bubble__sections {
+.ai-msg__sections {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 14px;
   width: 100%;
+  min-width: 0;
+  padding: 4px 4px 0;
+  box-sizing: border-box;
 }
 
 .ai-section-label {
@@ -295,8 +311,10 @@
   align-items: flex-start;
   gap: 8px;
   font-size: 14px;
-  line-height: 1.45;
+  line-height: 1.5;
   color: var(--color-text);
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .ai-recs-list li::before {
@@ -323,17 +341,22 @@
 }
 
 .ai-followup-chip {
-  padding: 7px 14px;
+  padding: 8px 14px;
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-full);
+  border-radius: 16px;
   background: var(--color-white);
   color: var(--color-text);
   font-size: 13px;
   font-weight: 500;
   font-family: inherit;
+  line-height: 1.35;
   cursor: pointer;
   transition: all 0.2s;
   text-align: left;
+  max-width: 100%;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
   -webkit-tap-highlight-color: transparent;
 }
 
@@ -341,6 +364,11 @@
   border-color: var(--color-primary);
   color: var(--color-primary);
   background: rgba(254, 165, 10, 0.05);
+}
+
+.ai-followup-chip:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
 }
 
 .ai-out-of-scope {
@@ -353,6 +381,18 @@
   font-style: italic;
   line-height: 1.5;
   margin: 0;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+/* Generic safety: any pre/code/table inside an AI message scrolls
+   horizontally instead of breaking the page layout. */
+.ai-msg__text pre,
+.ai-msg__text code,
+.ai-msg__sections table {
+  max-width: 100%;
+  overflow-x: auto;
+  display: block;
 }
 
 /* Typing indicator */
@@ -391,10 +431,13 @@
   display: flex;
   gap: 10px;
   align-items: flex-end;
+  width: 100%;
+  min-width: 0;
 }
 
 .ai-chat__input {
-  flex: 1;
+  flex: 1 1 auto;
+  min-width: 0;
   padding: 12px 16px;
   border: 1.5px solid var(--color-border);
   border-radius: 16px;
@@ -408,6 +451,7 @@
   outline: none;
   transition: border-color 0.2s, box-shadow 0.2s;
   line-height: 1.5;
+  overflow-wrap: anywhere;
 }
 
 .ai-chat__input:focus {
@@ -805,15 +849,29 @@
   .ai-chat__messages {
     min-height: 220px;
     max-height: 360px;
+    gap: 14px;
   }
 
-  .ai-bubble {
-    max-width: 92%;
+  .ai-msg--user,
+  .ai-msg--ai {
+    max-width: 94%;
   }
 
-  .ai-bubble__text {
+  .ai-msg__text {
     font-size: 14px;
     padding: 10px 14px;
+    line-height: 1.5;
+  }
+
+  .ai-chat__send {
+    width: 44px;
+    height: 44px;
+    font-size: 18px;
+  }
+
+  .ai-followup-chip {
+    font-size: 12.5px;
+    padding: 7px 12px;
   }
 
   .ai-plate-cta {

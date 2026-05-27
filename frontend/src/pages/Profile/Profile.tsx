@@ -1,5 +1,5 @@
 import { API_URL } from '../../config/api';
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect } from 'react'
 import { useAuth } from '../../context/useAuth'
 import { Navigate, useNavigate } from 'react-router-dom'
 import Header from '../../components/Header/Header'
@@ -110,24 +110,6 @@ function Profile() {
   const [recommendation, setRecommendation] = useState<RecommendationData | null>(null)
   const [loading, setLoading] = useState(true)
   const [tab, setTab] = useState<Tab>('dashboard')
-
-  const reloadMeals = useCallback(() => {
-    const token = localStorage.getItem('token')
-    if (!token) return
-    Promise.all([
-      fetch(`${API_URL}/meals/profile/mine`, {
-        headers: { Authorization: `Bearer ${token}` },
-      }).then(r => r.ok ? r.json() : Promise.reject()),
-      fetch(`${API_URL}/profile/streak`, {
-        headers: { Authorization: `Bearer ${token}` },
-      }).then(r => r.ok ? r.json() : Promise.reject()),
-    ])
-      .then(([mealsData, streakData]) => {
-        setMeals(mealsData.meals || [])
-        setStreak(streakData)
-      })
-      .catch(() => {})
-  }, [])
 
   useEffect(() => {
     const token = localStorage.getItem('token')
@@ -592,7 +574,7 @@ function Profile() {
 
         </div>
       </div>
-      <AIBubble onMealAdded={reloadMeals} />
+      <AIBubble />
     </>
   )
 }
