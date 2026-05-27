@@ -163,3 +163,6 @@ frontend/.env.*
 
 
 .claude
+
+# macOS
+.DS_Store
