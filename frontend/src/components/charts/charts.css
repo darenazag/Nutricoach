@@ -60,3 +60,11 @@
     max-width: 100%;
   }
 }
+
+/* Global chart overflow guardrail */
+.recharts-wrapper {
+  max-width: 100%;
+}
+.recharts-surface {
+  overflow: visible;
+}

@@ -1,6 +1,7 @@
 .mini-features {
   padding: 100px 0 100px 24px;
   background: var(--color-bg);
+  overflow-x: clip;
 }
 
 .mf-container {

@@ -95,6 +95,8 @@ body.dark .text-gradient-dark {
   scrollbar-width: none;
   padding-bottom: 16px;
   cursor: grab;
+  overscroll-behavior-x: contain;
+  max-width: 100%;
 }
 .scroll-snap-x:active { cursor: grabbing; }
 .scroll-snap-x::-webkit-scrollbar { display: none; }
