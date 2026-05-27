@@ -1,0 +1,204 @@
+erDiagram
+    AI_CONVERSATION {
+        string conversationId PK "unique"
+        string userId "index"
+        string title
+        string type
+        string provider
+        string model
+        string status
+        mixed metadata
+        date createdAt
+        date updatedAt
+    }
+
+    AI_MESSAGE {
+        string messageId PK "unique"
+        string conversationId FK "index"
+        string userId "index"
+        string role
+        string content
+        mixed structuredData
+        string provider
+        string model
+        string promptVersion
+        object tokenUsage
+        object costEstimate
+        object safety
+        date createdAt
+        date updatedAt
+    }
+
+    AI_PLATE_ANALYSIS {
+        string analysisId PK "unique"
+        string userId "index"
+        string mealId "sparse index"
+        boolean imageStored
+        object imageMetadata
+        object[] detectedFoods
+        object estimatedNutrition
+        string[] assumptions
+        string confidenceReason
+        object proportions
+        string confidence
+        string[] recommendations
+        string[] warnings
+        mixed rawAiResponse
+        object futureEmbedding
+        date createdAt
+        date updatedAt
+    }
+
+    AI_WEEKLY_MENU_PLAN {
+        string planId PK "unique"
+        string userId "index"
+        string status "index"
+        string objective
+        number caloriesTarget
+        number proteinTarget
+        number carbsTarget
+        number fatTarget
+        number mealsPerDay
+        number totalDays
+        string notes
+        string plan
+        number completedDays
+        string provider
+        string model
+        string promptVersion
+        number cacheHits
+        number cacheMisses
+        number providerCallsPlanned
+        number providerCallsCompleted
+        mixed errorDetails
+        boolean realTokensAvailable
+        date createdAt
+        date updatedAt
+    }
+
+    AI_WEEKLY_MENU_DAY {
+        string planId FK "compound unique with dayNumber"
+        number dayNumber
+        string status
+        boolean cached
+        string cacheKey
+        string responseText
+        number dailyCalories
+        object[] meals
+        string[] recommendations
+        string[] warnings
+        object safety
+        string errorMessage
+        string provider
+        string model
+        string promptVersion
+        date createdAt
+        date updatedAt
+    }
+
+    AI_CACHE_ENTRY {
+        string cacheKey PK "unique"
+        string type
+        string inputHash "index"
+        string resultText
+        mixed resultJson
+        string provider
+        string model
+        string promptVersion
+        date expiresAt "TTL index"
+        number hitCount
+        date createdAt
+        date updatedAt
+    }
+
+    AI_PROMPT_TEMPLATE {
+        string promptKey "compound unique with version"
+        string version
+        string type
+        string systemPrompt
+        string userPromptTemplate
+        mixed outputSchema
+        boolean isActive
+        string notes
+        date createdAt
+        date updatedAt
+    }
+
+    TOKEN_USAGE {
+        number inputTokens
+        number outputTokens
+        number totalTokens
+    }
+
+    COST_ESTIMATE {
+        number amount
+        string currency
+    }
+
+    MESSAGE_SAFETY {
+        boolean blocked
+        string reason
+    }
+
+    IMAGE_METADATA {
+        string mimeType
+        number sizeBytes
+        number width
+        number height
+    }
+
+    DETECTED_FOOD {
+        string name
+        string estimatedQuantity
+        string confidence
+    }
+
+    ESTIMATED_NUTRITION {
+        object caloriesRange
+        object proteinRange
+        object carbsRange
+        object fatRange
+    }
+
+    PLATE_PROPORTIONS {
+        string protein
+        string carbs
+        string vegetables
+        string fats
+    }
+
+    FUTURE_EMBEDDING {
+        number[] embedding
+        string embeddingModel
+        string embeddingVersion
+    }
+
+    WEEKLY_MEAL {
+        string name
+        string description
+        number estimatedCalories
+        number estimatedProtein
+        number estimatedCarbs
+        number estimatedFat
+    }
+
+    DAY_SAFETY {
+        boolean isOutOfScope
+        string[] flags
+        string escalationMessage
+    }
+
+    AI_CONVERSATION ||--o{ AI_MESSAGE : conversationId
+    AI_WEEKLY_MENU_PLAN ||--o{ AI_WEEKLY_MENU_DAY : planId
+    AI_PROMPT_TEMPLATE ||--o{ AI_CACHE_ENTRY : promptVersion
+
+    AI_MESSAGE ||--|| TOKEN_USAGE : embeds
+    AI_MESSAGE ||--|| COST_ESTIMATE : embeds
+    AI_MESSAGE ||--|| MESSAGE_SAFETY : embeds
+    AI_PLATE_ANALYSIS ||--|| IMAGE_METADATA : embeds
+    AI_PLATE_ANALYSIS ||--o{ DETECTED_FOOD : embeds
+    AI_PLATE_ANALYSIS ||--|| ESTIMATED_NUTRITION : embeds
+    AI_PLATE_ANALYSIS ||--|| PLATE_PROPORTIONS : embeds
+    AI_PLATE_ANALYSIS ||--|| FUTURE_EMBEDDING : embeds
+    AI_WEEKLY_MENU_DAY ||--o{ WEEKLY_MEAL : embeds
+    AI_WEEKLY_MENU_DAY ||--|| DAY_SAFETY : embeds

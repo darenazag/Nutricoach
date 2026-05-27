@@ -1,0 +1,179 @@
+/* === SHARED UTILITY CLASSES === */
+
+/* Dark glassmorphism card */
+body.dark .glass-card-dark {
+  background: rgba(15, 23, 42, 0.35);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(51, 65, 85, 0.5);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+}
+
+body.dark .glass-card-dark:hover {
+  border-color: rgba(254, 165, 10, 0.3);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.25), 0 0 40px color-mix(in srgb, var(--color-primary) 6%, transparent);
+}
+
+/* Gradient heading text in dark mode */
+body.dark .text-gradient-dark {
+  background: linear-gradient(135deg, #f1f5f9 0%, #94a3b8 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Section tag badge */
+.section-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--color-primary);
+  background: linear-gradient(135deg, rgba(254, 165, 10, 0.12), rgba(254, 165, 10, 0.06));
+  border: 1px solid rgba(254, 165, 10, 0.2);
+  padding: 7px 18px;
+  border-radius: var(--radius-full);
+  margin-bottom: 20px;
+}
+
+/* Horizontal card row (MealLog + RegistrarComida) */
+.card-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: var(--color-white);
+  border-radius: 16px;
+  padding: 16px 18px;
+  box-shadow: 0 1px 3px rgba(87, 23, 0, 0.05), 0 4px 12px rgba(87, 23, 0, 0.06);
+  transition: box-shadow 0.2s;
+}
+.card-row:hover {
+  box-shadow: 0 2px 8px rgba(87, 23, 0, 0.1), 0 6px 20px rgba(87, 23, 0, 0.08);
+}
+
+/* Circular back button */
+.btn-back-circle {
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 50%;
+  background: var(--color-border);
+  color: var(--color-text-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+  flex-shrink: 0;
+}
+.btn-back-circle:hover {
+  background: var(--color-primary);
+  color: #fff;
+}
+
+/* Error banner */
+.error-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 12px;
+  font-size: 13px;
+  color: #991b1b;
+}
+
+/* Horizontal scroll snap container */
+.scroll-snap-x {
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  padding-bottom: 16px;
+  cursor: grab;
+}
+.scroll-snap-x:active { cursor: grabbing; }
+.scroll-snap-x::-webkit-scrollbar { display: none; }
+
+/* Track inside scroll-snap */
+.scroll-snap-track {
+  display: flex;
+  gap: 20px;
+  padding: 8px 4px 16px;
+  width: max-content;
+}
+
+/* Touch target minimum size */
+.touch-target {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+/* Card lift on hover */
+.card-hover-lift:hover {
+  transform: translateY(-6px);
+  border-color: var(--color-primary);
+}
+
+/* Input focus ring */
+.input-focus-ring:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 4px rgba(254, 165, 10, 0.12);
+}
+
+/* Option selected state */
+.option-selected {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(250, 166, 26, 0.15);
+}
+
+/* Store badge (App Store / Google Play) */
+.store-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: #0a0a0a;
+  border-radius: 9px;
+  padding: 7px 18px 7px 14px;
+  text-decoration: none;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  border: 1px solid #2a2a2a;
+  min-width: 150px;
+}
+.store-badge:hover {
+  transform: translateY(-2px);
+}
+.store-badge--ios:hover { border-color: #555; }
+.store-badge--android:hover { border-color: #34A853; }
+
+.store-badge-icon {
+  width: 26px;
+  height: 26px;
+  flex-shrink: 0;
+  display: block;
+}
+
+.store-badge-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.15;
+}
+
+.store-badge-small {
+  font-size: 7.5px;
+  font-weight: 400;
+  color: #aaa;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.store-badge-name {
+  font-size: 14.5px;
+  font-weight: 600;
+  color: #fff;
+  letter-spacing: -0.2px;
+}
