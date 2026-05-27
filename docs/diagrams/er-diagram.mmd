@@ -1,0 +1,132 @@
+erDiagram
+    USER_ACCOUNT {
+        numeric user_id PK
+        varchar name
+        varchar email
+        varchar password
+        enum role
+    }
+
+    PROFILE {
+        numeric user_id PK,FK
+        numeric weight
+        numeric age
+        numeric height
+        char gender
+        char activityFactor
+        char objective
+        numeric basalMetabolicRate
+        numeric totalDailyEnergyExpenditure
+    }
+
+    MEAL {
+        numeric meal_id PK
+        varchar name
+        numeric calories
+        numeric protein
+        numeric fat
+        numeric carbs
+        varchar img
+        varchar source
+    }
+
+    FOOD_ITEM {
+        numeric food_id PK
+        numeric protein
+        numeric calories
+        numeric carbs
+        numeric fat
+        varchar source
+    }
+
+    PROFILE_MEAL {
+        numeric Profile_user_id FK
+        numeric Meal_meal_id FK
+    }
+
+    MEAL_FOOD_ITEM {
+        numeric Meal_meal_id FK
+        numeric Food_item_food_id FK
+    }
+
+    AI_CONVERSATION {
+        string conversationId PK
+        string userId
+        string type
+        string status
+        date createdAt
+        date updatedAt
+    }
+
+    AI_MESSAGE {
+        string messageId PK
+        string conversationId FK
+        string role
+        string content
+        object structuredData
+        object safety
+        object metadata
+    }
+
+    AI_PLATE_ANALYSIS {
+        string analysisId PK
+        string userId
+        string conversationId FK
+        object detectedFoods
+        object estimatedNutrition
+        string confidence
+        object imageMetadata
+        date createdAt
+    }
+
+    AI_WEEKLY_MENU_PLAN {
+        string planId PK
+        string userId
+        string status
+        numeric requestedDays
+        numeric completedDays
+        date createdAt
+        date updatedAt
+    }
+
+    AI_WEEKLY_MENU_DAY {
+        string dayId PK
+        string planId FK
+        numeric dayNumber
+        string status
+        object meals
+        object nutritionTotals
+    }
+
+    AI_CACHE_ENTRY {
+        string cacheKey PK
+        string interactionType
+        string provider
+        string model
+        object response
+        numeric hitCount
+        date expiresAt
+    }
+
+    AI_PROMPT_TEMPLATE {
+        string key PK
+        string version
+        string interactionType
+        string systemPrompt
+        string userPromptTemplate
+        boolean isActive
+    }
+
+    USER_ACCOUNT ||--|| PROFILE : has
+    PROFILE ||--o{ PROFILE_MEAL : receives
+    MEAL ||--o{ PROFILE_MEAL : assigned
+    MEAL ||--o{ MEAL_FOOD_ITEM : contains
+    FOOD_ITEM ||--o{ MEAL_FOOD_ITEM : composes
+
+    USER_ACCOUNT ||--o{ AI_CONVERSATION : owns
+    AI_CONVERSATION ||--o{ AI_MESSAGE : includes
+    USER_ACCOUNT ||--o{ AI_PLATE_ANALYSIS : uploads
+    AI_CONVERSATION ||--o{ AI_PLATE_ANALYSIS : audits
+    USER_ACCOUNT ||--o{ AI_WEEKLY_MENU_PLAN : requests
+    AI_WEEKLY_MENU_PLAN ||--o{ AI_WEEKLY_MENU_DAY : contains
+    AI_PROMPT_TEMPLATE ||--o{ AI_CACHE_ENTRY : versions
