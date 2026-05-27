@@ -1,7 +1,7 @@
 import { API_URL } from '../../config/api';
 import { useState, useEffect } from 'react'
 import { useAuth } from '../../context/useAuth'
-import { Navigate, useNavigate } from 'react-router-dom'
+import { Navigate, useNavigate, Link } from 'react-router-dom'
 import Header from '../../components/Header/Header'
 import AIBubble from '../../components/AIBubble/AIBubble'
 import { CaloriesBarChart } from '../../components/charts/CaloriesBarChart'
@@ -100,6 +100,31 @@ function cleanSource(source: string | null) {
 }
 
 type Tab = 'perfil' | 'dashboard'
+
+// Fallback local P0: sugerencias estáticas para la preview del "Menú sugerido de hoy".
+// El menú IA completo (DeepSeek/Gemini + persistencia en Mongo) vive en /asistente-ia.
+type SuggestedMealKey = 'desayuno' | 'almuerzo' | 'cena'
+const MOCK_FOODS: Record<SuggestedMealKey, Record<string, string[]>> = {
+  desayuno: {
+    bajo:  ['2 huevos revueltos', '1 tostada integral', '1 café'],
+    medio: ['Avena con leche', '1 plátano', '1 cda de mantequilla de maní'],
+    alto:  ['Tortilla de 4 huevos', '2 tostadas', '½ aguacate', '1 zumo de naranja'],
+  },
+  almuerzo: {
+    bajo:  ['Pechuga de pollo a la plancha', 'ensalada verde'],
+    medio: ['Pollo a la plancha', 'arroz integral', 'ensalada'],
+    alto:  ['Pollo grillé', 'arroz blanco', 'aguacate', 'ensalada completa'],
+  },
+  cena: {
+    bajo:  ['Salmón a la plancha', 'ensalada ligera'],
+    medio: ['Salmón a la plancha', 'ensalada mixta'],
+    alto:  ['Salmón al horno', 'ensalada completa', '1 batata asada'],
+  },
+}
+
+function getSuggestion(key: SuggestedMealKey, categoria: string): string[] {
+  return MOCK_FOODS[key]?.[categoria] ?? ['Plato saludable equilibrado']
+}
 
 function Profile() {
   const { user, isAuthenticated } = useAuth()
@@ -393,13 +418,22 @@ function Profile() {
                 {todayRecommendation ? (
                   <>
                   <div className="prec-grid">
-                    {suggestedMeals.map(({ key, label, info }) => (
-                      <div key={key} className={`prec-item prec-item--${info.categoria}`}>
-                        <span className="prec-item-label">{label}</span>
-                        <span className="prec-item-cat">{info.categoria}</span>
-                        <span className="prec-item-kcal">{Number(info.kcal ?? 0)} kcal</span>
-                      </div>
-                    ))}
+                    {suggestedMeals.map(({ key, label, info }) => {
+                      const foods = getSuggestion(key as SuggestedMealKey, info.categoria)
+                      return (
+                        <div key={key} className={`prec-item prec-item--${info.categoria}`}>
+                          <div className="prec-item-top">
+                            <span className="prec-item-label">{label}</span>
+                            <span className="prec-item-cat">{info.categoria}</span>
+                            <span className="prec-item-kcal">{Number(info.kcal ?? 0)} kcal</span>
+                          </div>
+                          <div className="prec-item-foods">
+                            <span className="prec-item-foods-label">Sugerencia:</span>
+                            <span className="prec-item-foods-text">{foods.join(' · ')}</span>
+                          </div>
+                        </div>
+                      )
+                    })}
                     <div className="prec-total">
                       Total: {todayCalories} kcal
                     </div>
@@ -414,6 +448,11 @@ function Profile() {
                       <strong>{todayProjectedWeight.toFixed(1)} kg</strong>
                     </div>
                   </div>
+                  <Link to="/asistente-ia" className="prec-ai-cta">
+                    <span className="prec-ai-cta-icon" aria-hidden="true">✨</span>
+                    <span className="prec-ai-cta-text">Generar menú completo con IA</span>
+                    <span className="prec-ai-cta-arrow" aria-hidden="true">→</span>
+                  </Link>
                   </>
                 ) : (
                   <p className="prec-empty">
