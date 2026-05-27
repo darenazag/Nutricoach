@@ -7,6 +7,7 @@ import { runAiPlateAnalysis } from '../services/aiPlateAnalysis.service.js';
 import { buildAiPlateContextFromP0User } from '../adapters/index.js';
 import * as mealModel from '../../../models/mealModel.js';
 import * as profileModel from '../../../models/profileModel.js';
+import type { MealType } from '../../../types/domain.js';
 
 // ── Upload config (mirrors aiPlateAnalysis.controller limits) ─────────────────
 
@@ -143,7 +144,10 @@ const saveMealBodySchema = z.object({
   fat:        z.number().nonnegative(),
   carbs:      z.number().nonnegative(),
   source:     z.string().max(200).optional(),
-  mealType:   z.string().max(50).optional(),
+  mealType:   z.preprocess(
+    (value) => (typeof value === 'string' ? value.trim().toLowerCase() : value),
+    z.enum(['desayuno', 'almuerzo', 'merienda', 'cena'])
+  ).optional(),
   analysisId: z.string().optional(),
 });
 
@@ -158,20 +162,19 @@ const postSaveAnalyzedMeal: RequestHandler = async (req, res, next) => {
     }
     const { name, calories, protein, fat, carbs, source, mealType } = parsed.data;
     const userId = Number(req.auth!.sub);
-    const meal_id = Date.now();
 
-    const meal = await mealModel.create({
-      meal_id,
+    const normalizedMealType = (mealType ?? null) as MealType | null;
+    const meal = await mealModel.createWithGeneratedId({
       name,
       calories,
       protein,
       fat,
       carbs,
       img: null,
-      source: source ?? `Análisis IA (NutriCoach)${mealType ? ' - ' + mealType.toLowerCase() : ''}`,
+      source: source ?? `Análisis IA (NutriCoach)${normalizedMealType ? ' - ' + normalizedMealType : ''}`,
     });
 
-    await profileModel.assignMeal(userId, meal_id);
+    await profileModel.assignMeal(userId, meal.meal_id, normalizedMealType);
 
     res.status(201).json({ success: true, data: { meal } });
   } catch (err) {

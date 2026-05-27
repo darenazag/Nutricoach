@@ -53,12 +53,12 @@ export async function getMeals(req: Request, res: Response): Promise<void> {
   if (!profile) {
     throw HttpError.notFound(`No existe el perfil ${id}`);
   }
-  const mealIds = await profileModel.findMealIds(id);
+  const mealAssignments = await profileModel.findMealAssignments(id);
   const meals: MealWithItems[] = [];
-  for (const mealId of mealIds) {
+  for (const { mealId, mealType } of mealAssignments) {
     const meal = await mealModel.findByIdWithItems(mealId);
     if (meal) {
-      meals.push(meal);
+      meals.push({ ...meal, mealType });
     }
   }
   res.json(meals);
@@ -92,13 +92,13 @@ export async function create(req: Request, res: Response): Promise<void> {
  */
 export async function assignMeal(req: Request, res: Response): Promise<void> {
   const id = Number(req.params.id);
-  const { mealId } = req.body as AssignMealInput;
+  const { mealId, mealType } = req.body as AssignMealInput;
   const profile = await profileModel.findById(id);
   if (!profile) {
     throw HttpError.notFound(`No existe el perfil ${id}`);
   }
-  await profileModel.assignMeal(id, mealId);
-  res.status(201).json({ message: 'Comida asignada', userId: id, mealId });
+  await profileModel.assignMeal(id, mealId, mealType ?? null);
+  res.status(201).json({ message: 'Comida asignada', userId: id, mealId, mealType: mealType ?? null });
 }
 
 /**
@@ -155,12 +155,12 @@ export async function getMyMeals(req: Request, res: Response): Promise<void> {
     throw HttpError.notFound(`No existe el perfil ${id}`);
   }
 
-  const mealIds = await profileModel.findMealIds(id);
+  const mealAssignments = await profileModel.findMealAssignments(id);
   const meals: MealWithItems[] = [];
-  for (const mealId of mealIds) {
+  for (const { mealId, mealType } of mealAssignments) {
     const meal = await mealModel.findByIdWithItems(mealId);
     if (meal) {
-      meals.push(meal);
+      meals.push({ ...meal, mealType });
     }
   }
 
@@ -170,8 +170,8 @@ export async function getMyMeals(req: Request, res: Response): Promise<void> {
 /**
  * POST /api/meals/profile/assign - Asigna una comida al usuario autenticado.
  *
- * Alias de compatibilidad para el frontend. `mealType` se acepta pero se ignora
- * de momento porque la tabla puente actual no tiene columna para tipo de comida.
+ * Alias de compatibilidad para el frontend. `mealType` persiste la categoria
+ * elegida para esa asignacion.
  *
  * @param {Request} req - Peticion autenticada.
  * @param {Response} res - Respuesta.
@@ -179,14 +179,14 @@ export async function getMyMeals(req: Request, res: Response): Promise<void> {
  */
 export async function assignMealToMe(req: Request, res: Response): Promise<void> {
   const id = req.auth!.sub;
-  const { mealId } = req.body as AssignMealInput;
+  const { mealId, mealType } = req.body as AssignMealInput;
   const profile = await profileModel.findById(id);
   if (!profile) {
     throw HttpError.notFound(`No existe el perfil ${id}`);
   }
 
-  await profileModel.assignMeal(id, mealId);
-  res.status(201).json({ message: 'Comida asignada', userId: id, mealId });
+  await profileModel.assignMeal(id, mealId, mealType ?? null);
+  res.status(201).json({ message: 'Comida asignada', userId: id, mealId, mealType: mealType ?? null });
 }
 
 /**

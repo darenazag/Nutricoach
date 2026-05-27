@@ -4,7 +4,7 @@
  */
 
 import { query } from '../config/db.js';
-import { Profile } from '../types/domain.js';
+import { MealType, Profile, ProfileMealAssignment } from '../types/domain.js';
 
 /** Lista de columnas seleccionables con sus alias camelCase. */
 const SELECT_COLUMNS = `
@@ -18,6 +18,19 @@ const SELECT_COLUMNS = `
   "basalMetabolicRate" AS "basalMetabolicRate",
   "totalDailyEnergyExpenditure" AS "totalDailyEnergyExpenditure"
 `;
+
+let profileMealTypeColumnReady: Promise<void> | null = null;
+
+function ensureProfileMealTypeColumn(): Promise<void> {
+  if (!profileMealTypeColumnReady) {
+    profileMealTypeColumnReady = query(
+      `ALTER TABLE public."Profile_Meal"
+       ADD COLUMN IF NOT EXISTS meal_type character varying(20)`
+    ).then(() => undefined);
+  }
+
+  return profileMealTypeColumnReady;
+}
 
 /**
  * Devuelve todos los perfiles.
@@ -94,6 +107,33 @@ export async function findMealIds(userId: number): Promise<number[]> {
 }
 
 /**
+ * Devuelve las comidas asignadas a un perfil junto con su categoria.
+ *
+ * @param {number} userId - Identificador del usuario.
+ * @returns {Promise<ProfileMealAssignment[]>} Asignaciones del perfil.
+ */
+export async function findMealAssignments(
+  userId: number
+): Promise<ProfileMealAssignment[]> {
+  await ensureProfileMealTypeColumn();
+
+  const result = await query<{
+    Meal_meal_id: number;
+    meal_type: MealType | null;
+  }>(
+    `SELECT "Meal_meal_id", meal_type
+     FROM public."Profile_Meal"
+     WHERE "Profile_user_id" = $1`,
+    [userId]
+  );
+
+  return result.rows.map((row) => ({
+    mealId: row.Meal_meal_id,
+    mealType: row.meal_type,
+  }));
+}
+
+/**
  * Asigna una comida a un perfil (idempotente).
  *
  * @param {number} userId - Id del perfil.
@@ -102,15 +142,21 @@ export async function findMealIds(userId: number): Promise<number[]> {
  */
 export async function assignMeal(
   userId: number,
-  mealId: number
+  mealId: number,
+  mealType: MealType | null = null
 ): Promise<void> {
+  await ensureProfileMealTypeColumn();
+
   await query(
-    `INSERT INTO public."Profile_Meal" ("Profile_user_id", "Meal_meal_id")
-     SELECT $1, $2
-     WHERE NOT EXISTS (
-       SELECT 1 FROM public."Profile_Meal"
+    `WITH updated AS (
+       UPDATE public."Profile_Meal"
+       SET meal_type = $3
        WHERE "Profile_user_id" = $1 AND "Meal_meal_id" = $2
-     )`,
-    [userId, mealId]
+       RETURNING 1
+     )
+     INSERT INTO public."Profile_Meal" ("Profile_user_id", "Meal_meal_id", meal_type)
+     SELECT $1, $2, $3
+     WHERE NOT EXISTS (SELECT 1 FROM updated)`,
+    [userId, mealId, mealType]
   );
 }

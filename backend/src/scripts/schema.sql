@@ -68,6 +68,7 @@ CREATE TABLE IF NOT EXISTS public."Profile_Meal"
 (
     "Profile_user_id" numeric NOT NULL,
     "Meal_meal_id" numeric NOT NULL,
+    meal_type character varying(20) CHECK (meal_type IS NULL OR meal_type IN ('desayuno','almuerzo','merienda','cena')),
     FOREIGN KEY ("Profile_user_id") REFERENCES public."Profile" (user_id),
     FOREIGN KEY ("Meal_meal_id") REFERENCES public."Meal" (meal_id)
 );
