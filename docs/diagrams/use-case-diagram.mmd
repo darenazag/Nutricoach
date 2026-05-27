@@ -1,0 +1,54 @@
+flowchart LR
+    visitor[Visitante]
+    user[Usuario autenticado]
+    admin[Administrador]
+    aiProvider[Proveedor IA<br/>DeepSeek / Gemini]
+    db[(PostgreSQL + MongoDB)]
+
+    subgraph system[NutriCoach AI]
+      ucRegister((Registrarse))
+      ucLogin((Iniciar sesion))
+      ucProfile((Completar perfil nutricional))
+      ucDashboard((Consultar dashboard))
+      ucManualMeal((Registrar comida manual))
+      ucAnalyzePlate((Analizar plato por imagen))
+      ucSaveAnalyzed((Guardar comida analizada))
+      ucChat((Conversar con asistente IA))
+      ucWeeklyMenu((Generar menu semanal))
+      ucConversationHistory((Consultar historial IA))
+      ucManageCatalog((Gestionar catalogo de comidas/alimentos))
+      ucManageUsers((Consultar usuarios))
+      ucHealth((Comprobar salud API))
+    end
+
+    visitor --> ucRegister
+    visitor --> ucLogin
+
+    user --> ucProfile
+    user --> ucDashboard
+    user --> ucManualMeal
+    user --> ucAnalyzePlate
+    user --> ucSaveAnalyzed
+    user --> ucChat
+    user --> ucWeeklyMenu
+    user --> ucConversationHistory
+    user --> ucHealth
+
+    admin --> ucManageCatalog
+    admin --> ucManageUsers
+    admin --> ucHealth
+
+    ucLogin -. habilita JWT .-> ucProfile
+    ucLogin -. habilita JWT .-> ucDashboard
+    ucAnalyzePlate -. incluye .-> ucSaveAnalyzed
+    ucChat -. usa .-> aiProvider
+    ucWeeklyMenu -. usa .-> aiProvider
+    ucAnalyzePlate -. usa .-> aiProvider
+
+    ucProfile -. persiste/lee .-> db
+    ucDashboard -. lee .-> db
+    ucManualMeal -. persiste .-> db
+    ucSaveAnalyzed -. persiste .-> db
+    ucConversationHistory -. lee .-> db
+    ucWeeklyMenu -. persiste .-> db
+    ucChat -. persiste .-> db
