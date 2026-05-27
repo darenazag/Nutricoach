@@ -274,11 +274,11 @@ export function AiAssistantPage() {
               )}
 
               {messages.map(msg => (
-                <div key={msg.id} className={`ai-bubble ai-bubble--${msg.role}`}>
-                  <div className="ai-bubble__text">{msg.text}</div>
+                <div key={msg.id} className={`ai-msg ai-msg--${msg.role}`}>
+                  <div className="ai-msg__text">{msg.text}</div>
 
                   {msg.role === 'ai' && msg.data && (
-                    <div className="ai-bubble__sections">
+                    <div className="ai-msg__sections">
                       {msg.data.safety?.isOutOfScope ? (
                         <p className="ai-out-of-scope">
                           {msg.data.safety.escalationMessage ??
@@ -333,7 +333,7 @@ export function AiAssistantPage() {
               ))}
 
               {chatLoading && (
-                <div className="ai-bubble ai-bubble--ai">
+                <div className="ai-msg ai-msg--ai">
                   <div className="ai-typing">
                     <span className="ai-typing-dot" />
                     <span className="ai-typing-dot" />
