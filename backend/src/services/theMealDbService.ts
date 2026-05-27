@@ -1,16 +1,16 @@
 /**
  * @file Cliente de TheMealDB (API secundaria de recetas).
  * Usa `fetch` nativo (Node 18+). La clave de desarrollo "1" es gratuita.
- * Importante: TheMealDB NO devuelve datos nutricionales; aporta ingredientes,
- * medidas e instrucciones. Las calorias/macros deben calcularse aparte.
+ * TheMealDB NO devuelve datos nutricionales; aporta ingredientes, medidas
+ * e instrucciones. Las calorías/macros deben calcularse aparte.
  *
  * Docs: https://www.themealdb.com/api.php
  */
 
 import { env } from '../config/env.js';
-import { MealDbMeal, MealDbResponse } from '../types/theMealDb.js';
+import type { MealDbMeal, MealDbResponse } from '../types/theMealDb.js';
 
-/** Ingrediente extraido de una receta de TheMealDB. */
+/** Ingrediente extraído de una receta de TheMealDB. */
 export interface MealDbIngredient {
   /** Nombre del ingrediente. */
   name: string;
@@ -19,9 +19,9 @@ export interface MealDbIngredient {
 }
 
 /**
- * Construye la URL base con la clave configurada.
+ * Construye la URL base con la clave de API configurada.
  *
- * @param {string} endpoint - Endpoint (ej. "search.php").
+ * @param {string} endpoint - Nombre del endpoint (ej. "search.php").
  * @returns {string} URL base sin query params.
  */
 function baseUrl(endpoint: string): string {
@@ -29,7 +29,7 @@ function baseUrl(endpoint: string): string {
 }
 
 /**
- * Realiza un GET y parsea el JSON.
+ * Realiza un GET y parsea el JSON como MealDbResponse.
  *
  * @param {string} url - URL completa.
  * @returns {Promise<MealDbResponse>} La respuesta tipada.
@@ -39,7 +39,7 @@ async function getJson(url: string): Promise<MealDbResponse> {
   const response = await fetch(url);
   if (!response.ok) {
     throw new Error(
-      `TheMealDB respondio ${response.status} ${response.statusText}`
+      `TheMealDB respondió ${response.status} ${response.statusText}`
     );
   }
   return (await response.json()) as MealDbResponse;
@@ -48,12 +48,10 @@ async function getJson(url: string): Promise<MealDbResponse> {
 /**
  * Busca una receta por nombre y devuelve la primera coincidencia.
  *
- * @param {string} name - Nombre o termino del plato (ej. "chicken").
+ * @param {string} name - Nombre o término del plato (ej. "chicken").
  * @returns {Promise<MealDbMeal | null>} La receta o null si no hay match.
  */
-export async function searchMealByName(
-  name: string
-): Promise<MealDbMeal | null> {
+export async function searchMealByName(name: string): Promise<MealDbMeal | null> {
   const params = new URLSearchParams({ s: name });
   const data = await getJson(`${baseUrl('search.php')}?${params.toString()}`);
   return data.meals?.[0] ?? null;
@@ -76,16 +74,16 @@ export async function lookupMealById(id: string): Promise<MealDbMeal | null> {
  * TheMealDB usa campos planos numerados strIngredient1..20 / strMeasure1..20.
  *
  * @param {MealDbMeal} meal - Receta de TheMealDB.
- * @returns {MealDbIngredient[]} Ingredientes no vacios.
+ * @returns {MealDbIngredient[]} Lista de ingredientes no vacíos.
  */
 export function extractIngredients(meal: MealDbMeal): MealDbIngredient[] {
   const ingredients: MealDbIngredient[] = [];
   for (let i = 1; i <= 20; i += 1) {
-    const name = meal[`strIngredient${i}`];
+    const name    = meal[`strIngredient${i}`];
     const measure = meal[`strMeasure${i}`];
     if (name && name.trim() !== '') {
       ingredients.push({
-        name: name.trim(),
+        name:    name.trim(),
         measure: (measure ?? '').trim(),
       });
     }

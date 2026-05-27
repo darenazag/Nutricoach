@@ -1,90 +1,81 @@
 /**
  * @file Tipos del dominio que reflejan el esquema de la base de datos.
- * Los codigos de un solo caracter respetan el tipo `"char"` de PostgreSQL.
+ * Los códigos de un solo carácter respetan el tipo `"char"` de PostgreSQL.
  */
 
-/** Genero del perfil: 'M' (Masculino) | 'F' (Femenino). */
+/** Género del perfil: 'M' (Masculino) | 'F' (Femenino). */
 export type Gender = 'M' | 'F';
 
-/** Rol de autorizacion del usuario. */
+/** Rol de autorización del usuario. */
 export type Role = 'user' | 'admin';
 
 /**
- * Factor de actividad fisica.
- * 'S' = Sedentario, 'A' = Activo, 'M' = Muy activo.
+ * Factor de actividad física.
+ * 'S' = Sedentario, 'L' = Ligero, 'A' = Activo (moderado), 'V' = Muy activo.
  */
-export type ActivityFactor = 'S' | 'A' | 'M';
+export type ActivityFactor = 'S' | 'L' | 'A' | 'V';
 
 /**
  * Objetivo nutricional.
- * 'P' = Perder, 'M' = Mantener, 'G' = Ganar.
+ * 'P' = Perder peso, 'M' = Mantener peso, 'G' = Ganar masa muscular.
  */
 export type Objective = 'P' | 'M' | 'G';
-
-/**
- * Perfil fisiologico de un usuario.
- * Corresponde a la tabla `public."Profile"`.
- */
-export interface Profile {
-  /** Identificador del usuario (PK). */
-  user_id: number;
-  /** Peso en kilogramos. */
-  weight: number;
-  /** Edad en anios. */
-  age: number;
-  /** Altura en centimetros. */
-  height: number;
-  /** Genero ('M' | 'F'). */
-  gender: Gender;
-  /** Factor de actividad ('S' | 'A'). */
-  activityFactor: ActivityFactor;
-  /** Objetivo ('P' | 'M' | 'G'). */
-  objective: Objective;
-  /** Tasa metabolica basal (kcal). */
-  basalMetabolicRate: number;
-  /** Gasto energetico diario total (kcal). */
-  totalDailyEnergyExpenditure: number;
-}
-
-/** Datos necesarios para crear un perfil (sin valores calculados opcionales). */
-export type ProfileInput = Omit<
-  Profile,
-  'basalMetabolicRate' | 'totalDailyEnergyExpenditure'
-> & {
-  basalMetabolicRate?: number;
-  totalDailyEnergyExpenditure?: number;
-};
 
 /**
  * Usuario con credenciales.
  * Corresponde a la tabla `public."User"`.
  */
 export interface User {
-  /** Identificador (PK y FK hacia Profile). */
+  /** Identificador generado por SERIAL (PK). */
   user_id: number;
   /** Nombre visible. */
   name: string;
-  /** Contrasenia. En produccion deberia almacenarse hasheada. */
+  /** Contraseña almacenada hasheada con bcrypt. */
   password: string;
-  /** Correo electronico. */
+  /** Correo electrónico único. */
   email: string;
 }
 
-/** Usuario expuesto en respuestas, sin la contrasenia. */
+/** Usuario expuesto en respuestas API, sin la contraseña. */
 export type SafeUser = Omit<User, 'password'>;
 
 /**
- * Comida o plato preparado con macros totales.
+ * Perfil fisiológico de un usuario.
+ * Corresponde a la tabla `public."Profile"`.
+ */
+export interface Profile {
+  /** Identificador del usuario (PK y FK → User). */
+  user_id: number;
+  /** Peso en kilogramos. */
+  weight: number;
+  /** Edad en años. */
+  age: number;
+  /** Altura en centímetros. */
+  height: number;
+  /** Género ('M' | 'F'). */
+  gender: Gender;
+  /** Factor de actividad ('S' | 'L' | 'A' | 'V'). */
+  activityFactor: ActivityFactor;
+  /** Objetivo ('P' | 'M' | 'G'). */
+  objective: Objective;
+  /** Tasa Metabólica Basal en kcal (calculada automáticamente). */
+  basalMetabolicRate: number;
+  /** Gasto Energético Total Diario en kcal (calculado automáticamente). */
+  totalDailyEnergyExpenditure: number;
+}
+
+/**
+ * Comida o plato preparado con sus macros totales.
  * Corresponde a la tabla `public."Meal"`.
  */
 export interface Meal {
-  /** Identificador (PK). */
+  /** Identificador generado por SERIAL (PK). */
   meal_id: number;
   /** Nombre del plato. */
   name: string;
-  /** Calorias totales (kcal). */
+  /** Calorías totales (kcal). */
   calories: number;
-  /** Proteina total (g). */
+  /** Proteína total (g). */
   protein: number;
   /** Grasa total (g). */
   fat: number;
@@ -92,39 +83,29 @@ export interface Meal {
   carbs: number;
   /** Ruta o URL de la imagen (opcional). */
   img: string | null;
-  /** Fuente o descripcion (opcional). */
+  /** Fuente o descripción (opcional). */
   source: string | null;
 }
 
 /**
- * Alimento individual por porcion estandar (ej. 100 g).
+ * Alimento individual por porción estándar (ej. 100 g).
  * Corresponde a la tabla `public."Food_item"`.
  */
 export interface FoodItem {
-  /** Identificador (PK). */
+  /** Identificador generado por SERIAL (PK). */
   food_id: number;
-  /** Proteina (g). */
+  /** Nombre del alimento para mostrar. */
+  name: string;
+  /** Proteína (g). */
   protein: number;
-  /** Calorias (kcal). */
+  /** Calorías (kcal). */
   calories: number;
   /** Carbohidratos (g). */
   carbs: number;
   /** Grasa (g). */
   fat: number;
-  /** Nombre / fuente del alimento. */
+  /** Fuente u origen del dato nutricional. */
   source: string;
-}
-
-/** Relacion N:M entre Meal y Food_item. */
-export interface MealFoodItem {
-  Meal_meal_id: number;
-  Food_item_food_id: number;
-}
-
-/** Relacion N:M entre Profile y Meal. */
-export interface ProfileMeal {
-  Profile_user_id: number;
-  Meal_meal_id: number;
 }
 
 /** Comida con la lista de alimentos que la componen. */
@@ -132,23 +113,13 @@ export interface MealWithItems extends Meal {
   items: FoodItem[];
 }
 
-
-/**
- * Proyección de un día en la simulación Monte Carlo.
- */
-export interface DiaProyeccion {
-  /** Número de día (1 a 100) */
-  dia: number;
-  /** Calorías consumidas ese día (con variación ±50 kcal) */
-  calorias_consumidas: number;
-  /** Balance energético (calorías_consumidas - GETD) */
-  balance_energetico: number;
-  /** Peso proyectado al final del día (kg) */
-  peso_proyectado: number;
-  /** Menú recomendado para ese día (categorías calóricas) */
-  recomendacion_menu: {
-    desayuno: { categoria: string; kcal: number };
-    almuerzo: { categoria: string; kcal: number };
-    cena: { categoria: string; kcal: number };
+/** Respuesta paginada genérica. */
+export interface Paginated<T> {
+  data: T[];
+  pagination: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
   };
 }

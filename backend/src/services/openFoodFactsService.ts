@@ -1,22 +1,22 @@
 /**
  * @file Cliente de Open Food Facts (API principal de alimentos).
- * Usa `fetch` nativo (Node 18+). No requiere clave, pero Open Food Facts pide
- * un User-Agent personalizado para identificar la app.
+ * Usa `fetch` nativo (Node 18+). No requiere clave de API; Open Food Facts
+ * solo pide un User-Agent personalizado para identificar la aplicación.
  *
  * Docs: https://openfoodfacts.github.io/openfoodfacts-server/api/
  */
 
 import { env } from '../config/env.js';
-import {
+import type {
   OffProduct,
   OffProductResponse,
   OffSearchResponse,
 } from '../types/openFoodFacts.js';
 
-const SEARCH_URL = 'https://world.openfoodfacts.org/cgi/search.pl';
+const SEARCH_URL  = 'https://world.openfoodfacts.org/cgi/search.pl';
 const PRODUCT_URL = 'https://world.openfoodfacts.org/api/v2/product';
 
-/** Campos que solicitamos para minimizar el tamanio de la respuesta. */
+/** Campos solicitados para minimizar el tamaño de la respuesta. */
 const FIELDS = 'code,product_name,brands,nutriments,image_url';
 
 /**
@@ -25,7 +25,7 @@ const FIELDS = 'code,product_name,brands,nutriments,image_url';
  * @template T - Forma esperada del JSON.
  * @param {string} url - URL completa con query string.
  * @returns {Promise<T>} El cuerpo JSON tipado.
- * @throws {Error} Si la respuesta no es satisfactoria.
+ * @throws {Error} Si la respuesta HTTP no es satisfactoria.
  */
 async function getJson<T>(url: string): Promise<T> {
   const response = await fetch(url, {
@@ -34,17 +34,17 @@ async function getJson<T>(url: string): Promise<T> {
   if (!response.ok) {
     const body = await response.text().catch(() => '');
     throw new Error(
-      `Open Food Facts respondio ${response.status} ${response.statusText}: ${body.slice(0, 200)}`
+      `Open Food Facts respondió ${response.status} ${response.statusText}: ${body.slice(0, 200)}`
     );
   }
   return (await response.json()) as T;
 }
 
 /**
- * Busca un producto por texto y devuelve el primero con datos nutricionales.
- * Prioriza productos que tengan al menos energia y proteinas informadas.
+ * Busca un producto por texto libre y devuelve el primero con datos
+ * nutricionales completos (energía + proteínas).
  *
- * @param {string} term - Texto a buscar (ej. "chicken breast").
+ * @param {string} term - Término de búsqueda (ej. "chicken breast").
  * @returns {Promise<OffProduct | null>} El producto o null si no hay resultados.
  */
 export async function searchProduct(term: string): Promise<OffProduct | null> {
@@ -56,13 +56,10 @@ export async function searchProduct(term: string): Promise<OffProduct | null> {
     page_size: '10',
     fields: FIELDS,
   });
-  const data = await getJson<OffSearchResponse>(
-    `${SEARCH_URL}?${params.toString()}`
-  );
+  const data = await getJson<OffSearchResponse>(`${SEARCH_URL}?${params.toString()}`);
   if (!data.products || data.products.length === 0) {
     return null;
   }
-  // Preferimos un producto que tenga energia y proteinas informadas.
   const withMacros = data.products.find(
     (p) =>
       p.nutriments?.['energy-kcal_100g'] != null &&
@@ -72,9 +69,9 @@ export async function searchProduct(term: string): Promise<OffProduct | null> {
 }
 
 /**
- * Obtiene un producto por su codigo de barras.
+ * Obtiene un producto por su código de barras.
  *
- * @param {string} barcode - Codigo de barras.
+ * @param {string} barcode - Código de barras EAN/UPC.
  * @returns {Promise<OffProduct | null>} El producto o null si no existe.
  */
 export async function getProductByBarcode(

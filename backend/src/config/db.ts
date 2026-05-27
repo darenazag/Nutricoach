@@ -1,26 +1,27 @@
 /**
  * @file Pool de conexiones a PostgreSQL usando node-postgres (pg).
+ * Único punto de acceso a la base de datos en toda la aplicación.
  */
 
 import { Pool, PoolClient, QueryResult, QueryResultRow } from 'pg';
 import { env } from './env.js';
 
 /**
- * Pool unico de conexiones. Reutilizable en toda la aplicacion.
- * Si DATABASE_URL esta definida se usa; si no, se compone con los campos sueltos.
+ * Pool único de conexiones reutilizable en toda la aplicación.
+ * Si DATABASE_URL está definida se usa directamente; si no, se compone
+ * con los campos individuales de configuración.
  */
 export const pool: Pool = env.db.url
   ? new Pool({ connectionString: env.db.url })
   : new Pool({
-      host: env.db.host,
-      port: env.db.port,
-      user: env.db.user,
+      host:     env.db.host,
+      port:     env.db.port,
+      user:     env.db.user,
       password: env.db.password,
       database: env.db.database,
     });
 
 pool.on('error', (err: Error) => {
-  // Error inesperado en un cliente inactivo del pool.
   console.error('[db] Error inesperado en el pool de PostgreSQL:', err.message);
 });
 
@@ -40,8 +41,8 @@ export async function query<T extends QueryResultRow = QueryResultRow>(
 }
 
 /**
- * Ejecuta una funcion dentro de una transaccion.
- * Hace COMMIT si la funcion termina bien y ROLLBACK si lanza.
+ * Ejecuta una función dentro de una transacción.
+ * Hace COMMIT si la función termina correctamente y ROLLBACK si lanza.
  *
  * @template T - Tipo devuelto por el callback.
  * @param {(client: PoolClient) => Promise<T>} fn - Trabajo a ejecutar.
@@ -65,7 +66,7 @@ export async function withTransaction<T>(
 }
 
 /**
- * Cierra el pool de conexiones. Util en scripts puntuales y en shutdown.
+ * Cierra el pool de conexiones. Útil en scripts puntuales y en shutdown.
  *
  * @returns {Promise<void>}
  */

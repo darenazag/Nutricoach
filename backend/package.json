@@ -1,34 +1,25 @@
 {
   "name": "nutricoach-backend",
   "version": "1.0.0",
-  "description": "Backend MVC para NutriCoach: gestion de perfiles, comidas y alimentos con integracion de Open Food Facts y TheMealDB",
+  "description": "Backend MVC integrado para NutriCoach: perfiles, comidas, alimentos, JWT y APIs externas.",
   "main": "dist/server.js",
   "type": "module",
   "scripts": {
-    "build": "tsc && npm run copy:assets",
-    "copy:assets": "node --input-type=module -e \"import {copyFileSync} from 'fs'; copyFileSync('src/scripts/schema.sql','dist/scripts/schema.sql')\"",
+    "build": "tsc",
     "start": "node dist/server.js",
     "dev": "tsx watch src/server.ts",
     "db:init": "tsx src/scripts/initDb.ts",
+    "db:reset": "tsx src/scripts/resetDb.ts",
     "db:seed": "tsx src/scripts/seedFromApis.ts",
     "lint": "tsc --noEmit"
   },
-  "keywords": [
-    "nutrition",
-    "open-food-facts",
-    "themealdb",
-    "express",
-    "typescript",
-    "postgres",
-    "mvc"
-  ],
-  "author": "",
-  "license": "MIT",
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
+    "express-rate-limit": "^8.5.2",
+    "helmet": "^8.2.0",
     "jsonwebtoken": "^9.0.2",
     "pg": "^8.12.0",
     "zod": "^3.23.8"
@@ -40,7 +31,7 @@
     "@types/jsonwebtoken": "^9.0.6",
     "@types/node": "^20.14.10",
     "@types/pg": "^8.11.6",
-    "tsx": "^4.19.2",
+    "tsx": "^4.22.3",
     "typescript": "^5.5.3"
   }
 }

@@ -1,19 +1,14 @@
-FROM node:18-alpine
-
-# Crear el directorio de la aplicación dentro del contenedor
-WORKDIR /usr/src/app
-
-# Copiar archivos de dependencias
+FROM node:20-alpine AS builder
+WORKDIR /app
 COPY package*.json ./
-
-# Instalar dependencias
-RUN npm install
-
-# Copiar el resto del código del backend
+RUN npm ci
 COPY . .
+RUN npm run build
 
-# Exponer el puerto del servidor Express
+FROM node:20-alpine
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci --omit=dev
+COPY --from=builder /app/dist ./dist
 EXPOSE 3000
-
-# Comando para ejecutar en modo desarrollo (usando el script 'dev' con nodemon que definimos)
-CMD ["npm", "run", "dev"]
+CMD ["node", "dist/server.js"]

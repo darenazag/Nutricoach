@@ -1,38 +1,36 @@
 /**
- * @file Inicializa la base de datos ejecutando el `schema.sql` original.
- * Este script aplica el SQL tal cual lo proporciono el usuario (tablas + datos
- * semilla). Ejecutar con: `npm run db:init`.
+ * @file Script de inicialización de la base de datos.
+ * Lee el archivo init.sql y lo ejecuta contra PostgreSQL.
+ * Uso: npm run db:init
  */
 
 import { readFileSync } from 'fs';
-import { dirname, join } from 'path';
+import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { pool, closePool } from '../config/db.js';
 
-/** Directorio del modulo actual (equivalente a __dirname en ESM). */
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 /**
- * Lee y ejecuta el fichero schema.sql contra la base de datos.
+ * Lee y ejecuta el archivo SQL de inicialización del esquema.
  *
  * @returns {Promise<void>}
  */
 async function initDb(): Promise<void> {
-  const sqlPath = join(__dirname, 'schema.sql');
+  const sqlPath = resolve(__dirname, '../../init.sql');
+  console.log(`[initDb] Leyendo esquema desde: ${sqlPath}`);
+
   const sql = readFileSync(sqlPath, 'utf-8');
 
-  console.log('[db:init] Ejecutando schema.sql...');
-  // El fichero ya incluye su propio BEGIN/COMMIT, asi que se lanza completo.
-  await pool.query(sql);
-  console.log('[db:init] Esquema y datos semilla aplicados correctamente.');
+  try {
+    await pool.query(sql);
+    console.log('[initDb] Esquema inicializado correctamente.');
+  } finally {
+    await closePool();
+  }
 }
 
-initDb()
-  .catch((err: unknown) => {
-    const message = err instanceof Error ? err.message : String(err);
-    console.error('[db:init] Error:', message);
-    process.exitCode = 1;
-  })
-  .finally(() => {
-    void closePool();
-  });
+initDb().catch((err: unknown) => {
+  console.error('[initDb] Error:', err instanceof Error ? err.message : err);
+  process.exit(1);
+});

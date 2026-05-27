@@ -1,34 +1,35 @@
 /**
- * @file Punto de entrada: arranca el servidor HTTP.
+ * @file Punto de entrada del servidor HTTP.
+ * Arranca Express, verifica la configuración crítica y gestiona el cierre ordenado.
  */
 
 import { createApp } from './app.js';
-import { env, assertAuthConfig } from './config/env.js';
+import { assertAuthConfig, env } from './config/env.js';
 import { closePool } from './config/db.js';
 
-// Falla pronto si la config de auth es insegura en produccion.
+// Falla rápido si el JWT_SECRET es el inseguro por defecto en producción.
 assertAuthConfig();
 
-const app = createApp();
-
+const app    = createApp();
 const server = app.listen(env.port, () => {
   console.log(`[server] NutriCoach backend escuchando en puerto ${env.port}`);
   console.log(`[server] Entorno: ${env.nodeEnv}`);
 });
 
 /**
- * Cierre ordenado ante senales del sistema: cierra el pool y el servidor.
+ * Cierre ordenado ante señales del sistema operativo.
+ * Cierra el servidor HTTP y el pool de conexiones a la BD.
  *
- * @param {string} signal - Senal recibida.
+ * @param {string} signal - Señal recibida (SIGINT | SIGTERM).
  * @returns {Promise<void>}
  */
 async function shutdown(signal: string): Promise<void> {
-  console.log(`[server] Recibida senal ${signal}, cerrando...`);
+  console.log(`[server] Señal ${signal} recibida, cerrando...`);
   server.close(async () => {
     await closePool();
     process.exit(0);
   });
 }
 
-process.on('SIGINT', () => void shutdown('SIGINT'));
+process.on('SIGINT',  () => void shutdown('SIGINT'));
 process.on('SIGTERM', () => void shutdown('SIGTERM'));

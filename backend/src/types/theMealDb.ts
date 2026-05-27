@@ -2,23 +2,24 @@
  * @file Tipos para las respuestas de TheMealDB.
  * TheMealDB devuelve recetas con ingredientes/medidas en campos planos
  * numerados (strIngredient1..20, strMeasure1..20) y NO incluye datos
- * nutricionales (calorias/macros), que deben calcularse aparte.
+ * nutricionales (calorías/macros), que deben calcularse aparte.
  */
 
 /**
- * Receta de TheMealDB. Solo se tipan los campos usados; los ingredientes
- * numerados se acceden por indice de cadena.
+ * Receta de TheMealDB.
+ * Solo se tipan los campos usados; los ingredientes numerados se acceden
+ * mediante firma de índice de cadena.
  */
 export interface MealDbMeal {
   /** Id de la receta en TheMealDB. */
   idMeal: string;
   /** Nombre del plato. */
   strMeal: string;
-  /** Categoria (ej. "Chicken"). */
+  /** Categoría (ej. "Chicken"). */
   strCategory?: string;
-  /** Region/cocina (ej. "Italian"). */
+  /** Región/cocina (ej. "Italian"). */
   strArea?: string;
-  /** Instrucciones de preparacion. */
+  /** Instrucciones de preparación. */
   strInstructions?: string;
   /** URL de la imagen del plato. */
   strMealThumb?: string;
@@ -28,7 +29,7 @@ export interface MealDbMeal {
   strYoutube?: string;
   /**
    * Ingredientes y medidas numerados: strIngredient1..20, strMeasure1..20.
-   * Se acceden dinamicamente, de ahi la firma de indice.
+   * Se acceden dinámicamente, de ahí la firma de índice.
    */
   [key: string]: string | null | undefined;
 }

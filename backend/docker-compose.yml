@@ -1,68 +1,59 @@
+version: "3.9"
+
 services:
   db:
     image: postgres:16-alpine
-    container_name: nutricoach_db
     restart: unless-stopped
-    env_file: .env
     environment:
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_DB:       nutricoach_db
+      POSTGRES_USER:     nutricoach_user
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-nutricoach_password}
     ports:
-      - "${DB_PORT:-5432}:5432"
+      - "127.0.0.1:5432:5432"   # Solo localhost; no exponer a la red pública
     volumes:
-      - nutricoach_pgdata:/var/lib/postgresql/data
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      - postgres_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      test: ["CMD-SHELL", "pg_isready -U nutricoach_user -d nutricoach_db"]
       interval: 5s
       timeout: 5s
       retries: 10
-    networks:
-      - nutricoach_network
+
+  backend:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      PORT:              3000
+      NODE_ENV:          production
+      DB_HOST:           db
+      DB_PORT:           5432
+      DB_NAME:           nutricoach_db
+      DB_USER:           nutricoach_user
+      DB_PASSWORD:       ${DB_PASSWORD:-nutricoach_password}
+      JWT_SECRET:        ${JWT_SECRET:?JWT_SECRET es obligatorio en producción}
+      JWT_EXPIRES_IN:    ${JWT_EXPIRES_IN:-1h}
+      BCRYPT_SALT_ROUNDS: 10
+      ADMIN_EMAIL:       ${ADMIN_EMAIL:-}
+      OFF_USER_AGENT:    "NutriCoach/1.0 (contacto@nutricoach.com)"
+      THEMEALDB_API_KEY: "1"
+      ALLOWED_ORIGINS:   ${ALLOWED_ORIGINS:-http://localhost:5173}
+    depends_on:
+      db:
+        condition: service_healthy
 
   pgadmin:
-    image: dpage/pgadmin4:latest
-    container_name: nutricoach_pgadmin
+    image: dpage/pgadmin4
     restart: unless-stopped
-    env_file: .env
     environment:
-      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
-      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+      PGADMIN_DEFAULT_EMAIL:    ${PGADMIN_EMAIL:-admin@nutricoach.com}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:?PGADMIN_PASSWORD es obligatorio}
     ports:
-      - "${PGADMIN_PORT:-5050}:80"
+      - "127.0.0.1:5050:80"    # Solo localhost; nunca exponer en producción
     depends_on:
       db:
         condition: service_healthy
-    networks:
-      - nutricoach_network
-
-  api:
-    build: .
-    container_name: nutricoach_api
-    restart: unless-stopped
-    env_file: .env
-    environment:
-      DB_HOST: db
-      DB_PORT: 5432
-      DB_USER: ${DB_USER}
-      DB_PASSWORD: ${DB_PASSWORD}
-      DB_NAME: ${DB_NAME}
-      PORT: ${PORT:-3000}
-    ports:
-      - "${PORT:-3000}:${PORT:-3000}"
-    depends_on:
-      db:
-        condition: service_healthy
-    volumes:
-      - .:/usr/src/app
-      - /usr/src/app/node_modules
-    networks:
-      - nutricoach_network
 
 volumes:
-  nutricoach_pgdata:
-
-networks:
-  nutricoach_network:
-    driver: bridge
+  postgres_data:

@@ -1,27 +1,38 @@
 /**
  * @file Modelo de acceso a datos para la tabla `public."User"`.
+ * Los IDs son generados automáticamente por SERIAL en la BD.
+ * La contraseña solo se expone cuando es estrictamente necesario (login).
  */
 
 import { query } from '../config/db.js';
-import { SafeUser, User } from '../types/domain.js';
+import type { SafeUser, User } from '../types/domain.js';
 
 /**
- * Devuelve todos los usuarios sin exponer la contrasenia.
+ * Devuelve todos los usuarios sin exponer la contraseña.
  *
- * @returns {Promise<SafeUser[]>} Lista de usuarios seguros.
+ * @param {number} limit  - Máximo de filas a devolver.
+ * @param {number} offset - Desplazamiento para paginación.
+ * @returns {Promise<{ data: SafeUser[]; total: number }>}
  */
-export async function findAll(): Promise<SafeUser[]> {
-  const result = await query<SafeUser>(
-    'SELECT user_id, name, email FROM public."User" ORDER BY user_id'
-  );
-  return result.rows;
+export async function findAll(
+  limit: number,
+  offset: number
+): Promise<{ data: SafeUser[]; total: number }> {
+  const [rows, count] = await Promise.all([
+    query<SafeUser>(
+      'SELECT user_id, name, email FROM public."User" ORDER BY user_id LIMIT $1 OFFSET $2',
+      [limit, offset]
+    ),
+    query<{ count: string }>('SELECT COUNT(*) AS count FROM public."User"'),
+  ]);
+  return { data: rows.rows, total: Number(count.rows[0].count) };
 }
 
 /**
- * Busca un usuario (sin password) por su id.
+ * Busca un usuario (sin contraseña) por su id.
  *
  * @param {number} userId - Identificador del usuario.
- * @returns {Promise<SafeUser | null>} El usuario o null.
+ * @returns {Promise<SafeUser | null>} El usuario o null si no existe.
  */
 export async function findById(userId: number): Promise<SafeUser | null> {
   const result = await query<SafeUser>(
@@ -32,7 +43,7 @@ export async function findById(userId: number): Promise<SafeUser | null> {
 }
 
 /**
- * Busca un usuario completo (con password) por email. Util para login.
+ * Busca un usuario completo (con contraseña) por email. Útil para login.
  *
  * @param {string} email - Correo del usuario.
  * @returns {Promise<User | null>} El usuario completo o null.
@@ -46,19 +57,18 @@ export async function findByEmail(email: string): Promise<User | null> {
 }
 
 /**
- * Inserta o actualiza un usuario (idempotente por user_id).
+ * Inserta un nuevo usuario. El user_id es generado por SERIAL.
+ * El campo email tiene restricción UNIQUE en la BD.
  *
- * @param {User} user - Usuario a guardar.
- * @returns {Promise<SafeUser>} El usuario guardado, sin password.
+ * @param {Omit<User, 'user_id'>} newUser - Datos del usuario (sin id).
+ * @returns {Promise<SafeUser>} El usuario creado con su id asignado.
  */
-export async function create(user: User): Promise<SafeUser> {
+export async function create(newUser: Omit<User, 'user_id'>): Promise<SafeUser> {
   const result = await query<SafeUser>(
-    `INSERT INTO public."User" (user_id, name, password, email)
-     VALUES ($1, $2, $3, $4)
-     ON CONFLICT (user_id) DO UPDATE
-       SET name = EXCLUDED.name, password = EXCLUDED.password, email = EXCLUDED.email
+    `INSERT INTO public."User" (name, password, email)
+     VALUES ($1, $2, $3)
      RETURNING user_id, name, email`,
-    [user.user_id, user.name, user.password, user.email]
+    [newUser.name, newUser.password, newUser.email]
   );
   return result.rows[0];
 }
@@ -75,17 +85,4 @@ export async function existsByEmail(email: string): Promise<boolean> {
     [email]
   );
   return (result.rowCount ?? 0) > 0;
-}
-
-/**
- * Devuelve el siguiente user_id disponible (max + 1, o 1 si la tabla esta vacia).
- * Util porque el esquema original no usa autoincremento.
- *
- * @returns {Promise<number>} El proximo id libre.
- */
-export async function nextId(): Promise<number> {
-  const result = await query<{ next_id: number }>(
-    'SELECT COALESCE(MAX(user_id), 0) + 1 AS next_id FROM public."User"'
-  );
-  return Number(result.rows[0].next_id);
 }

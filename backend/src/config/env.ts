@@ -1,5 +1,6 @@
 /**
  * @file Carga, valida y expone las variables de entorno de forma tipada.
+ * Se llama una única vez al arrancar el servidor.
  */
 
 import dotenv from 'dotenv';
@@ -7,23 +8,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 /**
- * Devuelve una variable de entorno obligatoria o lanza un error si falta.
- *
- * @param {string} key - Nombre de la variable.
- * @param {string} [fallback] - Valor por defecto opcional.
- * @returns {string} El valor de la variable.
- * @throws {Error} Si la variable no existe y no hay fallback.
- */
-function required(key: string, fallback?: string): string {
-  const value = process.env[key] ?? fallback;
-  if (value === undefined) {
-    throw new Error(`Falta la variable de entorno obligatoria: ${key}`);
-  }
-  return value;
-}
-
-/**
- * Devuelve una variable opcional.
+ * Devuelve una variable de entorno opcional con fallback.
  *
  * @param {string} key - Nombre de la variable.
  * @param {string} [fallback] - Valor por defecto.
@@ -33,84 +18,93 @@ function optional(key: string, fallback?: string): string | undefined {
   return process.env[key] ?? fallback;
 }
 
-/** Configuracion centralizada y tipada de la aplicacion. */
+/** Configuración centralizada y tipada de la aplicación. */
 export const env = {
   /** Puerto del servidor HTTP. */
   port: Number(optional('PORT', '3000')),
-  /** Entorno de ejecucion. */
+  /** Entorno de ejecución. */
   nodeEnv: optional('NODE_ENV', 'development') as string,
 
-  /** Configuracion de la base de datos. */
+  /** Configuración de la base de datos. */
   db: {
-    /** URL completa de conexion (tiene prioridad si esta definida). */
+    /** URL completa de conexión (tiene prioridad si está definida). */
     url: optional('DATABASE_URL'),
-    host: optional('DB_HOST', 'localhost') as string,
-    port: Number(optional('DB_PORT', '5432')),
-    user: optional('DB_USER', 'postgres') as string,
+    host:     optional('DB_HOST', 'localhost') as string,
+    port:     Number(optional('DB_PORT', '5432')),
+    user:     optional('DB_USER', 'postgres') as string,
     password: optional('DB_PASSWORD', 'postgres') as string,
-    database: optional('DB_NAME', 'nutricoach') as string,
+    database: optional('DB_NAME', 'nutricoach_db') as string,
   },
 
-  /** Configuracion de Open Food Facts (API principal de alimentos). */
+  /**
+   * Configuración de Open Food Facts.
+   * No requiere clave; solo pide un User-Agent para identificar la app.
+   */
   openFoodFacts: {
-    /**
-     * User-Agent requerido por Open Food Facts para identificar la app.
-     * Formato recomendado: AppName/Version (email de contacto).
-     */
     userAgent: optional(
       'OFF_USER_AGENT',
       'NutriCoach/1.0 (contacto@nutricoach.com)'
     ) as string,
   },
 
-  /** Configuracion de TheMealDB (API secundaria de recetas). */
+  /** Configuración de TheMealDB. "1" es la clave de desarrollo gratuita. */
   theMealDb: {
-    /** Clave de API. "1" es la clave de desarrollo gratuita. */
     apiKey: optional('THEMEALDB_API_KEY', '1') as string,
   },
 
-  /** Configuracion de autenticacion. */
+  /** Configuración de autenticación JWT y bcrypt. */
   auth: {
-    /** Secreto para firmar los JWT. */
     jwtSecret: optional('JWT_SECRET', 'dev_insecure_secret_change_me') as string,
-    /** Caducidad del token (formato de la libreria jsonwebtoken). */
     jwtExpiresIn: optional('JWT_EXPIRES_IN', '1h') as string,
-    /** Rondas de sal para bcrypt. */
     bcryptSaltRounds: Number(optional('BCRYPT_SALT_ROUNDS', '10')),
-    /** Email que recibe rol admin (vacio = no hay admin por entorno). */
     adminEmail: optional('ADMIN_EMAIL', '')?.trim().toLowerCase() ?? '',
   },
+
+  /**
+   * Orígenes permitidos para CORS.
+   * Separados por coma. En desarrollo acepta localhost por defecto.
+   */
+  allowedOrigins: optional(
+    'ALLOWED_ORIGINS',
+    'http://localhost:3000,http://localhost:5173,http://localhost:4173'
+  )!
+    .split(',')
+    .map((o) => o.trim())
+    .filter(Boolean),
 } as const;
 
+/** Valores de JWT_SECRET que se consideran inseguros. */
+const INSECURE_SECRETS = new Set([
+  'dev_insecure_secret_change_me',
+  'cambia_esto_por_un_secreto_largo_y_aleatorio',
+  'cambia_esto_en_produccion',
+]);
+
 /**
- * Las APIs externas (Open Food Facts y TheMealDB) no requieren credenciales
- * obligatorias: Open Food Facts solo pide un User-Agent (que tiene valor por
- * defecto) y TheMealDB usa la clave de desarrollo "1". Esta funcion se
- * mantiene como punto de extension por si en el futuro se aniaden claves.
+ * Verifica que la configuración de autenticación sea segura.
+ * En producción lanza si el secreto es el por defecto o demasiado corto.
+ * En desarrollo emite advertencias.
  *
+ * @throws {Error} Si en producción el secreto es inseguro.
  * @returns {void}
  */
-export function assertExternalApisConfig(): void {
-  if (!env.openFoodFacts.userAgent) {
-    throw new Error('Falta OFF_USER_AGENT para Open Food Facts');
-  }
-}
-
-// Reexporta `required` por si algun modulo necesita una variable estricta.
-export { required };
-
-/**
- * Verifica que en produccion el secreto JWT no sea el inseguro por defecto.
- *
- * @throws {Error} Si NODE_ENV es production y no se configuro JWT_SECRET.
- */
 export function assertAuthConfig(): void {
-  if (
-    env.nodeEnv === 'production' &&
-    (!process.env.JWT_SECRET || env.auth.jwtSecret === 'dev_insecure_secret_change_me')
-  ) {
-    throw new Error(
-      'JWT_SECRET debe configurarse con un valor seguro en produccion'
-    );
+  const secret = env.auth.jwtSecret;
+  const isProduction = env.nodeEnv === 'production';
+
+  if (INSECURE_SECRETS.has(secret)) {
+    const msg = 'JWT_SECRET usa un valor inseguro por defecto. Genera uno con: openssl rand -base64 64';
+    if (isProduction) throw new Error(msg);
+    console.warn(`[config] ⚠️  ${msg}`);
+  }
+
+  if (secret.length < 32) {
+    const msg = `JWT_SECRET demasiado corto (${secret.length} chars). Mínimo recomendado: 32.`;
+    if (isProduction) throw new Error(msg);
+    console.warn(`[config] ⚠️  ${msg}`);
+  }
+
+  if (!env.auth.adminEmail) {
+    console.warn('[config] ⚠️  ADMIN_EMAIL no configurado: ningún usuario tendrá rol admin.');
   }
 }

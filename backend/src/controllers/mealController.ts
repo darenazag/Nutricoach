@@ -1,86 +1,137 @@
-import { Request, Response } from 'express';
-import * as profileModel from '../models/profileModel.js';
-import { HttpError } from '../utils/httpError.js';
-import type { Objective } from '../types/domain.js';
+/**
+ * @file Controladores para los endpoints de comidas (Meal).
+ * Incluye la proyección de 100 días con la lógica determinista de DARIO
+ * (combos fijos) y la lógica de simulación de ELI (cálculo de balance y
+ * peso proyectado día a día).
+ *
+ * Los IDs son generados por SERIAL; el cliente no los provee en la creación.
+ */
 
-// ============================================================================
-// MONTE CARLO – Proyección de 100 días con variedad de menús
-// ============================================================================
+import { Request, Response } from 'express';
+import * as mealModel from '../models/mealModel.js';
+import * as profileModel from '../models/profileModel.js';
+import type { Objective } from '../types/domain.js';
+import { HttpError } from '../utils/httpError.js';
+import type { CreateMealInput, PaginationInput } from '../validators/schemas.js';
+
+/**
+ * GET /api/meals - Lista comidas paginadas.
+ *
+ * @param {Request} req - Petición con query params { page, limit } validados.
+ * @param {Response} res - Respuesta.
+ * @returns {Promise<void>}
+ */
+export async function list(req: Request, res: Response): Promise<void> {
+  const { page, limit } = req.query as unknown as PaginationInput;
+  const offset = (page - 1) * limit;
+  const { data, total } = await mealModel.findAll(limit, offset);
+  res.json({
+    meals: data,
+    pagination: {
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    },
+  });
+}
+
+/**
+ * GET /api/meals/:id - Devuelve una comida con sus ingredientes.
+ *
+ * @param {Request} req - Petición con :id validado.
+ * @param {Response} res - Respuesta.
+ * @returns {Promise<void>}
+ * @throws {HttpError} 404 si no existe.
+ */
+export async function getById(req: Request, res: Response): Promise<void> {
+  const id = (req.params as unknown as { id: number }).id;
+  const meal = await mealModel.findByIdWithItems(id);
+  if (!meal) {
+    throw HttpError.notFound(`No existe la comida ${id}`);
+  }
+  res.json(meal);
+}
+
+/**
+ * POST /api/meals - Crea una comida y enlaza sus alimentos. Requiere rol admin.
+ * El meal_id es asignado por SERIAL en la BD.
+ *
+ * @param {Request} req - Petición con la comida validada por Zod.
+ * @param {Response} res - Respuesta.
+ * @returns {Promise<void>}
+ */
+export async function create(req: Request, res: Response): Promise<void> {
+  const { foodIds, img, source, ...rest } = req.body as CreateMealInput;
+  const meal = { ...rest, img: img ?? null, source: source ?? null };
+  const result = await mealModel.createWithItems(meal, foodIds);
+  res.status(201).json(result);
+}
+
+// ── Recomendación de menú (proyección 100 días) ──────────────────────────────
 
 /** Kcal por categoría de comida. */
 const KCAL: Record<string, number> = { bajo: 250, medio: 500, alto: 750 };
-type Categoria = 'bajo' | 'medio' | 'alto';
+
+type Cat = 'bajo' | 'medio' | 'alto';
 
 interface Combo {
-  desayuno: Categoria;
-  almuerzo: Categoria;
-  cena: Categoria;
-}
-
-/** Proyección de un día (para tipado de la respuesta) */
-interface DiaProyeccion {
-  dia: number;
-  calorias_consumidas: number;
-  balance_energetico: number;
-  peso_proyectado: number;
-  recomendacion_menu: {
-    desayuno: { categoria: string; kcal: number };
-    almuerzo: { categoria: string; kcal: number };
-    cena: { categoria: string; kcal: number };
-  };
+  desayuno: Cat;
+  almuerzo: Cat;
+  cena: Cat;
 }
 
 /**
- * Genera un pool de combinaciones válidas para el objetivo del usuario.
- * @param tmb Tasa metabólica basal (kcal)
- * @param getd Gasto energético total diario (kcal)
- * @param objective Objetivo del perfil ('P' | 'M' | 'G')
- * @param poolSize Número máximo de combinaciones a generar (por defecto 500)
- * @returns Array de combos válidos, cada uno con su estructura, total calórico y balance
+ * Combinaciones canónicas de comidas (de menor a mayor total calórico).
+ * Uso de combos fijos garantiza determinismo.
  */
-function generarPoolValido(
-  tmb: number,
-  getd: number,
-  objective: Objective,
-  poolSize: number = 500
-): { combo: Combo; totalCalorias: number; balance: number }[] {
-  const pool: { combo: Combo; totalCalorias: number; balance: number }[] = [];
-  const categorias: Categoria[] = ['bajo', 'medio', 'alto'];
+const COMBOS: Combo[] = [
+  { desayuno: 'bajo',  almuerzo: 'bajo',  cena: 'bajo'  }, // 750 kcal
+  { desayuno: 'bajo',  almuerzo: 'medio', cena: 'bajo'  }, // 1000
+  { desayuno: 'bajo',  almuerzo: 'alto',  cena: 'bajo'  }, // 1250
+  { desayuno: 'bajo',  almuerzo: 'alto',  cena: 'medio' }, // 1500
+  { desayuno: 'medio', almuerzo: 'medio', cena: 'medio' }, // 1500
+  { desayuno: 'medio', almuerzo: 'alto',  cena: 'bajo'  }, // 1500
+  { desayuno: 'medio', almuerzo: 'alto',  cena: 'medio' }, // 1750
+  { desayuno: 'medio', almuerzo: 'alto',  cena: 'alto'  }, // 2000
+  { desayuno: 'alto',  almuerzo: 'alto',  cena: 'alto'  }, // 2250
+];
 
-  for (let intento = 0; intento < poolSize; intento++) {
-    const desayuno = categorias[Math.floor(Math.random() * categorias.length)];
-    const almuerzo = categorias[Math.floor(Math.random() * categorias.length)];
-    const cena = categorias[Math.floor(Math.random() * categorias.length)];
-    const totalCalorias = KCAL[desayuno] + KCAL[almuerzo] + KCAL[cena];
-    const balance = totalCalorias - getd;
-    let valido = false;
+function comboTotal(c: Combo): number {
+  return KCAL[c.desayuno] + KCAL[c.almuerzo] + KCAL[c.cena];
+}
 
-    if (objective === 'P') {
-      valido = totalCalorias < getd && totalCalorias >= tmb;
-    } else if (objective === 'G') {
-      const minSuperavit = getd * 1.10;
-      const maxSuperavit = getd * 1.15;
-      valido = totalCalorias >= minSuperavit && totalCalorias <= maxSuperavit;
-    } else if (objective === 'M') {
-      valido = Math.abs(balance) <= 100;
-    }
-
-    if (valido) {
-      pool.push({
-        combo: { desayuno, almuerzo, cena },
-        totalCalorias,
-        balance,
-      });
-    }
+function pickCombo(tmb: number, getd: number, objective: Objective): Combo {
+  if (objective === 'P') {
+    const valid = COMBOS.filter((c) => comboTotal(c) >= tmb && comboTotal(c) < getd);
+    if (valid.length > 0) return valid[valid.length - 1];
+    const mid = (tmb + getd) / 2;
+    return COMBOS.reduce((best, c) =>
+      Math.abs(comboTotal(c) - mid) < Math.abs(comboTotal(best) - mid) ? c : best
+    );
   }
-  return pool;
+  if (objective === 'G') {
+    const lo = getd * 1.10;
+    const hi = getd * 1.15;
+    const valid = COMBOS.filter((c) => comboTotal(c) >= lo && comboTotal(c) <= hi);
+    if (valid.length > 0) return valid[0];
+    const mid = (lo + hi) / 2;
+    return COMBOS.reduce((best, c) =>
+      Math.abs(comboTotal(c) - mid) < Math.abs(comboTotal(best) - mid) ? c : best
+    );
+  }
+  return COMBOS.reduce((best, c) =>
+    Math.abs(comboTotal(c) - getd) < Math.abs(comboTotal(best) - getd) ? c : best
+  );
 }
 
-/**
- * Convierte un valor a número finito o lanza error.
- * (Función auxiliar que ya deberías tener en el controlador)
- */
-function toFiniteProfileNumber(value: unknown, field: string): number {
+const OBJECTIVE_LABEL: Record<Objective, string> = {
+  P: 'Perder peso',
+  M: 'Mantener peso',
+  G: 'Ganar masa muscular',
+};
+
+function toFiniteNumber(value: unknown, field: string): number {
   const parsed = Number(value);
   if (!Number.isFinite(parsed)) {
     throw new HttpError(422, `El perfil tiene un valor numérico inválido en ${field}`);
@@ -89,17 +140,12 @@ function toFiniteProfileNumber(value: unknown, field: string): number {
 }
 
 /**
- * Etiqueta legible del objetivo.
- */
-const OBJECTIVE_LABEL: Record<Objective, string> = {
-  P: 'Perder peso',
-  M: 'Mantener peso',
-  G: 'Ganar masa muscular',
-};
-
-/**
- * GET /api/meals/recommend - Proyección de 100 días con simulación Monte Carlo.
- * Requiere autenticación.
+ * GET /api/meals/recommend - Proyección nutricional de 100 días. Requiere auth.
+ *
+ * @param {Request} req - Petición autenticada.
+ * @param {Response} res - Respuesta.
+ * @returns {Promise<void>}
+ * @throws {HttpError} 404 si el usuario no tiene perfil registrado.
  */
 export async function recommend(req: Request, res: Response): Promise<void> {
   const userId = req.auth!.sub;
@@ -109,93 +155,39 @@ export async function recommend(req: Request, res: Response): Promise<void> {
     throw HttpError.notFound('El usuario no tiene perfil registrado');
   }
 
-  const tmb = toFiniteProfileNumber(profile.basalMetabolicRate, 'basalMetabolicRate');
-  const getd = toFiniteProfileNumber(profile.totalDailyEnergyExpenditure, 'totalDailyEnergyExpenditure');
-  const weightStart = toFiniteProfileNumber(profile.weight, 'weight');
-  const objective = profile.objective;
+  const tmb    = toFiniteNumber(profile.basalMetabolicRate,          'basalMetabolicRate');
+  const getd   = toFiniteNumber(profile.totalDailyEnergyExpenditure, 'totalDailyEnergyExpenditure');
+  const weight = toFiniteNumber(profile.weight,                      'weight');
 
-  // 1. Generar el pool de combinaciones válidas
-  let pool = generarPoolValido(tmb, getd, objective, 500);
-  if (pool.length === 0) {
-    // Devolvemos error detallado (similar al JS)
-    res.status(422).json({
-      error: `No hay combinaciones válidas para el objetivo '${objective}' con los parámetros actuales.`,
-      diagnostico: {
-        tmb,
-        getd,
-        objetivo: objective,
-        rango_buscado: objective === 'P'
-          ? `${tmb} - ${getd} kcal`
-          : objective === 'G'
-          ? `${(getd * 1.10).toFixed(0)} - ${(getd * 1.15).toFixed(0)} kcal`
-          : `${getd - 100} - ${getd + 100} kcal`,
-      },
-    });
-    return;
-  }
+  const combo        = pickCombo(tmb, getd, profile.objective);
+  const dailyKcal    = comboTotal(combo);
+  const dailyBalance = dailyKcal - getd;
 
-  // 2. Simular 100 días muestreando sin reemplazo
-  const KCAL_POR_KG = 7700;
-  let pesoActual = weightStart;
-  let poolActual = [...pool];
-  const proyeccionDiaria: DiaProyeccion[] = [];
+  const KCAL_POR_KG       = 7700;
+  const proyeccion_diaria = [];
+  let pesoActual = weight;
 
   for (let dia = 1; dia <= 100; dia++) {
-    // Regenerar pool si se agota
-    if (poolActual.length === 0) {
-      poolActual = generarPoolValido(tmb, getd, objective, 500);
-      if (poolActual.length === 0) {
-        // Si sigue sin haber combinaciones, devolvemos error (no debería ocurrir)
-        res.status(422).json({
-          error: 'No se pudo generar ningún combo válido para continuar la simulación.',
-        });
-        return;
-      }
-    }
-
-    // Seleccionar una combinación aleatoria y eliminarla del pool
-    const indice = Math.floor(Math.random() * poolActual.length);
-    const { combo, totalCalorias } = poolActual[indice];
-    poolActual.splice(indice, 1);
-
-    // Aplicar variación aleatoria de ±50 kcal, acotada al rango seguro según objetivo
-    let variacion = (Math.random() - 0.5) * 100;
-    let caloriasConVariacion = totalCalorias + variacion;
-
-    if (objective === 'P') {
-      caloriasConVariacion = Math.min(Math.max(caloriasConVariacion, tmb), getd);
-    } else if (objective === 'G') {
-      const minSuperavit = getd * 1.10;
-      const maxSuperavit = getd * 1.15;
-      caloriasConVariacion = Math.min(Math.max(caloriasConVariacion, minSuperavit), maxSuperavit);
-    } else if (objective === 'M') {
-      caloriasConVariacion = Math.min(Math.max(caloriasConVariacion, getd - 100), getd + 100);
-    }
-
-    const balanceConVariacion = caloriasConVariacion - getd;
-    pesoActual += balanceConVariacion / KCAL_POR_KG;
-
-    proyeccionDiaria.push({
+    pesoActual += dailyBalance / KCAL_POR_KG;
+    proyeccion_diaria.push({
       dia,
-      calorias_consumidas: Math.round(caloriasConVariacion),
-      balance_energetico: Math.round(balanceConVariacion),
-      peso_proyectado: Math.round(pesoActual * 100) / 100,
+      calorias_consumidas: dailyKcal,
+      balance_energetico:  Math.round(dailyBalance),
+      peso_proyectado:     Math.round(pesoActual * 100) / 100,
       recomendacion_menu: {
         desayuno: { categoria: combo.desayuno, kcal: KCAL[combo.desayuno] },
         almuerzo: { categoria: combo.almuerzo, kcal: KCAL[combo.almuerzo] },
-        cena: { categoria: combo.cena, kcal: KCAL[combo.cena] },
+        cena:     { categoria: combo.cena,     kcal: KCAL[combo.cena]     },
       },
     });
   }
 
   res.json({
-    datos_usuario: {
-      tmb: `${tmb} kcal`,
+    datos_biometricos: {
+      tmb:  `${tmb} kcal`,
       getd: `${getd} kcal`,
     },
-    objetivo_usuario: OBJECTIVE_LABEL[objective],
-    metodo: 'Monte Carlo - Muestreo sin reemplazo con variación ±50 kcal acotada',
-    pool_size: pool.length,
-    proyeccion_diaria: proyeccionDiaria,
+    objetivo_usuario: OBJECTIVE_LABEL[profile.objective],
+    proyeccion_diaria,
   });
 }

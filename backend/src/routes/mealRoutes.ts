@@ -1,19 +1,28 @@
 /**
- * @file Rutas de comidas (Meal). Prefijo: /api/meals
- * Lectura publica; crear requiere rol admin.
+ * @file Rutas de comidas (Meal).
+ * Prefijo: /api/meals
+ *
+ * Lectura pública con paginación; crear requiere rol admin.
+ * Las rutas de perfil bajo /api/meals/profile/* requieren autenticación.
  */
 
 import { Router } from 'express';
 import * as controller from '../controllers/mealController.js';
 import * as profileController from '../controllers/profileController.js';
-import { asyncHandler } from '../utils/asyncHandler.js';
 import { authenticate } from '../middlewares/authenticate.js';
 import { requireAdmin } from '../middlewares/authorize.js';
 import { validate } from '../middlewares/validate.js';
-import { assignMealSchema, createMealSchema, idParamSchema } from '../validators/schemas.js';
+import { asyncHandler } from '../utils/asyncHandler.js';
+import {
+  assignMealSchema,
+  createMealSchema,
+  idParamSchema,
+  paginationSchema,
+} from '../validators/schemas.js';
 
 const router = Router();
 
+// Las rutas más específicas deben ir antes que /:id
 router.get(
   '/profile/mine',
   authenticate,
@@ -27,9 +36,18 @@ router.post(
   asyncHandler(profileController.assignMealToMe)
 );
 
-router.get('/', asyncHandler(controller.list));
+router.get(
+  '/',
+  validate(paginationSchema, 'query'),
+  asyncHandler(controller.list)
+);
 router.get('/recommend', authenticate, asyncHandler(controller.recommend));
-router.get('/:id', validate(idParamSchema, 'params'), asyncHandler(controller.getById));
+router.get(
+  '/:id',
+  validate(idParamSchema, 'params'),
+  asyncHandler(controller.getById)
+);
+
 router.post(
   '/',
   authenticate,
