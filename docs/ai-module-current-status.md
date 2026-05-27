@@ -4,6 +4,8 @@
 > Fecha: 2026-05-27
 > Stack: Node.js + Express + TypeScript + Mongoose 9 + Zod + `@google/genai` + DeepSeek
 
+> **Despliegue VPS: PENDIENTE.** El módulo está validado en local. No se ha desplegado todavía en ningún servidor público. Variables de entorno de producción (`CLIENT_URL`, `VITE_API_URL`, `GEMINI_API_KEY`, `MONGO_URI`, …) deben definirse cuando se aborde el despliegue.
+
 ---
 
 ## Resumen ejecutivo

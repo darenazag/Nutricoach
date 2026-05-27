@@ -241,6 +241,24 @@ Si los cuatro comandos pasan **y** los pasos 5–9 funcionan en navegador, el MV
 
 ---
 
+## 13. Smoke VPS — pendiente
+
+> **Estado: PENDIENTE.** El despliegue VPS todavía no se ha realizado. Esta sección queda como placeholder para cuando se aborde.
+
+Cuando el despliegue esté listo, este apartado deberá incluir:
+
+- Cómo verificar que el backend público responde en el dominio asignado (`GET /api/health`).
+- Cómo verificar que el frontend público sirve correctamente (`/`, `/login`).
+- Cómo confirmar que `CLIENT_URL` y `VITE_API_URL` están bien configurados (sin caer a fallback `*`).
+- Cómo validar HTTPS y certificados.
+- Cómo confirmar que `GEMINI_API_KEY` y `DEEPSEEK_API_KEY` están en el `.env` del servidor (sin imprimirlas).
+- Cómo verificar que Mongo y Postgres del VPS aceptan conexión desde el backend.
+- Cómo ejecutar el smoke manual (§§5–9) contra la URL pública en lugar de `localhost`.
+
+Hasta entonces, las únicas validaciones aplicables son las locales descritas arriba.
+
+---
+
 ## Ver también
 
 - [docs/ai-module-current-status.md](../../ai-module-current-status.md) — resumen ejecutivo del MVP.

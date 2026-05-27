@@ -579,6 +579,10 @@ El MVP entrega valor de producto demostrable end-to-end: el usuario sube una fot
 
 La deuda técnica conocida está documentada y priorizada, con la fix más arquitectónica (permisos P0) ya identificada como el siguiente paso natural. Ninguna deuda bloquea la demo del MVP; todas son mejoras de robustez, coste o experiencia operativa.
 
+### Nota sobre despliegue
+
+**El despliegue en VPS está PENDIENTE.** Esta memoria describe el estado del módulo IA validado **localmente**. El plan de despliegue (Docker compose unificado, reverse proxy, HTTPS, variables de producción) es el siguiente paso natural del proyecto pero no se ha aplicado todavía. Cualquier referencia a "producción" en este documento es prospectiva (cómo se comportaría / qué hace falta definir), no descriptiva.
+
 ---
 
 ## Referencias
