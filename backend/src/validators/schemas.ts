@@ -29,10 +29,15 @@ export const registerSchema = z.object({
   password: z.string().min(8).max(72), // bcrypt limita a 72 bytes
 });
 
-/** Body de login. */
+/**
+ * Body de login.
+ * Defense: Zod validation rejects malformed payloads before they reach the
+ * controller; `userModel.findByEmail` uses a parameterised query (`WHERE email = $1`)
+ * so no string concatenation occurs and SQL injection cannot alter the query.
+ */
 export const loginSchema = z.object({
-  email: z.string().email(),
-  password: z.string().min(1),
+  email: z.string().email().max(50),
+  password: z.string().min(1).max(72), // bcrypt limita a 72 bytes
 });
 
 // ---------------------------------------------------------------------------
