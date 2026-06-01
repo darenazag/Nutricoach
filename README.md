@@ -2,7 +2,7 @@
 
 App fullstack de hábitos saludables, registro de comidas, menús e IA.
 
-> Proyecto grupal final de bootcamp Full Stack. Actualmente se encuentra en fase inicial de planificación y definición técnica.
+> Proyecto grupal final de bootcamp Full Stack.
 
 ---
 
@@ -53,7 +53,7 @@ Para mantener el alcance realista, estas funcionalidades quedan fuera de la prim
 
 ---
 
-## Stack técnico
+## Stack tecnológico
 
 | Capa | Tecnología prevista | Uso |
 | --- | --- | --- |
