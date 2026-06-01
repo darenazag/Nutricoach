@@ -21,6 +21,9 @@ export type ActivityFactor = 'S' | 'A' | 'M';
  */
 export type Objective = 'P' | 'M' | 'G';
 
+/** Tipo de comida usado al asignar platos al perfil. */
+export type MealType = 'desayuno' | 'almuerzo' | 'merienda' | 'cena';
+
 /**
  * Perfil fisiologico de un usuario.
  * Corresponde a la tabla `public."Profile"`.
@@ -125,9 +128,17 @@ export interface MealFoodItem {
 export interface ProfileMeal {
   Profile_user_id: number;
   Meal_meal_id: number;
+  meal_type: MealType | null;
+}
+
+/** Asignacion de comida a perfil con categoria opcional. */
+export interface ProfileMealAssignment {
+  mealId: number;
+  mealType: MealType | null;
 }
 
 /** Comida con la lista de alimentos que la componen. */
 export interface MealWithItems extends Meal {
   items: FoodItem[];
+  mealType?: MealType | null;
 }

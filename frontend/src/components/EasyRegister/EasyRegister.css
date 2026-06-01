@@ -148,6 +148,27 @@ body.dark .er-card-desc {
   }
 }
 
+@media (max-width: 767px) {
+  .er-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  .er-card-icon {
+    width: 56px;
+    height: 56px;
+    font-size: 24px;
+  }
+
+  .er-card-title {
+    font-size: 14px;
+  }
+
+  .er-card-desc {
+    font-size: 12px;
+  }
+}
+
 @media (max-width: 540px) {
   .easy-register {
     padding: 56px 16px;
@@ -185,26 +206,5 @@ body.dark .er-card-desc {
 
   .er-card-desc {
     font-size: 13px;
-  }
-}
-
-@media (max-width: 767px) {
-  .er-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
-  }
-
-  .er-card-icon {
-    width: 56px;
-    height: 56px;
-    font-size: 24px;
-  }
-
-  .er-card-title {
-    font-size: 14px;
-  }
-
-  .er-card-desc {
-    font-size: 12px;
   }
 }

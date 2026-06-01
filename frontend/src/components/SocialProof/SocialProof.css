@@ -1,3 +1,8 @@
+/* Section guardrail — prevents scroll-track from leaking to page level */
+#social-proof {
+  overflow-x: clip;
+}
+
 .sp-card {
   width: 360px;
   flex-shrink: 0;

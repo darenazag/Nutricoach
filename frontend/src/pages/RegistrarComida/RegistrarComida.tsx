@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import Header from '../../components/Header/Header'
 import { mealService } from '../../services/mealService'
+import { normalizeImageForUpload } from '../../utils/normalizeImage'
 import type { Meal, Analysis } from '../../types'
 import './RegistrarComida.css'
 
@@ -31,6 +32,7 @@ function RegistrarComida() {
 
   const [preview, setPreview] = useState<string | null>(null)
   const [analyzing, setAnalyzing] = useState(false)
+  const [normalizingImage, setNormalizingImage] = useState(false)
   const [analysis, setAnalysis] = useState<Analysis | null>(null)
   const [editName, setEditName] = useState('')
   const [editCalories, setEditCalories] = useState('')
@@ -49,15 +51,35 @@ function RegistrarComida() {
       .finally(() => setLoading(false))
   }, [])
 
-  function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
+  async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     if (!file) return
-    setPreview(URL.createObjectURL(file))
-    uploadForAnalysis(file)
+    // Resetear el input para permitir seleccionar el mismo archivo otra vez
+    e.target.value = ''
+
+    setAnalyzing(true)
+    setNormalizingImage(true)
+    setAnalysis(null)
+    setPreview(null)
+
+    let normalized: File
+    try {
+      normalized = await normalizeImageForUpload(file)
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'No se pudo procesar la imagen. Intenta con otra foto.'
+      alert(msg)
+      setAnalyzing(false)
+      setNormalizingImage(false)
+      return
+    }
+
+    setNormalizingImage(false)
+    setPreview(URL.createObjectURL(normalized))
+    void uploadForAnalysis(normalized)
   }
 
   async function uploadForAnalysis(file: File) {
-    setAnalyzing(true)
+    // analyzing ya está en true desde handleFile
     setAnalysis(null)
 
     try {
@@ -214,8 +236,12 @@ function RegistrarComida() {
               {analyzing && (
                 <div className="rc-analyzing">
                   <div className="rc-spinner" />
-                  <p>Analizando tu comida...</p>
-                  <p className="rc-analyzing-hint">La IA está identificando los alimentos y calculando nutrientes</p>
+                  <p>{normalizingImage ? 'Preparando imagen...' : 'Analizando tu comida...'}</p>
+                  <p className="rc-analyzing-hint">
+                    {normalizingImage
+                      ? 'Convirtiendo y optimizando la foto para el análisis'
+                      : 'La IA está identificando los alimentos y calculando nutrientes'}
+                  </p>
                 </div>
               )}
 
