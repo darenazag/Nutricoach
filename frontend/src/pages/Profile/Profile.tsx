@@ -30,6 +30,7 @@ interface Meal {
   carbs: number
   img: string | null
   source: string
+  mealType?: string | null
 }
 
 interface StreakData {
@@ -201,10 +202,13 @@ function Profile() {
     Cena: [],
   }
   meals.forEach((meal, i) => {
+    const map: Record<string, string> = { desayuno: 'Desayuno', almuerzo: 'Almuerzo', merienda: 'Merienda', cena: 'Cena' }
+    const persistedType = meal.mealType?.toLowerCase()
     const catMatch = meal.source?.match(/-\s*(desayuno|almuerzo|merienda|cena)$/i)
     let key: string
-    if (catMatch) {
-      const map: Record<string, string> = { desayuno: 'Desayuno', almuerzo: 'Almuerzo', merienda: 'Merienda', cena: 'Cena' }
+    if (persistedType && map[persistedType]) {
+      key = map[persistedType]
+    } else if (catMatch) {
       key = map[catMatch[1].toLowerCase()] || MEAL_CATEGORIES[i % MEAL_CATEGORIES.length].id
     } else {
       key = MEAL_CATEGORIES[i % MEAL_CATEGORIES.length].id

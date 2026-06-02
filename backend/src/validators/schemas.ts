@@ -13,6 +13,11 @@ export const idParamSchema = z.object({
   id: z.coerce.number().int().positive(),
 });
 
+const mealTypeSchema = z.preprocess(
+  (value) => (typeof value === 'string' ? value.trim().toLowerCase() : value),
+  z.enum(['desayuno', 'almuerzo', 'merienda', 'cena'])
+);
+
 // ---------------------------------------------------------------------------
 // Auth
 // ---------------------------------------------------------------------------
@@ -81,6 +86,7 @@ export const createProfileSchema = z.object({
 /** Body para asignar una comida a un perfil. */
 export const assignMealSchema = z.object({
   mealId: numeric.int().positive(),
+  mealType: mealTypeSchema.optional(),
 });
 
 // Tipos inferidos para usar en los controladores.

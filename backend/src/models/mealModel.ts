@@ -6,6 +6,8 @@
 import { query, withTransaction } from '../config/db.js';
 import { FoodItem, Meal, MealWithItems } from '../types/domain.js';
 
+type NewMeal = Omit<Meal, 'meal_id'>;
+
 /**
  * Devuelve todas las comidas.
  *
@@ -87,6 +89,43 @@ export async function create(meal: Meal): Promise<Meal> {
     ]
   );
   return result.rows[0];
+}
+
+/**
+ * Inserta una comida generando el identificador desde PostgreSQL.
+ * La tabla original no usa SERIAL; el lock serializa MAX + 1 para evitar
+ * colisiones entre guardados concurrentes.
+ *
+ * @param {NewMeal} meal - Comida sin identificador.
+ * @returns {Promise<Meal>} La comida guardada.
+ */
+export async function createWithGeneratedId(meal: NewMeal): Promise<Meal> {
+  return withTransaction(async (client) => {
+    await client.query('LOCK TABLE public."Meal" IN EXCLUSIVE MODE');
+
+    const nextIdResult = await client.query<{ next_id: number }>(
+      'SELECT COALESCE(MAX(meal_id), 0) + 1 AS next_id FROM public."Meal"'
+    );
+    const mealId = Number(nextIdResult.rows[0]?.next_id ?? 1);
+
+    const result = await client.query<Meal>(
+      `INSERT INTO public."Meal" (meal_id, name, calories, protein, fat, carbs, img, source)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+       RETURNING meal_id, name, calories, protein, fat, carbs, img, source`,
+      [
+        mealId,
+        meal.name,
+        meal.calories,
+        meal.protein,
+        meal.fat,
+        meal.carbs,
+        meal.img,
+        meal.source,
+      ]
+    );
+
+    return result.rows[0];
+  });
 }
 
 /**

@@ -21,6 +21,31 @@ services:
     networks:
       - nutricoach_network
 
+  mongo:
+    image: mongo:7-jammy
+    container_name: nutricoach_mongo
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+      MONGO_INITDB_DATABASE: ${MONGO_DB}
+    ports:
+      - "${MONGO_PORT:-27017}:27017"
+    volumes:
+      - nutricoach_mongodata:/data/db
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "mongosh --quiet \"mongodb://$${MONGO_INITDB_ROOT_USERNAME}:$${MONGO_INITDB_ROOT_PASSWORD}@localhost:27017/admin\" --eval \"db.runCommand({ ping: 1 }).ok\""
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - nutricoach_network
+
   pgadmin:
     image: dpage/pgadmin4:latest
     container_name: nutricoach_pgadmin
@@ -48,20 +73,21 @@ services:
       DB_USER: ${DB_USER}
       DB_PASSWORD: ${DB_PASSWORD}
       DB_NAME: ${DB_NAME}
+      MONGO_URI: mongodb://${MONGO_INITDB_ROOT_USERNAME}:${MONGO_INITDB_ROOT_PASSWORD}@mongo:27017/${MONGO_DB}?authSource=admin
       PORT: ${PORT:-3000}
     ports:
       - "${PORT:-3000}:${PORT:-3000}"
     depends_on:
       db:
         condition: service_healthy
-    volumes:
-      - .:/usr/src/app
-      - /usr/src/app/node_modules
+      mongo:
+        condition: service_healthy
     networks:
       - nutricoach_network
 
 volumes:
   nutricoach_pgdata:
+  nutricoach_mongodata:
 
 networks:
   nutricoach_network:

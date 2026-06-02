@@ -100,17 +100,19 @@ export function assertExternalApisConfig(): void {
 export { required };
 
 /**
- * Verifica que en produccion el secreto JWT no sea el inseguro por defecto.
+ * Verifica que en produccion el secreto JWT no sea el inseguro por defecto
+ * y que CLIENT_URL este definida (evita CORS wildcard).
  *
- * @throws {Error} Si NODE_ENV es production y no se configuro JWT_SECRET.
+ * @throws {Error} Si NODE_ENV es production y falta alguna variable critica.
  */
 export function assertAuthConfig(): void {
-  if (
-    env.nodeEnv === 'production' &&
-    (!process.env.JWT_SECRET || env.auth.jwtSecret === 'dev_insecure_secret_change_me')
-  ) {
-    throw new Error(
-      'JWT_SECRET debe configurarse con un valor seguro en produccion'
-    );
+  if (env.nodeEnv !== 'production') return;
+
+  if (!process.env.JWT_SECRET || env.auth.jwtSecret === 'dev_insecure_secret_change_me') {
+    throw new Error('JWT_SECRET debe configurarse con un valor seguro en produccion');
+  }
+
+  if (!process.env.CLIENT_URL) {
+    throw new Error('CLIENT_URL debe configurarse en produccion (evita CORS wildcard)');
   }
 }
