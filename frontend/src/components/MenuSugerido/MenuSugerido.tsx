@@ -98,14 +98,17 @@ export default function MenuSugerido({
   const todayProjection = projectionDays[todayIndex]
   const todayRecommendation = todayProjection?.recomendacion_menu ?? null
 
-  const meals: { key: MealType; info: { categoria: string; kcal: number } }[] =
-    todayRecommendation
-      ? [
-          { key: 'desayuno', info: todayRecommendation.desayuno },
-          { key: 'almuerzo', info: todayRecommendation.almuerzo },
-          { key: 'cena', info: todayRecommendation.cena },
-        ]
-      : []
+  const meals = useMemo<{ key: MealType; info: { categoria: string; kcal: number } }[]>(
+    () =>
+      todayRecommendation
+        ? [
+            { key: 'desayuno', info: todayRecommendation.desayuno },
+            { key: 'almuerzo', info: todayRecommendation.almuerzo },
+            { key: 'cena', info: todayRecommendation.cena },
+          ]
+        : [],
+    [todayRecommendation],
+  )
 
   const totalKcal = useMemo(
     () => meals.reduce((s, m) => s + Number(m.info.kcal), 0),
