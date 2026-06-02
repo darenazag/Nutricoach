@@ -122,15 +122,89 @@ curl -X POST http://localhost:3000/api/profiles/3/meals \
 # -> 403 { "error": "Solo puedes modificar tu propio perfil" }
 ```
 
+## Seguridad
+
+El backend aplica varias capas de defensa en profundidad:
+
+| Capa | Mecanismo |
+|---|---|
+| Cabeceras HTTP | `helmet` — X-Content-Type-Options, X-Frame-Options, CSP, HSTS, etc. |
+| Rate limiting | `express-rate-limit` en `/api/auth/login` y `/api/auth/register` (20 req / 15 min / IP) |
+| Tamaño de payload | `express.json({ limit: '1mb' })` |
+| Autenticación | JWT firmado con `JWT_SECRET`, expira en 1h |
+| Contraseñas | bcrypt (10 rounds por defecto; configurable con `BCRYPT_SALT_ROUNDS`) |
+| Validación de entrada | Zod en todos los endpoints — email `.email().max(50)`, password `.min(1).max(72)` |
+| SQL injection | Queries 100% parametrizadas (`WHERE email = $1`) — sin concatenación SQL en ningún modelo |
+| CORS | Restringido a `CLIENT_URL`; en producción la variable es obligatoria (fuerza error en arranque) |
+| Secretos | `JWT_SECRET` se valida en arranque: falla si es el valor inseguro por defecto en `NODE_ENV=production` |
+
+## Variables de entorno
+
+Ver `backend/.env.example` para la lista completa. Las más importantes:
+
+```env
+# PostgreSQL
+DATABASE_URL=postgres://usuario:contraseña@localhost:5432/nutricoach
+
+# MongoDB (módulo IA)
+MONGO_URI=mongodb://usuario:contraseña@localhost:27017/nutricoach_ai?authSource=admin
+
+# Auth — OBLIGATORIO en producción
+JWT_SECRET=cadena_larga_aleatoria_segura
+CLIENT_URL=http://localhost:5173
+
+# IA
+GEMINI_API_KEY=tu_clave_de_gemini
+GEMINI_MODEL=gemini-2.5-flash
+
+# Proveedor de texto alternativo (opcional)
+AI_TEXT_PROVIDER=gemini          # gemini | deepseek
+AI_ENABLE_DEEPSEEK=false
+DEEPSEEK_API_KEY=tu_clave_deepseek
+```
+
+## Scripts disponibles
+
+```bash
+npm run dev              # Desarrollo con tsx watch
+npm run build            # Compila TypeScript a dist/
+npm start                # Ejecuta dist/server.js (producción)
+npm run lint             # TypeScript type-check (tsc --noEmit)
+npm test                 # Suite de tests (vitest)
+npm run db:init          # Crea tablas PostgreSQL y datos semilla
+npm run db:seed          # Rellena alimentos/comidas desde Open Food Facts y TheMealDB
+npm run seed:ai-prompts  # Carga plantillas de prompt en MongoDB
+```
+
+## Módulo IA
+
+El módulo IA vive en `src/modules/ai/` y usa **MongoDB** para persistencia. Es independiente del módulo P0 (PostgreSQL).
+
+```
+src/modules/ai/
+├── controllers/     Un controlador por endpoint
+├── services/        Lógica de negocio (chat, menú, perfil, plato, conversaciones)
+├── models/          Modelos Mongoose (AiConversation, AiMessage, AiPromptTemplate, AiCache)
+├── routes/          ai.routes.ts — registra todos los endpoints bajo /api/ai
+├── adapters/        nutricoachContext.adapter.ts — construye el contexto del usuario para prompts
+├── prompts/         Plantillas de prompt por funcionalidad
+├── clients/         geminiClient.ts, deepseekClient.ts
+└── seeders/         seedAiPromptTemplates.ts
+```
+
+El **AI Provider Router** (`aiProviderRouter.service.ts`) permite usar DeepSeek como proveedor de texto alternativo. Si DeepSeek falla, hace fallback automático a Gemini. El proveedor activo se controla con `AI_TEXT_PROVIDER` y `AI_ENABLE_DEEPSEEK`.
+
 ## Endpoints
 
-Base: `http://localhost:3000`. 🔒 = requiere token. 👑 = requiere rol admin (o ser el propio dueño, en el caso de perfiles).
+Base: `http://localhost:3000`. 🔒 = requiere token JWT. 👑 = requiere rol admin (o ser el propio dueño en el caso de perfiles).
+
+### P0 — Auth, perfiles, comidas, alimentos
 
 | Método | Ruta | Descripción |
 |--------|------|-------------|
-| GET | `/health` | Estado del servicio |
-| POST | `/api/auth/register` | Registra usuario, devuelve token |
-| POST | `/api/auth/login` | Login, devuelve token |
+| GET | `/api/health` | Estado del servicio |
+| POST | `/api/auth/register` ⏱ | Registra usuario, devuelve token |
+| POST | `/api/auth/login` ⏱ | Login, devuelve token |
 | GET | `/api/auth/me` 🔒 | Usuario autenticado (incluye su rol) |
 | GET | `/api/foods` | Lista alimentos |
 | GET | `/api/foods/:id` | Un alimento |
@@ -146,6 +220,24 @@ Base: `http://localhost:3000`. 🔒 = requiere token. 👑 = requiere rol admin 
 | POST | `/api/profiles/:id/meals` 🔒 | Asigna una comida (propio, o cualquiera si admin) |
 | GET | `/api/users` 👑 | Lista usuarios (sin password) |
 | GET | `/api/users/:id` 👑 | Un usuario |
+
+⏱ = rate limited (20 req / 15 min / IP)
+
+### IA — Todos requieren 🔒
+
+| Método | Ruta | Descripción |
+|--------|------|-------------|
+| POST | `/api/ai/chat` | Chat conversacional con Gemini |
+| POST | `/api/ai/menu` | Menú orientativo diario (con caché MongoDB) |
+| POST | `/api/ai/menu/weekly` | Plan de menú semanal (con caché MongoDB) |
+| GET | `/api/ai/menu/weekly/:planId` | Recupera un plan semanal guardado |
+| POST | `/api/ai/profile-explanation` | Explicación del perfil nutricional (con caché) |
+| POST | `/api/ai/plate-analysis` | Análisis de imagen de plato (`multipart/form-data`, campo `image`) |
+| POST | `/api/ai/analyze` | Análisis legacy (usado por AIBubble del frontend) |
+| POST | `/api/ai/analyze-preview` | Previsualización de análisis (RegistrarComida) |
+| POST | `/api/ai/save-analyzed-meal` | Guarda comida analizada en PostgreSQL |
+| GET | `/api/ai/conversations` | Lista conversaciones del usuario (query `?page=&limit=`) |
+| GET | `/api/ai/conversations/:id` | Una conversación con sus mensajes |
 
 Toda la entrada (body y parámetros `:id`) se valida con Zod; ante datos inválidos la respuesta es `400` con el detalle del fallo.
 

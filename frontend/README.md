@@ -1,75 +1,80 @@
-# React + TypeScript + Vite
+# NutriCoach AI — Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+SPA React para la gestión de hábitos nutricionales, registro de comidas y funcionalidades de IA.
 
-Currently, two official plugins are available:
+## Stack
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+| Tecnología | Uso |
+|---|---|
+| React 19 + TypeScript | Framework SPA y tipos estáticos |
+| Vite | Bundler y servidor de desarrollo |
+| Tailwind CSS | Estilos utilitarios |
+| React Router | Navegación entre páginas |
+| Recharts | Gráficas de calorías y macronutrientes |
 
-## React Compiler
+## Páginas y rutas
 
-The React Compiler is enabled on this template. See [this documentation](https://react.dev/learn/react-compiler) for more information.
+| Ruta | Página | Descripción |
+|---|---|---|
+| `/` | Landing | Página de bienvenida y presentación |
+| `/login` | Login | Inicio de sesión |
+| `/register` | Register | Registro de usuario |
+| `/about-you` | AboutYouStep | Paso 1 del onboarding — datos básicos |
+| `/objective` | ObjectiveStep | Paso 2 del onboarding — objetivo nutricional |
+| `/profile` | Profile | Dashboard principal — calorías, macros, menú sugerido |
+| `/profile/edit` | EditProfile | Edición del perfil nutricional |
+| `/profile/form` | ProfileForm | Creación del perfil (primer acceso) |
+| `/meal-log` | MealLog | Historial de comidas registradas |
+| `/registrar-comida` | RegistrarComida | Registro manual o por análisis de imagen IA |
 
-Note: This will impact Vite dev & build performances.
+## Instalación y desarrollo
 
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
+cp .env.example .env   # solo necesario si no usas el proxy de Vite
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+En desarrollo, el proxy de Vite reenvía `/api/*` al backend en `http://localhost:3000` sin necesidad de configurar `VITE_API_URL`.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## Variables de entorno
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```env
+# Solo necesario en producción (o si el backend no corre en localhost:3000)
+VITE_API_URL=https://api.tudominio.com/api
+```
+
+Ver `.env.example` para referencia.
+
+## Scripts
+
+```bash
+npm run dev      # Servidor de desarrollo con HMR
+npm run build    # Compilación para producción (salida en dist/)
+npm run preview  # Preview del build de producción
+npm run lint     # ESLint
+```
+
+## Cliente HTTP
+
+Toda la comunicación con el backend pasa por `src/services/api.ts`, que:
+
+- Añade automáticamente el header `Authorization: Bearer <token>` en peticiones autenticadas.
+- Normaliza los dos formatos de error de la API (`{ error: string }` de P0 y `{ success: false, error: { message } }` del módulo IA).
+- Lanza `ApiError` con el código de estado HTTP para que los componentes puedan distinguir 401 de 404 de 500.
+
+## Arquitectura de componentes
+
+```
+src/
+├── pages/           Vistas completas (una por ruta)
+├── components/      Componentes reutilizables
+│   ├── charts/      Gráficas de macros y calorías (Recharts)
+│   ├── MenuSugerido/ Menú semanal orientativo generado por IA
+│   ├── AIBubble/    Widget flotante de chat IA
+│   └── ...
+├── hooks/           Custom hooks (useAuth, useProfile, ...)
+├── services/        api.ts — cliente HTTP centralizado
+├── types/           Tipos de dominio compartidos con el backend
+└── utils/           Funciones de utilidad (normalizeImage, ...)
 ```
