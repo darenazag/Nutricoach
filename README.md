@@ -1,18 +1,8 @@
 # NutriCoach AI
 
-App fullstack de hábitos saludables, registro de comidas, menús e IA.
+Aplicación web fullstack de hábitos saludables con registro de comidas, dashboard nutricional y módulo de inteligencia artificial.
 
-> Proyecto grupal final de bootcamp Full Stack. Actualmente se encuentra en fase inicial de planificación y definición técnica.
-
----
-
-## Descripción
-
-NutriCoach AI es una aplicación web fullstack pensada para ayudar a usuarios a mejorar sus hábitos de alimentación de forma sencilla, visual y orientativa.
-
-El proyecto busca resolver problemas habituales como la falta de visibilidad sobre lo que se come durante el día, la dificultad de estimar calorías manualmente y el tiempo necesario para planificar menús equilibrados.
-
-La aplicación se plantea como una herramienta de bienestar y educación nutricional, no como una aplicación médica. Su objetivo es facilitar el registro de comidas, mostrar progreso mediante un dashboard y usar IA para generar menús, resolver dudas generales y estimar de forma aproximada el contenido de un plato a partir de una imagen.
+> Proyecto grupal final de bootcamp Full Stack.
 
 ---
 
@@ -20,131 +10,115 @@ La aplicación se plantea como una herramienta de bienestar y educación nutrici
 
 NutriCoach AI ofrece recomendaciones orientativas y educativas sobre hábitos saludables.
 
-No sustituye el criterio de profesionales sanitarios, médicos, dietistas o nutricionistas. La aplicación no debe utilizarse para diagnóstico médico, tratamiento de enfermedades, dietas clínicas ni decisiones relacionadas con patologías, medicación o trastornos alimentarios.
+No sustituye el criterio de profesionales sanitarios, médicos, dietistas o nutricionistas. No debe utilizarse para diagnóstico médico, tratamiento de enfermedades, dietas clínicas ni decisiones relacionadas con patologías, medicación o trastornos alimentarios.
 
-Las estimaciones de calorías, macronutrientes o alimentos detectados por IA pueden ser imprecisas y deberán poder revisarse o corregirse manualmente por el usuario.
-
----
-
-## Funcionalidades MVP previstas
-
-Estas funcionalidades están planificadas para la primera versión del proyecto. No implican que estén ya implementadas.
-
-- Registro e inicio de sesión de usuarios.
-- Perfil nutricional básico con edad, peso, altura, objetivo y nivel de actividad.
-- Registro manual de comidas diarias.
-- Dashboard de calorías, macronutrientes y progreso.
-- Generación de menús orientativos con IA.
-- Chat IA para dudas generales sobre hábitos saludables.
-- Estimación orientativa de calorías desde una imagen de plato como funcionalidad diferencial.
+Las estimaciones de calorías y macronutrientes generadas por IA son aproximadas y pueden contener errores.
 
 ---
 
-## Funcionalidades fuera del MVP
+## Estado del proyecto
 
-Para mantener el alcance realista, estas funcionalidades quedan fuera de la primera versión:
+**MVP implementado y funcional.** Todas las funcionalidades planificadas están en producción en la rama `main`.
 
-- Diagnóstico médico.
-- Dietas clínicas o planes para patologías específicas.
-- Integración con wearables.
-- Escáner de código de barras.
-- Rutinas deportivas avanzadas.
-- Comunidad, sistema social o publicaciones entre usuarios.
-
----
-
-## Stack técnico
-
-| Capa | Tecnología prevista | Uso |
-| --- | --- | --- |
-| Frontend | React + TypeScript + Vite | SPA, rutas, formularios, dashboard y subida de imágenes |
-| Backend | Node.js + Express + TypeScript | API REST, autenticación, validaciones y lógica de negocio |
-| Base de datos | PostgreSQL | Persistencia relacional de usuarios, comidas, menús e interacciones |
-| ORM | Sequelize | Modelos, asociaciones, migraciones y seeders |
-| IA | Gemini API | Generación de menús, chat y análisis orientativo de imagen |
-| Gráficas | Recharts o similar | Visualización de calorías, macros y evolución |
-| Deploy | VPS + Docker/Docker Compose + reverse proxy | Despliegue de frontend, backend y base de datos |
+| Funcionalidad | Estado |
+|---|---|
+| Registro e inicio de sesión (JWT + bcrypt) | ✅ |
+| Perfil nutricional (peso, altura, edad, objetivo, actividad) | ✅ |
+| Registro manual de comidas | ✅ |
+| Dashboard de calorías y macronutrientes | ✅ |
+| Menú semanal orientativo con IA | ✅ |
+| Chat IA para dudas nutricionales | ✅ |
+| Análisis orientativo de imagen de plato | ✅ |
+| Historial de conversaciones con IA | ✅ |
 
 ---
 
-## Arquitectura inicial
+## Stack tecnológico
 
-La arquitectura prevista separa frontend, backend, base de datos y servicios de IA:
+| Capa | Tecnología | Uso |
+|---|---|---|
+| Frontend | React 19 + TypeScript + Vite + Tailwind CSS | SPA, rutas, formularios, dashboard, subida de imágenes |
+| Backend | Node.js + Express 5 + TypeScript | API REST, autenticación, validaciones, lógica de negocio |
+| Base de datos principal | PostgreSQL + node-postgres (pg) | Usuarios, perfiles, comidas, alimentos (queries SQL directas) |
+| Base de datos IA | MongoDB + Mongoose | Conversaciones, mensajes, plantillas de prompt, caché IA |
+| IA | Gemini API (principal) + DeepSeek (fallback opcional) | Menús, chat, análisis de imagen, explicación de perfil |
+| Validación | Zod | Validación de cuerpos de petición en todos los endpoints |
+| Seguridad | helmet + express-rate-limit + bcryptjs + jsonwebtoken | Cabeceras HTTP, rate limiting en auth, hashing, JWT |
+| Tests | Vitest | 116 tests unitarios (módulo IA + seguridad auth) |
+| Deploy | Docker + Docker Compose | Contenedores para API, PostgreSQL, MongoDB y pgAdmin |
 
-```txt
-Frontend React
-    |
-    v
+---
+
+## Arquitectura
+
+```
+Frontend React (Vite)
+        │
+        │  HTTPS / REST JSON
+        ▼
 Backend Express API
-    |
-    v
-PostgreSQL + Sequelize
+        │
+        ├── PostgreSQL (pg)
+        │     └── User, HealthProfile, Meal, Food_item, Profile_Meal
+        │
+        └── MongoDB (Mongoose)
+              └── AiConversation, AiMessage, AiPromptTemplate, AiCache
+                        │
+                        ├── Gemini API  (proveedor principal)
+                        └── DeepSeek API (fallback opcional)
 ```
 
-Para las funcionalidades de IA:
+El frontend nunca llama directamente a las APIs de IA. Todas las peticiones pasan por el backend, que protege las credenciales, valida entradas y estructura las respuestas.
 
-```txt
-Frontend React
-    |
-    v
-Backend Express API
-    |
-    v
-Gemini API
+---
+
+## Estructura del repositorio
+
 ```
-
-El frontend nunca llamará directamente a Gemini. Todas las peticiones a IA pasarán por el backend para proteger credenciales, validar entradas, controlar costes, aplicar reglas de seguridad y estructurar las respuestas antes de enviarlas al cliente.
-
----
-
-## Despliegue previsto
-
-El proyecto está pensado para desplegarse en un VPS Linux propio usando Docker y Docker Compose.
-
-La arquitectura de despliegue prevista contempla un reverse proxy con HTTPS delante del frontend y del backend. El frontend y la API Express se servirán detrás de este reverse proxy, evitando exponer servicios internos de forma innecesaria.
-
-PostgreSQL deberá quedar dentro de una red interna de Docker y no exponerse públicamente. Solo el backend debería poder comunicarse con la base de datos.
-
-Esta sección se ampliará cuando existan la estructura `client/`, `server/` y el archivo `docker-compose.yml`. No se documentarán aquí IPs, usuarios SSH, rutas privadas, tokens ni credenciales reales.
-
----
-
-## Modelo de datos previsto
-
-Modelo inicial orientado a PostgreSQL + Sequelize. Podrá evolucionar durante la fase de implementación.
-
-| Entidad | Responsabilidad | Relaciones previstas |
-| --- | --- | --- |
-| `User` | Cuenta de usuario, autenticación y datos básicos | Tiene un `HealthProfile`, muchas `Meal`, muchos `MenuPlan` y muchas `AIInteraction` |
-| `HealthProfile` | Datos nutricionales básicos del usuario | Pertenece a un `User` |
-| `Meal` | Registro de una comida diaria | Pertenece a un `User` y contiene varios `FoodItem` |
-| `FoodItem` | Alimento o ingrediente dentro de una comida | Pertenece a una `Meal` |
-| `MenuPlan` | Menú diario o semanal generado o guardado | Pertenece a un `User` |
-| `AIInteraction` | Historial de interacciones con IA | Pertenece a un `User` y guarda tipo, entrada y salida |
-
----
-
-## Estructura prevista del repositorio
-
-La estructura final todavía está pendiente de cerrar. Una propuesta inicial es:
-
-```txt
 Nutricoach/
-├── client/
-│   └── Aplicación React + TypeScript + Vite
-├── server/
-│   └── API Node.js + Express + TypeScript
-├── docs/
-│   └── Documentación técnica y flujo de trabajo
-├── docker-compose.yml
-└── README.md
+├── backend/                 API Node.js + Express + TypeScript
+│   ├── src/
+│   │   ├── config/          Conexión a BD y variables de entorno
+│   │   ├── controllers/     Controladores P0 (auth, profile, meals, foods)
+│   │   ├── middlewares/     errorHandler, authenticate, authorize, validate
+│   │   ├── models/          Acceso a datos PostgreSQL (queries parametrizadas)
+│   │   ├── modules/ai/      Módulo IA completo (controllers, services, models, routes)
+│   │   ├── routes/          Rutas P0
+│   │   ├── scripts/         initDb.ts, seedFromApis.ts
+│   │   ├── services/        authService, seeder clients
+│   │   ├── types/           Tipos de dominio TypeScript
+│   │   ├── utils/           HttpError, asyncHandler
+│   │   ├── validators/      Esquemas Zod centralizados
+│   │   ├── app.ts           Configuración Express (helmet, CORS, rate limit)
+│   │   └── server.ts        Punto de entrada
+│   ├── .env.example
+│   ├── Dockerfile
+│   └── docker-compose.yml
+├── frontend/                SPA React + TypeScript + Vite
+│   ├── src/
+│   │   ├── components/      Componentes reutilizables
+│   │   ├── pages/           Vistas principales
+│   │   ├── services/        Cliente HTTP (api.ts)
+│   │   ├── hooks/           Custom hooks
+│   │   └── types/           Tipos de dominio frontend
+│   └── .env.example
+├── docs/                    Documentación técnica y diagramas
+│   ├── diagramas-tecnicos.md
+│   ├── ai-module-architecture.md
+│   ├── ai-module-current-status.md
+│   └── diagrams/            Diagramas Mermaid (ER, clases, casos de uso)
+└── docker-compose.yml       Solo bases de datos (desarrollo local)
 ```
 
 ---
 
 ## Instalación y ejecución local
 
-Esta sección es provisional y se actualizará cuando la estructura `client/` y `server/` esté cerrada.
+### Requisitos previos
+
+- Node.js 20+
+- PostgreSQL 12+
+- MongoDB 7+ (o Docker)
 
 ### 1. Clonar el repositorio
 
@@ -153,149 +127,182 @@ git clone git@github.com:darenazag/Nutricoach.git
 cd Nutricoach
 ```
 
-### 2. Instalar dependencias del frontend
+### 2. Configurar el backend
 
 ```bash
-cd client
+cd backend
 npm install
+cp .env.example .env   # edita con tus credenciales reales
 ```
 
-### 3. Instalar dependencias del backend
-
-```bash
-cd ../server
-npm install
-```
-
-### 4. Configurar variables de entorno
-
-Crear los archivos `.env` necesarios a partir de los ejemplos que se definan en el proyecto:
-
-```bash
-cp .env.example .env
-```
-
-No subir archivos `.env` con credenciales reales al repositorio.
-
-### 5. Levantar PostgreSQL
-
-Comando esperado si se usa Docker Compose:
-
-```bash
-docker compose up -d postgres
-```
-
-### 6. Ejecutar backend y frontend
-
-Backend:
-
-```bash
-cd server
-npm run dev
-```
-
-Frontend:
-
-```bash
-cd client
-npm run dev
-```
-
----
-
-## Variables de entorno previstas
-
-Ejemplo orientativo sin valores reales:
+Variables obligatorias en `backend/.env`:
 
 ```env
-DATABASE_URL=postgres://USER:PASSWORD@HOST:5432/DATABASE_NAME
-JWT_SECRET=replace_with_a_secure_secret
-GEMINI_API_KEY=replace_with_your_gemini_api_key
-GEMINI_MODEL=gemini-model-name
+DATABASE_URL=postgres://usuario:contraseña@localhost:5432/nutricoach
+MONGO_URI=mongodb://usuario:contraseña@localhost:27017/nutricoach_ai?authSource=admin
+JWT_SECRET=cadena_larga_aleatoria_segura
+GEMINI_API_KEY=tu_clave_de_gemini
 CLIENT_URL=http://localhost:5173
 ```
 
-Notas:
+Ver `backend/.env.example` para la lista completa de variables.
 
-- `GEMINI_API_KEY` debe existir solo en el backend.
-- `JWT_SECRET` debe ser seguro y diferente entre desarrollo y producción.
-- Las credenciales reales no deben subirse nunca a GitHub.
-
----
-
-## Flujo Git del equipo
-
-Repositorio:
+### 3. Inicializar la base de datos PostgreSQL
 
 ```bash
-git@github.com:darenazag/Nutricoach.git
+# Crea las tablas y los datos semilla (usuarios y perfiles)
+npm run db:init
+
+# Rellena alimentos, comidas y relaciones desde Open Food Facts y TheMealDB
+npm run db:seed
 ```
 
+### 4. Inicializar las plantillas de prompt de IA (MongoDB)
+
+```bash
+npm run seed:ai-prompts
+```
+
+### 5. Arrancar el backend
+
+```bash
+npm run dev      # desarrollo (tsx watch)
+npm run build && npm start   # producción
+```
+
+### 6. Configurar y arrancar el frontend
+
+```bash
+cd ../frontend
+npm install
+cp .env.example .env   # ajusta VITE_API_URL si no usas el proxy de Vite
+npm run dev
+```
+
+El proxy de Vite en desarrollo reenvía `/api/*` a `http://localhost:3000` automáticamente, por lo que `VITE_API_URL` no es necesario en local.
+
+### Con Docker Compose (recomendado para bases de datos)
+
+```bash
+# Levanta PostgreSQL, MongoDB y pgAdmin en local
+docker compose up -d
+
+# O levanta toda la aplicación (API incluida) desde backend/
+cd backend
+docker compose up -d
+```
+
+---
+
+## Endpoints del API
+
+### Autenticación y usuarios
+
+| Método | Ruta | Auth | Descripción |
+|--------|------|------|-------------|
+| POST | `/api/auth/register` | — | Registro, devuelve JWT |
+| POST | `/api/auth/login` | — | Login, devuelve JWT |
+| GET | `/api/auth/me` | 🔒 | Usuario autenticado |
+| GET | `/api/users` | 👑 | Lista usuarios |
+| GET | `/api/users/:id` | 👑 | Un usuario |
+
+> Login y register tienen rate limit: **20 peticiones / 15 minutos** por IP.
+
+### Perfiles nutricionales
+
+| Método | Ruta | Auth | Descripción |
+|--------|------|------|-------------|
+| GET | `/api/profiles` | — | Lista perfiles |
+| GET | `/api/profiles/:id` | — | Un perfil |
+| GET | `/api/profiles/:id/meals` | — | Comidas del perfil |
+| POST | `/api/profiles` | 🔒 | Crea/actualiza perfil propio |
+| POST | `/api/profiles/:id/meals` | 🔒 | Asigna comida al perfil |
+
+### Alimentos y comidas
+
+| Método | Ruta | Auth | Descripción |
+|--------|------|------|-------------|
+| GET | `/api/foods` | — | Lista alimentos |
+| GET | `/api/foods/:id` | — | Un alimento |
+| POST | `/api/foods` | 👑 | Crea alimento |
+| DELETE | `/api/foods/:id` | 👑 | Elimina alimento |
+| GET | `/api/meals` | — | Lista comidas |
+| GET | `/api/meals/:id` | — | Una comida |
+| POST | `/api/meals` | 👑 | Crea comida |
+
+### Módulo IA
+
+Todos los endpoints IA requieren JWT (`🔒`).
+
+| Método | Ruta | Descripción |
+|--------|------|-------------|
+| POST | `/api/ai/chat` | Chat conversacional con Gemini |
+| POST | `/api/ai/menu` | Menú orientativo diario (con caché) |
+| POST | `/api/ai/menu/weekly` | Plan de menú semanal (con caché) |
+| GET | `/api/ai/menu/weekly/:planId` | Recupera un plan semanal guardado |
+| POST | `/api/ai/profile-explanation` | Explicación del perfil nutricional (con caché) |
+| POST | `/api/ai/plate-analysis` | Análisis de imagen de plato (`multipart/form-data`) |
+| POST | `/api/ai/analyze` | Análisis legacy (usado por frontend AIBubble) |
+| POST | `/api/ai/analyze-preview` | Previsualización de análisis (RegistrarComida) |
+| POST | `/api/ai/save-analyzed-meal` | Guarda comida analizada |
+| GET | `/api/ai/conversations` | Lista conversaciones del usuario (paginado) |
+| GET | `/api/ai/conversations/:id` | Una conversación con sus mensajes |
+
+🔒 = requiere `Authorization: Bearer <token>` · 👑 = requiere rol admin
+
+---
+
+## Seguridad
+
+| Capa | Mecanismo |
+|---|---|
+| Cabeceras HTTP | `helmet` (X-Content-Type-Options, X-Frame-Options, CSP, HSTS...) |
+| Rate limiting | `express-rate-limit` en login y register (20 req / 15 min / IP) |
+| Autenticación | JWT firmado con `JWT_SECRET`, expira en 1h |
+| Contraseñas | bcrypt (10 rounds) |
+| Validación de entrada | Zod en todos los endpoints (400 ante datos inválidos) |
+| SQL injection | Queries parametrizadas (`WHERE email = $1`), sin concatenación SQL |
+| CORS | Restringido a `CLIENT_URL` (en producción esta variable es obligatoria) |
+| Secretos | Nunca en código fuente; validación de variables en arranque |
+
+---
+
+## Tests
+
+```bash
+cd backend
+npm test        # 116 tests (vitest)
+npm run lint    # TypeScript type-check
+```
+
+Cobertura: módulo IA (servicios, controladores, seguridad auth) y seguridad de login (SQL injection, Zod).
+
+---
+
+## Flujo Git
+
 | Rama | Uso |
-| --- | --- |
-| `main` | Rama estable para demos, entregas y despliegues validados |
-| `dev` | Rama de integración diaria del equipo |
-| `feat/*` | Nuevas funcionalidades |
-| `fix/*` | Correcciones concretas |
-| `docs/*` | Documentación |
+|---|---|
+| `main` | Versión estable — demos, entrega y despliegue validado |
+| `dev` | Integración continua del equipo |
+| `core/project` | Rama de trabajo principal durante el desarrollo |
+| `feat/*` / `fix/*` / `test/*` | Ramas de trabajo por tarea |
 
-Flujo recomendado:
-
-1. Crear ramas de trabajo desde `dev`.
-2. Abrir Pull Request hacia `dev`.
-3. Revisar cambios antes de hacer merge.
-4. Merge a `main` solo cuando haya una versión estable, demo o entrega validada.
+Flujo: rama de trabajo → PR a `core/project` → PR a `dev` → PR a `main`.
 
 ---
 
-## Equipo de trabajo
+## Equipo
 
-| Integrante | GitHub |
-| --- | --- |
-| Dario | [@darenazag](https://github.com/darenazag) |
-| Eli | [@Danzanfer](https://github.com/Danzanfer) |
-| Jeferson | [@Jeffersonfferss](https://github.com/Jeffersonfferss) |
-| David | [@David-LS-Bilbao](https://github.com/David-LS-Bilbao) |
-
----
-
-## Roles del equipo
-
-| Rol | Responsabilidad principal |
-| --- | --- |
-| Frontend UI/UX | Diseño visual, layout, componentes base, responsive y experiencia de usuario |
-| Frontend funcional | Conexión de pantallas con API, formularios, estados, gráficas y flujos de usuario |
-| Backend/API | API REST, autenticación, Sequelize, PostgreSQL, modelos, migraciones y CRUD |
-| IA + Deploy + Documentación | Integración con Gemini, prompts, Docker, VPS, documentación y preparación de demo |
-
----
-
-## Plan de trabajo resumido
-
-| Día | Objetivo | Entregable esperado |
-| --- | --- | --- |
-| Día 1 | Definición | MVP, roles, modelo inicial, issues, wireframes y README inicial |
-| Día 2 | Base técnica | Frontend y backend arrancando con estructura base |
-| Día 3 | Auth/perfil | Registro, login y perfil nutricional básico |
-| Día 4 | Comidas | CRUD de comidas y alimentos asociado a usuario |
-| Día 5 | Dashboard | Resumen de calorías, macros, progreso y gráficas |
-| Día 6 | Menús | Generación o gestión inicial de menús |
-| Día 7 | IA | Chat IA y generación de menús con respuestas seguras |
-| Día 8 | Integración | Flujos completos conectados y revisión de errores |
-| Día 9 | Deploy | Docker Compose, VPS, reverse proxy, variables y URL pública |
-| Día 10 | Presentación | README final, demo preparada, capturas y guion de presentación |
-
----
-
-## Estado actual del proyecto
-
-- Fase: planificación inicial.
-- README inicial creado.
-- Dosier técnico disponible en `docs/`.
-- Próximo paso: definir y crear la estructura base de `client/` y `server/`.
+| Integrante | GitHub | Rol principal |
+|---|---|---|
+| Dario | [@darenazag](https://github.com/darenazag) | Frontend UI/UX + liderazgo técnico |
+| Eli | [@Danzanfer](https://github.com/Danzanfer) | Frontend funcional |
+| Jeferson | [@Jeffersonfferss](https://github.com/Jeffersonfferss) | Backend / API P0 |
+| David | [@davidlopezsotelo](https://github.com/davidlopezsotelo) | Módulo IA + deploy + documentación |
 
 ---
 
 ## Licencia
 
-Pendiente de definir.
+MIT

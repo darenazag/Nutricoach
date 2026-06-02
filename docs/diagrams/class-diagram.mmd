@@ -1,0 +1,168 @@
+classDiagram
+    direction LR
+
+    class App {
+      +createApp()
+      +mountP0Routes()
+      +mountAiRoutes()
+      +errorHandler()
+    }
+
+    class AuthMiddleware {
+      +authenticate(req,res,next)
+      +requireAdmin(req,res,next)
+      +requireSelfOrAdmin(paramName)
+    }
+
+    class P0Routes {
+      +authRoutes
+      +profileRoutes
+      +mealRoutes
+      +foodItemRoutes
+      +userRoutes
+    }
+
+    class P0Controllers {
+      +authController
+      +profileController
+      +mealController
+      +foodItemController
+      +userController
+    }
+
+    class P0ModelsPg {
+      +userModel
+      +profileModel
+      +mealModel
+      +foodItemModel
+      +query()
+      +withTransaction()
+    }
+
+    class User {
+      +number user_id
+      +string name
+      +string email
+      +Role role
+    }
+
+    class Profile {
+      +number user_id
+      +number weight
+      +number age
+      +number height
+      +Gender gender
+      +ActivityFactor activityFactor
+      +Objective objective
+      +number basalMetabolicRate
+      +number totalDailyEnergyExpenditure
+    }
+
+    class Meal {
+      +number meal_id
+      +string name
+      +number calories
+      +number protein
+      +number fat
+      +number carbs
+      +string source
+    }
+
+    class AiRouter {
+      +postChat()
+      +postMenu()
+      +postWeeklyMenu()
+      +getWeeklyPlan()
+      +postProfileExplanation()
+      +postPlateAnalysis()
+      +getConversations()
+      +postLegacyAnalyze()
+      +postSaveAnalyzedMeal()
+    }
+
+    class AiControllers {
+      +postAiChat()
+      +postAiMenu()
+      +postAiWeeklyMenu()
+      +postAiPlateAnalysis()
+      +listAiConversations()
+      +handleAnalyzePreview()
+    }
+
+    class AiServices {
+      +runAiChat()
+      +runAiMenu()
+      +createWeeklyMenuPlan()
+      +runAiPlateAnalysis()
+      +getAiConversationById()
+      +validateAiResponse()
+    }
+
+    class AiRepositories {
+      +aiConversationRepository
+      +aiCacheRepository
+      +aiWeeklyMenuRepository
+    }
+
+    class AiProviderRouter {
+      +generateTextJsonWithFallback()
+      +generateImageJson()
+      -selectTextProvider()
+    }
+
+    class GeminiClient {
+      +generateGeminiJson()
+      +generateGeminiJsonWithImage()
+    }
+
+    class DeepSeekClient {
+      +generateDeepSeekJson()
+    }
+
+    class NutricoachContextAdapter {
+      +buildAiPlateContextFromP0User(userId)
+    }
+
+    class AiConversation {
+      +string conversationId
+      +string userId
+      +AiInteractionType type
+      +AiConversationStatus status
+    }
+
+    class AiMessage {
+      +string messageId
+      +string conversationId
+      +AiRole role
+      +string content
+      +object structuredData
+    }
+
+    class AiPlateAnalysis {
+      +string analysisId
+      +string userId
+      +object detectedFoods
+      +object estimatedNutrition
+      +AiConfidence confidence
+    }
+
+    App --> P0Routes
+    App --> AiRouter
+    App --> AuthMiddleware
+    P0Routes --> P0Controllers
+    P0Controllers --> P0ModelsPg
+    P0ModelsPg --> User
+    P0ModelsPg --> Profile
+    P0ModelsPg --> Meal
+    AiRouter --> AuthMiddleware
+    AiRouter --> AiControllers
+    AiControllers --> AiServices
+    AiControllers --> NutricoachContextAdapter
+    AiServices --> AiRepositories
+    AiServices --> AiProviderRouter
+    AiProviderRouter --> DeepSeekClient
+    AiProviderRouter --> GeminiClient
+    AiRepositories --> AiConversation
+    AiRepositories --> AiMessage
+    AiRepositories --> AiPlateAnalysis
+    NutricoachContextAdapter --> P0ModelsPg
